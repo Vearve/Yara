@@ -1,0 +1,243 @@
+"""
+Payroll Models
+Reflects Human Management Payroll sheet: components and per-employee entries.
+"""
+
+from django.db import models
+from apps.hcm.models import Employee
+
+
+class PayrollComponent(models.Model):
+    """Payroll component defaults per position/grade for analytics and templating."""
+    position = models.CharField(max_length=200, db_index=True)
+    currency = models.CharField(max_length=3, default='ZMW')
+    basic = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    housing = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    transportation = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    lunch = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    # Derived
+    gross = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    net = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [['position', 'currency']]
+        ordering = ['position']
+
+    def __str__(self):
+        return f"{self.position} ({self.currency})"
+
+
+class SalaryRange(models.Model):
+    """Aggregate bucket of employees by gross salary range (for dashboards)."""
+
+    label = models.CharField(max_length=50, unique=True)  # e.g., "3k < 4k"
+    currency = models.CharField(max_length=3, default='ZMW')
+    min_gross = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    max_gross = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    employee_count = models.PositiveIntegerField(default=0)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['label']
+
+    def __str__(self):
+        return f"{self.label} ({self.employee_count})"
+
+
+class PayrollEntry(models.Model):
+    """Employee payroll snapshot entry (row-based, matches sheet)."""
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='payroll_entries')
+    date_of_hire = models.DateField()
+    department = models.CharField(max_length=200)
+    resident = models.CharField(max_length=200)
+
+    currency = models.CharField(max_length=3, default='ZMW')
+    basic = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    housing = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    transportation = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    lunch = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    gross = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    net = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['employee__employee_id']
+
+    def __str__(self):
+        return f"Payroll {self.employee.full_name} {self.currency} {self.net}"
+
+
+class TitleBreakdown(models.Model):
+    """Breakdown of pay by job title/position for reporting (sheet: TITLE BREAKDOWN)."""
+
+    position = models.CharField(max_length=200, db_index=True)
+    currency = models.CharField(max_length=3, default='ZMW')
+    basic = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    housing = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    transportation = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    lunch = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    gross = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    net = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [['position', 'currency']]
+        ordering = ['position']
+
+    def __str__(self):
+        return f"{self.position} ({self.currency})"
+
+
+class PayrollPeriod(models.Model):
+    """
+    Represents a payroll period (monthly)
+    """
+    year = models.IntegerField()
+    month = models.IntegerField(choices=[
+        (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+        (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+        (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
+    ])
+    status = models.CharField(max_length=20, choices=[
+        ('DRAFT', 'Draft'),
+        ('PROCESSING', 'Processing'),
+        ('COMPLETED', 'Completed'),
+        ('PAID', 'Paid'),
+    ], default='DRAFT')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = [['year', 'month']]
+        ordering = ['-year', '-month']
+    
+    def __str__(self):
+        return f"{self.get_month_display()} {self.year}"
+
+
+class Payslip(models.Model):
+    """
+    Individual employee payslip for a specific period
+    Automatically calculates Zambian statutory deductions (NAPSA, PAYE, NHIMA)
+    """
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='payslips')
+    period = models.ForeignKey('PayrollPeriod', on_delete=models.CASCADE, related_name='payslips')
+    
+    # Basic salary components
+    basic_salary = models.DecimalField(max_digits=12, decimal_places=2)
+    housing_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    transportation_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    lunch_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    other_allowances = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    
+    # Leave/Absenteeism tracking
+    unpaid_leave_days = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Days of unpaid leave")
+    unpaid_leave_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    absenteeism_days = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Days absent")
+    absenteeism_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    
+    # Calculated fields
+    gross_salary = models.DecimalField(max_digits=12, decimal_places=2)
+    
+    # Statutory deductions (auto-calculated)
+    napsa_employee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    napsa_employer = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    paye_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    nhima_employee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    nhima_employer = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    
+    # Other deductions
+    total_custom_deductions = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    
+    # Final amounts
+    total_deductions = models.DecimalField(max_digits=12, decimal_places=2)
+    net_salary = models.DecimalField(max_digits=12, decimal_places=2)
+    
+    # Metadata
+    is_processed = models.BooleanField(default=False)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = [['employee', 'period']]
+        ordering = ['-period__year', '-period__month', 'employee__employee_id']
+    
+    def __str__(self):
+        return f"{self.employee.full_name} - {self.period}"
+    
+    def calculate(self):
+        """
+        Calculate all payroll amounts using Zambian formulas
+        """
+        from .utils import calculate_zambian_payroll, calculate_unpaid_leave_deduction
+        
+        # Calculate gross
+        self.gross_salary = (
+            self.basic_salary + 
+            self.housing_allowance + 
+            self.transportation_allowance + 
+            self.lunch_allowance + 
+            self.other_allowances
+        )
+        
+        # Calculate unpaid leave deduction if not manually set
+        if self.unpaid_leave_days > 0 and self.unpaid_leave_deduction == 0:
+            self.unpaid_leave_deduction = calculate_unpaid_leave_deduction(
+                self.gross_salary, 
+                float(self.unpaid_leave_days)
+            )
+        
+        # Collect all custom deductions
+        custom_deductions = {}
+        if self.absenteeism_deduction > 0:
+            custom_deductions['Absenteeism'] = float(self.absenteeism_deduction)
+        
+        # Add deductions from PayslipDeduction model
+        for deduction in self.custom_deductions.all():
+            custom_deductions[deduction.description] = float(deduction.amount)
+        
+        # Calculate using Zambian payroll formulas
+        result = calculate_zambian_payroll(
+            float(self.gross_salary),
+            float(self.unpaid_leave_deduction),
+            custom_deductions
+        )
+        
+        # Update fields
+        self.napsa_employee = result['deductions']['napsa_employee']
+        self.napsa_employer = result['deductions']['napsa_employer']
+        self.paye_tax = result['deductions']['paye']
+        self.nhima_employee = result['deductions']['nhima_employee']
+        self.nhima_employer = result['deductions']['nhima_employer']
+        self.total_custom_deductions = result['deductions']['total_custom']
+        self.total_deductions = result['deductions']['total']
+        self.net_salary = result['net_pay']
+        self.is_processed = True
+
+
+class PayslipDeduction(models.Model):
+    """
+    Custom deductions that can be added to a payslip
+    (e.g., loan repayment, advance deduction, disciplinary deduction)
+    """
+    payslip = models.ForeignKey(Payslip, on_delete=models.CASCADE, related_name='custom_deductions')
+    description = models.CharField(max_length=200, help_text="e.g., 'Loan Repayment', 'Advance Recovery'")
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['description']
+    
+    def __str__(self):
+        return f"{self.description}: K{self.amount}"
+

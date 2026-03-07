@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --bg-base: #05060a;
+  --bg-panel: #0b0f1a;
+  --bg-card: #0f1628;
+  --accent: #f5c400;
+  --accent-soft: #ffe37a;
+  --text: #f7f8fb;
+  --text-dim: #c4c8d4;
+  --border: rgba(255, 227, 122, 0.25);
+  --glow: 0 10px 50px rgba(245, 196, 0, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: radial-gradient(circle at 10% 20%, rgba(245, 196, 0, 0.08), transparent 30%),
+    radial-gradient(circle at 80% 0%, rgba(62, 231, 255, 0.09), transparent 25%),
+    linear-gradient(145deg, #05060a 0%, #0b0f1a 40%, #05060a 100%);
+  color: var(--text);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-soft);
+}
+
+.glass-panel {
+  background: rgba(15, 22, 40, 0.8);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--glow);
+}
+
+.card-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.chart-surface {
+  background: linear-gradient(135deg, #0f1628 0%, #0b0f1a 100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--glow);
+}
+
+.ant-typography,
+.ant-statistic-title,
+.ant-statistic-content {
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+}
+
+/* Independent sidebar scrollbar styling */
+.ant-layout-sider {
+  scroll-behavior: smooth;
+}
+
+.ant-layout-sider::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ant-layout-sider::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ant-layout-sider::-webkit-scrollbar-thumb {
+  background: rgba(245, 196, 0, 0.3);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.ant-layout-sider::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 196, 0, 0.6);
+  background-clip: padding-box;
+}
+
+/* Main content scrollbar */
+html {
+  scroll-behavior: smooth;
+}
+
+html::-webkit-scrollbar {
+  width: 8px;
+}
+
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: rgba(62, 231, 255, 0.3);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: rgba(62, 231, 255, 0.6);
+  background-clip: padding-box;
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HRMS API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        .section { margin: 20px 0; }
+        .links { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .link-box { background: #f0f4f8; padding: 15px; border-radius: 5px; border-left: 4px solid #007bff; }
+        .link-box a { color: #007bff; text-decoration: none; font-weight: bold; }
+        .link-box a:hover { text-decoration: underline; }
+        .link-box p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
+        .status { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 HRMS API</h1>
+        <p>Human Resource Management System for Zambian context</p>
+        
+        <div class="status">✅ API is running and ready to use!</div>
+        
+        <div class="section">
+            <h2>Documentation & Testing</h2>
+            <div class="links">
+                <div class="link-box">
+                    <a href="/api/docs/">📚 Swagger UI</a>
+                    <p>Interactive API documentation</p>
+                </div>
+                <div class="link-box">
+                    <a href="/admin/">⚙️ Django Admin</a>
+                    <p>Database management (user: admin)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>API Endpoints</h2>
+            <div class="links">
+                <div class="link-box">
+                    <a href="/api/v1/hcm/employees/">👥 HCM - Employees</a>
+                    <p>Employee records, contracts, departments</p>
+                </div>
+                <div class="link-box">
+                    <a href="/api/v1/recruitment/atrs/">📋 Recruitment - ATRs</a>
+                    <p>Approval to Recruit forms</p>
+                </div>
+                <div class="link-box">
+                    <a href="/api/v1/recruitment/candidates/">🎯 Recruitment - Candidates</a>
+                    <p>Candidate pipeline tracking</p>
+                </div>
+                <div class="link-box">
+                    <a href="/api/v1/payroll/components/">💰 Payroll - Components</a>
+                    <p>Salary components and payroll entries</p>
+                </div>
+                <div class="link-box">
+                    <a href="/api/v1/tracking/trainings/">📖 Tracking - Trainings</a>
+                    <p>Employee training records</p>
+                </div>
+                <div class="link-box">
+                    <a href="/api/v1/tracking/medicals/">🏥 Tracking - Medicals</a>
+                    <p>Medical examination records</p>
+                </div>
+                <div class="link-box">
+                    <a href="/api/v1/tracking/permits/">🎫 Tracking - Permits</a>
+                    <p>Site permits and induction status</p>
+                </div>
+                <div class="link-box">
+                    <a href="/api/v1/activities/reports/">📝 Activities - Reports</a>
+                    <p>Safety, complaint, grievance reports</p>
+                </div>
+                <div class="link-box">
+                    <a href="/api/v1/activities/case-studies/">📊 Activities - Cases</a>
+                    <p>Case management & investigations</p>
+                </div>
+                <div class="link-box">
+                    <a href="/api/v1/activities/kpis/">📈 Activities - KPIs</a>
+                    <p>Key Performance Indicators</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Getting Started</h2>
+            <pre style="background: #f0f0f0; padding: 10px; border-radius: 4px; overflow-x: auto;">
+# Authenticate and get token
+curl -X POST http://localhost:8000/api/token/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "admin"}'
+
+# Use token in API requests
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  http://localhost:8000/api/v1/hcm/employees/
+            </pre>
+        </div>
+
+        <div class="section" style="font-size: 12px; color: #999;">
+            <p>HRMS Backend v1.0 | Django 4.2.8 | DRF 3.14.0</p>
+        </div>
+    </div>
+</body>
+</html>
