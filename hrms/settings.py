@@ -173,9 +173,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+_project_static_dir = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = [_project_static_dir] if os.path.isdir(_project_static_dir) else []
 
 # Use WhiteNoise for serving static files in production
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
