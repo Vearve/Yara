@@ -18,7 +18,12 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-pro
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+# ALLOWED_HOSTS: include localhost for dev, Render domain for production
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1,*.onrender.com',
+    cast=Csv()
+)
 
 # Application definition
 # Temporarily using single-tenant mode with SQLite (enable django-tenants when Docker/Postgres is ready)
@@ -198,9 +203,10 @@ SIMPLE_JWT = {
 }
 
 # CORS Configuration
+# Default includes localhost for dev, will be overridden by env var for Render
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,http://localhost:3001,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176',
+    default='http://localhost:3000,http://localhost:3001,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,https://*.onrender.com',
     cast=Csv()
 )
 CORS_ALLOW_ALL_ORIGINS = False
@@ -285,15 +291,12 @@ LOGGING = {
 os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
 
 # CSRF Configuration
-if DEBUG:
-    CSRF_TRUSTED_ORIGINS = [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://localhost:5175',
-        'http://localhost:5176',
-    ]
+# Works for both dev and production
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='http://localhost:3000,http://localhost:3001,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,https://*.onrender.com',
+    cast=Csv()
+)
 
 # Production Security Settings
 if not DEBUG:
