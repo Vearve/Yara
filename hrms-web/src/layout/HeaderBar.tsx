@@ -184,7 +184,7 @@ export default function HeaderBar() {
       localStorage.removeItem('refresh');
       localStorage.removeItem('workspaceId');
       localStorage.removeItem('workspaceName');
-      window.location.href = '/login';
+      window.location.replace('/');
     } else if (info.key === 'profile') {
       nav('/profile');
     }

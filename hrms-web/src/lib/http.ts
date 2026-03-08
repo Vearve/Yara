@@ -3,7 +3,12 @@ import type { AxiosRequestHeaders } from 'axios';
 
 // In development, use /api (Vite will proxy to backend)
 // In production, use full URL from env
-const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+const envBaseURL = (import.meta.env.VITE_API_BASE_URL || '').trim();
+const normalizedBaseURL = envBaseURL
+  ? envBaseURL.replace(/\/+$/, '').replace(/\/api$/, '')
+  : '/api';
+
+const baseURL = normalizedBaseURL;
 
 const http = axios.create({ baseURL });
 
@@ -38,11 +43,11 @@ http.interceptors.response.use(
           return http(original as any);
         } catch (e) {
           localStorage.clear();
-          window.location.href = '/login';
+          window.location.replace('/');
         }
       } else {
         localStorage.clear();
-        window.location.href = '/login';
+        window.location.replace('/');
       }
     }
     return Promise.reject(error);
