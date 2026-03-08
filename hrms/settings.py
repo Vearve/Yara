@@ -8,6 +8,7 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config, Csv
 import dj_database_url
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,12 +19,28 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-pro
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-# ALLOWED_HOSTS: include localhost for dev, Render domain for production
-ALLOWED_HOSTS = config(
+def _normalize_host(raw: str) -> str:
+    value = (raw or '').strip()
+    if not value:
+        return ''
+    if '://' in value:
+        parsed = urlparse(value)
+        value = parsed.hostname or ''
+    value = value.split('/')[0].split(':')[0].strip()
+    return value
+
+
+# ALLOWED_HOSTS: tolerate env values with scheme/port and keep wildcard entries
+_raw_allowed_hosts = config(
     'ALLOWED_HOSTS',
     default='localhost,127.0.0.1,*.onrender.com',
     cast=Csv()
 )
+ALLOWED_HOSTS = [
+    host if host.startswith('*.') else _normalize_host(host)
+    for host in _raw_allowed_hosts
+]
+ALLOWED_HOSTS = [host for host in ALLOWED_HOSTS if host]
 
 # Application definition
 # Temporarily using single-tenant mode with SQLite (enable django-tenants when Docker/Postgres is ready)
@@ -206,7 +223,12 @@ SIMPLE_JWT = {
 # Default includes localhost for dev, will be overridden by env var for Render
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,http://localhost:3001,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,https://*.onrender.com',
+    default='http://localhost:3000,http://localhost:3001,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176',
+    cast=Csv()
+)
+CORS_ALLOWED_ORIGIN_REGEXES = config(
+    'CORS_ALLOWED_ORIGIN_REGEXES',
+    default=r'^https://.*\.onrender\.com$',
     cast=Csv()
 )
 CORS_ALLOW_ALL_ORIGINS = False
