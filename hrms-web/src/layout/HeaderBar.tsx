@@ -12,6 +12,19 @@ import { canPerformAction, getRoleLabel, getRoleColor } from '../lib/permissions
 
 const { Text } = Typography;
 
+const toAbsoluteLogoUrl = (value?: string | null): string | null => {
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
+
+  const normalized = value.startsWith('/') ? value : `/${value}`;
+  const envBaseURL = (import.meta.env.VITE_API_BASE_URL || '').trim();
+  const apiOrigin = envBaseURL
+    ? envBaseURL.replace(/\/+$/, '').replace(/\/api$/, '')
+    : '';
+
+  return apiOrigin ? `${apiOrigin}${normalized}` : value;
+};
+
 export default function HeaderBar() {
   const nav = useNavigate();
   const [logo, setLogo] = useState<string | null>(null);
@@ -37,7 +50,7 @@ export default function HeaderBar() {
       const res = await http.patch(`/api/v1/core/workspaces/${workspaceId}/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setLogo(res.data?.logo || null);
+      setLogo(toAbsoluteLogoUrl(res.data?.logo));
       window.dispatchEvent(new Event('companyLogoUpdated'));
       message.success('Company logo updated');
     } catch (error) {
@@ -54,7 +67,7 @@ export default function HeaderBar() {
       }
       try {
         const res = await http.get(`/api/v1/core/workspaces/${workspaceId}/`);
-        if (res.data?.logo) setLogo(res.data.logo);
+        if (res.data?.logo) setLogo(toAbsoluteLogoUrl(res.data.logo));
         else setLogo(null);
       } catch (error) {
         // Ignore logo load errors and clear logo
@@ -77,7 +90,7 @@ export default function HeaderBar() {
           const workspaceId = localStorage.getItem('workspaceId');
           if (workspaceId) {
             http.get(`/api/v1/core/workspaces/${workspaceId}/`)
-              .then(res => setLogo(res.data?.logo || null))
+              .then(res => setLogo(toAbsoluteLogoUrl(res.data?.logo)))
               .catch(() => setLogo(null));
           }
         }, 100);

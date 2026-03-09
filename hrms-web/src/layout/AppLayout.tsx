@@ -5,6 +5,19 @@ import HeaderBar from './HeaderBar';
 import Sidebar from './Sidebar';
 import http from '../lib/http';
 
+const toAbsoluteLogoUrl = (value?: string | null): string | null => {
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
+
+  const normalized = value.startsWith('/') ? value : `/${value}`;
+  const envBaseURL = (import.meta.env.VITE_API_BASE_URL || '').trim();
+  const apiOrigin = envBaseURL
+    ? envBaseURL.replace(/\/+$/, '').replace(/\/api$/, '')
+    : '';
+
+  return apiOrigin ? `${apiOrigin}${normalized}` : value;
+};
+
 const { Content, Sider, Header } = Layout;
 const { Title } = Typography;
 
@@ -76,7 +89,7 @@ export default function AppLayout() {
 
       try {
         const res = await http.get(`/api/v1/core/workspaces/${workspaceId}/`);
-        setLogoSrc(res.data?.logo || '/yara-hero.png');
+        setLogoSrc(toAbsoluteLogoUrl(res.data?.logo) || '/yara-hero.png');
         setLogoError(false);
       } catch (error) {
         setLogoSrc('/yara-hero.png');
@@ -126,7 +139,7 @@ export default function AppLayout() {
           zIndex: 0,
         }}
       />
-      
+
       <Sider
         width={240}
         style={{
@@ -141,9 +154,9 @@ export default function AppLayout() {
           scrollBehavior: 'smooth',
         }}
       >
-        <div style={{ 
-          padding: '24px 16px', 
-          textAlign: 'center', 
+        <div style={{
+          padding: '24px 16px',
+          textAlign: 'center',
           borderBottom: '1px solid rgba(245, 196, 0, 0.2)',
           background: 'linear-gradient(180deg, rgba(245, 196, 0, 0.05) 0%, transparent 100%)',
         }}>
