@@ -1,5 +1,5 @@
 import { Layout, Typography } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import HeaderBar from './HeaderBar';
 import Sidebar from './Sidebar';
@@ -24,12 +24,30 @@ const toAbsoluteLogoUrl = (value?: string | null): string | null => {
   return apiOrigin ? `${apiOrigin}${normalized}` : value;
 };
 
+const withCacheBust = (value?: string | null): string | null => {
+  if (!value) return null;
+  const sep = value.includes('?') ? '&' : '?';
+  return `${value}${sep}v=${Date.now()}`;
+};
+
 const { Content, Sider, Header } = Layout;
 const { Title } = Typography;
 
 export default function AppLayout() {
   const location = useLocation();
   const [logoSrc, setLogoSrc] = useState<string>('/yara-bg.svg');
+  const logoBlobUrlRef = useRef<string | null>(null);
+
+  const applyLogoSrc = (next: string) => {
+    if (logoBlobUrlRef.current && logoBlobUrlRef.current !== next) {
+      URL.revokeObjectURL(logoBlobUrlRef.current);
+      logoBlobUrlRef.current = null;
+    }
+    if (next.startsWith('blob:')) {
+      logoBlobUrlRef.current = next;
+    }
+    setLogoSrc(next);
+  };
 
   useEffect(() => {
     const isConsultant = localStorage.getItem('isConsultant') === '1';
@@ -87,15 +105,25 @@ export default function AppLayout() {
     const fetchLogo = async () => {
       const workspaceId = localStorage.getItem('workspaceId');
       if (!workspaceId) {
-        setLogoSrc('/yara-bg.svg');
+        applyLogoSrc('/yara-bg.svg');
         return;
       }
 
       try {
+        const blobRes = await http.get(`/api/v1/core/workspaces/${workspaceId}/logo/`, { responseType: 'blob' });
+        if (blobRes.data && blobRes.data.size > 0) {
+          applyLogoSrc(URL.createObjectURL(blobRes.data));
+          return;
+        }
+      } catch {
+        // Fall back to URL-based logo below
+      }
+
+      try {
         const res = await http.get(`/api/v1/core/workspaces/${workspaceId}/`);
-        setLogoSrc(toAbsoluteLogoUrl(res.data?.logo) || '/yara-bg.svg');
+        applyLogoSrc(withCacheBust(toAbsoluteLogoUrl(res.data?.logo)) || '/yara-bg.svg');
       } catch (error) {
-        setLogoSrc('/yara-bg.svg');
+        applyLogoSrc('/yara-bg.svg');
       }
     };
 
@@ -111,6 +139,10 @@ export default function AppLayout() {
       window.removeEventListener('storage', updateLogo);
       window.removeEventListener('companyLogoUpdated', updateLogo as EventListener);
       window.removeEventListener('workspaceChanged', updateLogo as EventListener);
+      if (logoBlobUrlRef.current) {
+        URL.revokeObjectURL(logoBlobUrlRef.current);
+        logoBlobUrlRef.current = null;
+      }
     };
   }, []);
   return (

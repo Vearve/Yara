@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.db.models import Count, Q
+from django.http import FileResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth import get_user_model
 
@@ -117,6 +118,17 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
         workspace = self.get_object()
         self._check_update_permission(workspace)
         return super().partial_update(request, *args, **kwargs)
+
+    @action(detail=True, methods=['get'])
+    def logo(self, request, pk=None):
+        workspace = self.get_object()
+        if not workspace.logo:
+            return Response({'detail': 'No logo uploaded'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            return FileResponse(workspace.logo.open('rb'))
+        except FileNotFoundError:
+            return Response({'detail': 'Logo file not found'}, status=status.HTTP_404_NOT_FOUND)
     
     @action(detail=False, methods=['get'])
     def my_workspaces(self, request):

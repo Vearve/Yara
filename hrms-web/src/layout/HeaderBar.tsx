@@ -1,7 +1,7 @@
 import { Flex, Input, Avatar, Upload, Button, Space, Drawer, Switch, Dropdown, Tabs, Card, Spin, Empty, Divider, Typography, Modal, List, Select, Popconfirm, message, Tag, Badge } from 'antd';
 import { MessageOutlined, SettingOutlined, UploadOutlined, LogoutOutlined, UserOutlined, HomeOutlined, SearchOutlined, UserAddOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { coreApi } from '../api/services/coreApi';
@@ -31,13 +31,50 @@ const toAbsoluteLogoUrl = (value?: string | null): string | null => {
   return apiOrigin ? `${apiOrigin}${normalized}` : value;
 };
 
+const withCacheBust = (value?: string | null): string | null => {
+  if (!value) return null;
+  const sep = value.includes('?') ? '&' : '?';
+  return `${value}${sep}v=${Date.now()}`;
+};
+
 export default function HeaderBar() {
   const nav = useNavigate();
   const [logo, setLogo] = useState<string>('/yara-bg.svg');
+  const logoBlobUrlRef = useRef<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showNet, setShowNet] = useState<boolean>(() => localStorage.getItem('pref_showNet') !== 'false');
   const [denseMode, setDenseMode] = useState<boolean>(() => localStorage.getItem('pref_dense') === 'true');
   const [userRole, setUserRole] = useState<string | null>(() => localStorage.getItem('workspaceRole'));
+
+  const applyLogoSrc = (next: string) => {
+    if (logoBlobUrlRef.current && logoBlobUrlRef.current !== next) {
+      URL.revokeObjectURL(logoBlobUrlRef.current);
+      logoBlobUrlRef.current = null;
+    }
+    if (next.startsWith('blob:')) {
+      logoBlobUrlRef.current = next;
+    }
+    setLogo(next);
+  };
+
+  const loadWorkspaceLogo = async (workspaceId: string) => {
+    try {
+      const blobRes = await http.get(`/api/v1/core/workspaces/${workspaceId}/logo/`, { responseType: 'blob' });
+      if (blobRes.data && blobRes.data.size > 0) {
+        applyLogoSrc(URL.createObjectURL(blobRes.data));
+        return;
+      }
+    } catch {
+      // Fall back to URL-based logo
+    }
+
+    try {
+      const res = await http.get(`/api/v1/core/workspaces/${workspaceId}/`);
+      applyLogoSrc(withCacheBust(toAbsoluteLogoUrl(res.data?.logo)) || '/yara-bg.svg');
+    } catch {
+      applyLogoSrc('/yara-bg.svg');
+    }
+  };
 
   const handleLogoUpload = async (info: any) => {
     const file = info.file?.originFileObj || info.file;
@@ -53,10 +90,8 @@ export default function HeaderBar() {
     formData.append('logo', file);
 
     try {
-      const res = await http.patch(`/api/v1/core/workspaces/${workspaceId}/`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setLogo(toAbsoluteLogoUrl(res.data?.logo) || '/yara-bg.svg');
+      await http.patch(`/api/v1/core/workspaces/${workspaceId}/`, formData);
+      await loadWorkspaceLogo(workspaceId);
       window.dispatchEvent(new Event('companyLogoUpdated'));
       message.success('Company logo updated');
     } catch (error) {
@@ -68,17 +103,10 @@ export default function HeaderBar() {
     const loadLogo = async () => {
       const workspaceId = localStorage.getItem('workspaceId');
       if (!workspaceId) {
-        setLogo('/yara-bg.svg');
+        applyLogoSrc('/yara-bg.svg');
         return;
       }
-      try {
-        const res = await http.get(`/api/v1/core/workspaces/${workspaceId}/`);
-        if (res.data?.logo) setLogo(toAbsoluteLogoUrl(res.data.logo) || '/yara-bg.svg');
-        else setLogo('/yara-bg.svg');
-      } catch (error) {
-        // Ignore logo load errors and clear logo
-        setLogo('/yara-bg.svg');
-      }
+      await loadWorkspaceLogo(workspaceId);
     };
     loadLogo();
     window.addEventListener('workspaceChanged', loadLogo as EventListener);
@@ -95,15 +123,19 @@ export default function HeaderBar() {
         setTimeout(() => {
           const workspaceId = localStorage.getItem('workspaceId');
           if (workspaceId) {
-            http.get(`/api/v1/core/workspaces/${workspaceId}/`)
-              .then(res => setLogo(toAbsoluteLogoUrl(res.data?.logo) || '/yara-bg.svg'))
-              .catch(() => setLogo('/yara-bg.svg'));
+            loadWorkspaceLogo(workspaceId).catch(() => applyLogoSrc('/yara-bg.svg'));
           }
         }, 100);
       }
     };
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      if (logoBlobUrlRef.current) {
+        URL.revokeObjectURL(logoBlobUrlRef.current);
+        logoBlobUrlRef.current = null;
+      }
+    };
   }, []);
 
   const { data: profile } = useQuery({
@@ -597,7 +629,19 @@ export default function HeaderBar() {
             </Upload>
             {logo && (
               <div style={{ marginTop: 8, padding: 8, border: '1px solid rgba(212,175,55,0.3)', borderRadius: 4 }}>
-                <img src={logo} alt="Current Logo" style={{ height: 40, objectFit: 'contain' }} />
+                <img
+                  src={logo}
+                  alt="Current Logo"
+                  style={{ height: 40, objectFit: 'contain' }}
+                  onError={(event) => {
+                    const target = event.currentTarget;
+                    if (!target.src.includes('/yara-bg.svg')) {
+                      target.src = '/yara-bg.svg';
+                    } else if (!target.src.includes('/yara-hero.png')) {
+                      target.src = '/yara-hero.png';
+                    }
+                  }}
+                />
                 <div style={{ marginTop: 4, fontSize: 12 }}>Current logo (workspace)</div>
               </div>
             )}
