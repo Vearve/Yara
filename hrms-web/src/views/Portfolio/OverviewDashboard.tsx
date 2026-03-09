@@ -154,7 +154,7 @@ export default function OverviewDashboard() {
               workspaceName: localStorage.getItem('workspaceName')
             });
             window.dispatchEvent(new Event('workspaceChanged'));
-            window.location.href = '/dashboard';
+            window.location.replace('/#/dashboard');
           }}
           style={{ color: '#D4AF37' }}
         >
@@ -166,31 +166,31 @@ export default function OverviewDashboard() {
 
   if (isLoading) {
     return (
-        <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div className="flex flex-col gap-2">
-            <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Consultant View</div>
-            <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Portfolio Overview</h1>
-          </div>
-          <GlassCard gradient="gold" style={{ textAlign: 'center', padding: '48px 16px' }}>
-            <Spin tip="Loading portfolio data..." size="large" />
-          </GlassCard>
+      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="flex flex-col gap-2">
+          <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Consultant View</div>
+          <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Portfolio Overview</h1>
         </div>
+        <GlassCard gradient="gold" style={{ textAlign: 'center', padding: '48px 16px' }}>
+          <Spin tip="Loading portfolio data..." size="large" />
+        </GlassCard>
+      </div>
     );
   }
 
   if (error) {
     return (
-        <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div className="flex flex-col gap-2">
-            <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Consultant View</div>
-            <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Portfolio Overview</h1>
-          </div>
-          <GlassCard gradient="amber" style={{ textAlign: 'center', padding: '48px 16px', borderColor: 'rgba(255, 107, 107, 0.35)' }}>
-            <Text style={{ color: '#ff6b6b' }}>Error loading portfolio data. Check console for details.</Text>
-            <br />
-            <Text style={{ color: '#c4c8d4' }}>{String(error)}</Text>
-          </GlassCard>
+      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="flex flex-col gap-2">
+          <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Consultant View</div>
+          <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Portfolio Overview</h1>
         </div>
+        <GlassCard gradient="amber" style={{ textAlign: 'center', padding: '48px 16px', borderColor: 'rgba(255, 107, 107, 0.35)' }}>
+          <Text style={{ color: '#ff6b6b' }}>Error loading portfolio data. Check console for details.</Text>
+          <br />
+          <Text style={{ color: '#c4c8d4' }}>{String(error)}</Text>
+        </GlassCard>
+      </div>
     );
   }
 

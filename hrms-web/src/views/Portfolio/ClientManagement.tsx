@@ -1,28 +1,28 @@
 import { useState } from 'react';
-import { 
-  Card, 
-  Row, 
-  Col, 
-  Button, 
-  Table, 
-  Space, 
-  Tag, 
-  Modal, 
-  Form, 
-  Input, 
-  Select, 
+import {
+  Card,
+  Row,
+  Col,
+  Button,
+  Table,
+  Space,
+  Tag,
+  Modal,
+  Form,
+  Input,
+  Select,
   message,
   Descriptions,
   Statistic,
   Typography,
-  Alert 
+  Alert
 } from 'antd';
-import { 
-  PlusOutlined, 
-  EyeOutlined, 
-  TeamOutlined, 
+import {
+  PlusOutlined,
+  EyeOutlined,
+  TeamOutlined,
   ProjectOutlined,
-  EnvironmentOutlined 
+  EnvironmentOutlined
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import http from '../../lib/http';
@@ -134,7 +134,7 @@ export default function ClientManagement() {
           <Text type="secondary" style={{ fontSize: 12 }}>Active: {record.stats.active_employees}</Text>
         </Space>
       ),
-      sorter: (a: ClientSummary, b: ClientSummary) => 
+      sorter: (a: ClientSummary, b: ClientSummary) =>
         a.stats.total_employees - b.stats.total_employees,
     },
     {
@@ -195,7 +195,7 @@ export default function ClientManagement() {
                 workspaceName: localStorage.getItem('workspaceName')
               });
               window.dispatchEvent(new Event('workspaceChanged'));
-              window.location.href = '/dashboard';
+              window.location.replace('/#/dashboard');
             }}
             style={{ color: '#f5c400' }}
           >
@@ -390,7 +390,7 @@ export default function ClientManagement() {
                 localStorage.setItem('workspaceName', selectedClient.workspace.name);
                 localStorage.setItem('workspaceRole', selectedClient.role || 'VIEWER');
                 window.dispatchEvent(new Event('workspaceChanged'));
-                window.location.href = '/dashboard';
+                window.location.replace('/#/dashboard');
               }
             }}
             style={{

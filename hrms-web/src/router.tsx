@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createHashRouter, Navigate } from 'react-router-dom';
 import AppLayout from './layout/AppLayout';
 import Overview from './views/Dashboard/Overview';
 import ManagerDashboard from './views/Dashboard/ManagerDashboard';
@@ -42,7 +42,7 @@ import AccessRequestsManagement from './views/Core/AccessRequestsManagement';
 import WorkspaceDebug from './views/Core/WorkspaceDebug';
 import RouteErrorBoundary from './components/RouteErrorBoundary';
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   { path: '/login', element: <Login />, errorElement: <RouteErrorBoundary /> },
   { path: '/invite', element: <InviteByCode />, errorElement: <RouteErrorBoundary /> },
   { path: '/messaging', element: <ProtectedRoute><MessagingInbox /></ProtectedRoute>, errorElement: <RouteErrorBoundary /> },
