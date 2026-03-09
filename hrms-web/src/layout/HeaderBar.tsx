@@ -27,7 +27,7 @@ const toAbsoluteLogoUrl = (value?: string | null): string | null => {
 
 export default function HeaderBar() {
   const nav = useNavigate();
-  const [logo, setLogo] = useState<string | null>(null);
+  const [logo, setLogo] = useState<string>('/yara-bg.svg');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showNet, setShowNet] = useState<boolean>(() => localStorage.getItem('pref_showNet') !== 'false');
   const [denseMode, setDenseMode] = useState<boolean>(() => localStorage.getItem('pref_dense') === 'true');
@@ -50,7 +50,7 @@ export default function HeaderBar() {
       const res = await http.patch(`/api/v1/core/workspaces/${workspaceId}/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setLogo(toAbsoluteLogoUrl(res.data?.logo));
+      setLogo(toAbsoluteLogoUrl(res.data?.logo) || '/yara-bg.svg');
       window.dispatchEvent(new Event('companyLogoUpdated'));
       message.success('Company logo updated');
     } catch (error) {
@@ -62,16 +62,16 @@ export default function HeaderBar() {
     const loadLogo = async () => {
       const workspaceId = localStorage.getItem('workspaceId');
       if (!workspaceId) {
-        setLogo(null);
+        setLogo('/yara-bg.svg');
         return;
       }
       try {
         const res = await http.get(`/api/v1/core/workspaces/${workspaceId}/`);
-        if (res.data?.logo) setLogo(toAbsoluteLogoUrl(res.data.logo));
-        else setLogo(null);
+        if (res.data?.logo) setLogo(toAbsoluteLogoUrl(res.data.logo) || '/yara-bg.svg');
+        else setLogo('/yara-bg.svg');
       } catch (error) {
         // Ignore logo load errors and clear logo
-        setLogo(null);
+        setLogo('/yara-bg.svg');
       }
     };
     loadLogo();
@@ -90,8 +90,8 @@ export default function HeaderBar() {
           const workspaceId = localStorage.getItem('workspaceId');
           if (workspaceId) {
             http.get(`/api/v1/core/workspaces/${workspaceId}/`)
-              .then(res => setLogo(toAbsoluteLogoUrl(res.data?.logo)))
-              .catch(() => setLogo(null));
+              .then(res => setLogo(toAbsoluteLogoUrl(res.data?.logo) || '/yara-bg.svg'))
+              .catch(() => setLogo('/yara-bg.svg'));
           }
         }, 100);
       }
@@ -401,19 +401,25 @@ export default function HeaderBar() {
             Home
           </Button>
         )}
-        {logo && (
-          <img
-            src={logo}
-            alt="Company Logo"
-            style={{
-              height: 32,
-              maxWidth: 160,
-              width: 'auto',
-              objectFit: 'contain',
-              display: 'block',
-            }}
-          />
-        )}
+        <img
+          src={logo}
+          alt="Company Logo"
+          style={{
+            height: 32,
+            maxWidth: 160,
+            width: 'auto',
+            objectFit: 'contain',
+            display: 'block',
+          }}
+          onError={(event) => {
+            const target = event.currentTarget;
+            if (!target.src.includes('/yara-bg.svg')) {
+              target.src = '/yara-bg.svg';
+            } else if (!target.src.includes('/yara-hero.png')) {
+              target.src = '/yara-hero.png';
+            }
+          }}
+        />
       </Flex>
 
       <Flex vertical style={{ flex: 1, minWidth: 0, marginLeft: 16 }}>

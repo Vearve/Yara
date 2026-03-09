@@ -23,8 +23,7 @@ const { Title } = Typography;
 
 export default function AppLayout() {
   const location = useLocation();
-  const [logoSrc, setLogoSrc] = useState<string>('/yara-hero.png');
-  const [logoError, setLogoError] = useState(false);
+  const [logoSrc, setLogoSrc] = useState<string>('/yara-bg.svg');
 
   useEffect(() => {
     const isConsultant = localStorage.getItem('isConsultant') === '1';
@@ -82,18 +81,15 @@ export default function AppLayout() {
     const fetchLogo = async () => {
       const workspaceId = localStorage.getItem('workspaceId');
       if (!workspaceId) {
-        setLogoSrc('/yara-hero.png');
-        setLogoError(false);
+        setLogoSrc('/yara-bg.svg');
         return;
       }
 
       try {
         const res = await http.get(`/api/v1/core/workspaces/${workspaceId}/`);
-        setLogoSrc(toAbsoluteLogoUrl(res.data?.logo) || '/yara-hero.png');
-        setLogoError(false);
+        setLogoSrc(toAbsoluteLogoUrl(res.data?.logo) || '/yara-bg.svg');
       } catch (error) {
-        setLogoSrc('/yara-hero.png');
-        setLogoError(false);
+        setLogoSrc('/yara-bg.svg');
       }
     };
 
@@ -160,40 +156,19 @@ export default function AppLayout() {
           borderBottom: '1px solid rgba(245, 196, 0, 0.2)',
           background: 'linear-gradient(180deg, rgba(245, 196, 0, 0.05) 0%, transparent 100%)',
         }}>
-          {!logoError ? (
-            <img
-              src={logoSrc}
-              alt="Company Logo"
-              style={{ height: 52, objectFit: 'contain', marginBottom: 8, width: '100%' }}
-              onError={() => setLogoError(true)}
-            />
-          ) : (
-            <div>
-              <div
-                style={{
-                  color: '#f5c400',
-                  fontSize: 18,
-                  fontWeight: 700,
-                  letterSpacing: '0.2em',
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  margin: 0,
-                }}
-              >
-                HRMS
-              </div>
-              <div
-                style={{
-                  color: 'rgba(245, 196, 0, 0.5)',
-                  fontSize: 11,
-                  letterSpacing: '0.15em',
-                  marginTop: 4,
-                  fontWeight: 500,
-                }}
-              >
-                Neon Edition
-              </div>
-            </div>
-          )}
+          <img
+            src={logoSrc}
+            alt="Company Logo"
+            style={{ height: 52, objectFit: 'contain', marginBottom: 8, width: '100%' }}
+            onError={(event) => {
+              const target = event.currentTarget;
+              if (!target.src.includes('/yara-bg.svg')) {
+                target.src = '/yara-bg.svg';
+              } else if (!target.src.includes('/yara-hero.png')) {
+                target.src = '/yara-hero.png';
+              }
+            }}
+          />
         </div>
         <Sidebar activePath={location.pathname} />
       </Sider>
