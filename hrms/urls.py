@@ -39,6 +39,5 @@ urlpatterns = [
     path('api/v1/core/', include('apps.core.urls')),
 ]
 
-# Serve media files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files (needed for uploaded logos in production)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

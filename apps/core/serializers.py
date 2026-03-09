@@ -28,6 +28,14 @@ class WorkspaceSerializer(serializers.ModelSerializer):
     def get_employee_count(self, obj):
         return obj.employees.filter(employment_status='ACTIVE').count()
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        logo_url = data.get('logo')
+        request = self.context.get('request')
+        if logo_url and request and logo_url.startswith('/'):
+            data['logo'] = request.build_absolute_uri(logo_url)
+        return data
+
 
 class UserBasicSerializer(serializers.ModelSerializer):
     """Basic user info with workspace context when available."""
