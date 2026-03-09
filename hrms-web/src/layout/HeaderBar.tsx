@@ -14,9 +14,15 @@ const { Text } = Typography;
 
 const toAbsoluteLogoUrl = (value?: string | null): string | null => {
   if (!value) return null;
-  if (/^https?:\/\//i.test(value)) return value;
+  const trimmed = value.trim();
+  if (/^https?:\/\//i.test(trimmed)) {
+    if (window.location.protocol === 'https:' && trimmed.startsWith('http://')) {
+      return `https://${trimmed.slice('http://'.length)}`;
+    }
+    return trimmed;
+  }
 
-  const normalized = value.startsWith('/') ? value : `/${value}`;
+  const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
   const envBaseURL = (import.meta.env.VITE_API_BASE_URL || '').trim();
   const apiOrigin = envBaseURL
     ? envBaseURL.replace(/\/+$/, '').replace(/\/api$/, '')
