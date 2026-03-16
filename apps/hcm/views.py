@@ -20,14 +20,16 @@ import csv
 from io import BytesIO, StringIO
 from .models import (
     Employee, Contract, Engagement, Termination, Department, Job,
-    ContractType, TerminationReason, EmploymentType, EmployeeCategory, EmployeeDocument
+    ContractType, TerminationReason, EmploymentType, EmployeeCategory, EmployeeDocument,
+    EmployeeBeneficiary
 )
 from apps.core.models import WorkspaceMembership
 from .serializers import (
     EmployeeListSerializer, EmployeeDetailSerializer,
     ContractSerializer, EngagementSerializer, TerminationSerializer,
     DepartmentSerializer, JobSerializer, ContractTypeSerializer, TerminationReasonSerializer,
-    EmploymentTypeSerializer, EmployeeCategorySerializer, EmployeeDocumentSerializer
+    EmploymentTypeSerializer, EmployeeCategorySerializer, EmployeeDocumentSerializer,
+    EmployeeBeneficiarySerializer
 )
 
 
@@ -731,3 +733,30 @@ class EmployeeDocumentViewSet(viewsets.ModelViewSet):
         if hasattr(self.request, 'workspace') and self.request.workspace:
             qs = qs.filter(employee__workspace=self.request.workspace)
         return qs
+
+
+class EmployeeBeneficiaryViewSet(viewsets.ModelViewSet):
+    """Persistent employee beneficiaries."""
+    queryset = EmployeeBeneficiary.objects.select_related('employee').all()
+    serializer_class = EmployeeBeneficiarySerializer
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['employee']
+    ordering_fields = ['created_at', 'name']
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if hasattr(self.request, 'workspace') and self.request.workspace:
+            qs = qs.filter(employee__workspace=self.request.workspace)
+        return qs
+
+    def perform_create(self, serializer):
+        employee = serializer.validated_data.get('employee')
+        if not employee:
+            raise ValidationError({'employee': 'Employee is required.'})
+
+        if hasattr(self.request, 'workspace') and self.request.workspace:
+            if employee.workspace_id != self.request.workspace.id:
+                raise ValidationError({'employee': 'Employee is not in your active workspace.'})
+
+        serializer.save()

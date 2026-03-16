@@ -347,6 +347,23 @@ class EmployeeDocument(models.Model):
         return f"{self.employee.full_name} - {self.title or 'Document'}"
 
 
+class EmployeeBeneficiary(models.Model):
+    """Beneficiaries linked to an employee."""
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='beneficiaries')
+    name = models.CharField(max_length=200)
+    relationship = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20, blank=True)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.employee.full_name} - {self.name} ({self.relationship})"
+
+
 class ContractorCompliance(models.Model):
     """
     Track compliance requirements for external contractors.

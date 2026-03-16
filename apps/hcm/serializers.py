@@ -6,7 +6,7 @@ from rest_framework import serializers
 from apps.hcm.models import (
     Employee, Contract, Engagement, Termination,
     Department, Job, EmployeeCategory, EmployeeClassification, EmploymentType,
-    ContractType, TerminationReason, EmployeeDocument
+    ContractType, TerminationReason, EmployeeDocument, EmployeeBeneficiary
 )
 
 
@@ -132,6 +132,14 @@ class EmployeeDetailSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'full_name']
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        photo_url = data.get('photo')
+        request = self.context.get('request')
+        if photo_url and request and photo_url.startswith('/'):
+            data['photo'] = request.build_absolute_uri(photo_url)
+        return data
+
 
 class ContractSerializer(serializers.ModelSerializer):
     contract_type_name = serializers.CharField(source='contract_type.name', read_only=True)
@@ -189,3 +197,12 @@ class EmployeeDocumentSerializer(serializers.ModelSerializer):
         model = EmployeeDocument
         fields = ['id', 'employee', 'title', 'file', 'uploaded_at']
         read_only_fields = ['id', 'uploaded_at']
+
+
+class EmployeeBeneficiarySerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source='employee.full_name', read_only=True)
+
+    class Meta:
+        model = EmployeeBeneficiary
+        fields = ['id', 'employee', 'employee_name', 'name', 'relationship', 'phone', 'percentage', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'employee_name']

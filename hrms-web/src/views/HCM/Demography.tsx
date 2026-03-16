@@ -23,7 +23,7 @@ import {
   Statistic,
   Avatar,
 } from 'antd';
-import { 
+import {
   UploadOutlined,
   UserOutlined,
   TeamOutlined,
@@ -148,6 +148,15 @@ type EmployeeDocument = {
   uploaded_at: string;
 };
 
+type EmployeeBeneficiary = {
+  id: number;
+  employee: number;
+  name: string;
+  relationship: string;
+  phone?: string;
+  percentage?: number;
+};
+
 export default function Demography() {
   const queryClient = useQueryClient();
   const [workspaceId, setWorkspaceId] = useState<string | null>(() => localStorage.getItem('workspaceId'));
@@ -172,7 +181,6 @@ export default function Demography() {
   const [employeeForm] = Form.useForm();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [beneficiaries, setBeneficiaries] = useState<Array<{ name: string; relationship: string; phone?: string; percentage?: number }>>([]);
   const [beneficiaryModalOpen, setBeneficiaryModalOpen] = useState(false);
   const [beneficiaryForm] = Form.useForm();
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -194,26 +202,28 @@ export default function Demography() {
     employeeName: null,
   });
 
+  const beneficiaryEmployeeId = editingId;
+
   const { data: employeesData, isLoading: listLoading } = useQuery<EmployeeListResponse>({
     queryKey: ['employees', workspaceId],
     queryFn: async () => {
       try {
         const response = await http.get('/api/v1/hcm/employees/?page_size=200');
         const data = response.data;
-        
+
         if (data.results && data.next) {
           let allResults = [...data.results];
           let nextUrl = data.next;
-          
+
           while (nextUrl) {
             const nextResponse = await http.get(nextUrl.replace(/^.*api/, '/api'));
             allResults = [...allResults, ...nextResponse.data.results];
             nextUrl = nextResponse.data.next;
           }
-          
+
           return { ...data, results: allResults };
         }
-        
+
         return data;
       } catch (err) {
         console.error('Error fetching employees:', err);
@@ -387,6 +397,55 @@ export default function Demography() {
     },
   });
 
+  const { data: beneficiaries = [] } = useQuery<EmployeeBeneficiary[]>({
+    queryKey: ['employee-beneficiaries', beneficiaryEmployeeId],
+    enabled: !!beneficiaryEmployeeId && employeeModalOpen,
+    queryFn: async () => {
+      const res = await http.get('/api/v1/hcm/employee-beneficiaries/', {
+        params: { employee: beneficiaryEmployeeId },
+      });
+      return Array.isArray(res.data) ? res.data : (res.data?.results ?? []);
+    },
+  });
+
+  const addBeneficiaryMutation = useMutation({
+    mutationFn: async (values: { name: string; relationship: string; phone?: string; percentage?: number }) => {
+      if (!beneficiaryEmployeeId) {
+        throw new Error('Save the employee first before adding beneficiaries.');
+      }
+
+      return http.post('/api/v1/hcm/employee-beneficiaries/', {
+        employee: beneficiaryEmployeeId,
+        name: values.name,
+        relationship: values.relationship,
+        phone: values.phone || '',
+        percentage: values.percentage,
+      });
+    },
+    onSuccess: () => {
+      message.success('Beneficiary added');
+      setBeneficiaryModalOpen(false);
+      beneficiaryForm.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['employee-beneficiaries', beneficiaryEmployeeId] });
+    },
+    onError: (error: any) => {
+      message.error(error?.response?.data?.detail || error?.message || 'Could not add beneficiary');
+    },
+  });
+
+  const deleteBeneficiaryMutation = useMutation({
+    mutationFn: async (beneficiaryId: number) => {
+      return http.delete(`/api/v1/hcm/employee-beneficiaries/${beneficiaryId}/`);
+    },
+    onSuccess: () => {
+      message.success('Beneficiary removed');
+      queryClient.invalidateQueries({ queryKey: ['employee-beneficiaries', beneficiaryEmployeeId] });
+    },
+    onError: () => {
+      message.error('Could not remove beneficiary');
+    },
+  });
+
   const { data: employmentTypes = [] } = useQuery<any[]>({
     queryKey: ['employment-types'],
     queryFn: async () => {
@@ -554,11 +613,11 @@ export default function Demography() {
     },
     onError: (error: any) => {
       console.error('Employee save error:', error?.response?.data);
-      
+
       // Handle different error formats
       const data = error?.response?.data;
       let errorMsg = 'Could not save employee';
-      
+
       if (data) {
         // Check for field-specific errors
         if (data.employee_id) errorMsg = `Employee ID: ${data.employee_id[0]}`;
@@ -574,7 +633,7 @@ export default function Demography() {
           if (firstError) errorMsg = `${firstError[0]}: ${firstError[1][0]}`;
         }
       }
-      
+
       message.error(errorMsg);
     },
   });
@@ -584,7 +643,7 @@ export default function Demography() {
       message.error('Please select a file');
       return;
     }
-    
+
     setImportLoading(true);
     const formData = new FormData();
     formData.append('file', importFile);
@@ -797,7 +856,7 @@ export default function Demography() {
               if (!root) return;
               const canvas = await html2canvas(root, { scale: 2, backgroundColor: '#0f1117' });
               const img = canvas.toDataURL('image/png');
-              const pdf = new jsPDF('p','mm','a4');
+              const pdf = new jsPDF('p', 'mm', 'a4');
               const pageWidth = pdf.internal.pageSize.getWidth();
               const pageHeight = pdf.internal.pageSize.getHeight();
               const ratio = canvas.width / canvas.height;
@@ -813,7 +872,7 @@ export default function Demography() {
                 pageCanvas.height = sliceHeight;
                 let sy = 0;
                 while (sy < canvas.height) {
-                  ctx?.clearRect(0,0,pageCanvas.width,pageCanvas.height);
+                  ctx?.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
                   ctx?.drawImage(canvas, 0, sy, canvas.width, sliceHeight, 0, 0, pageCanvas.width, pageCanvas.height);
                   const part = pageCanvas.toDataURL('image/png');
                   pdf.addImage(part, 'PNG', 0, 0, pageWidth, pageHeight);
@@ -828,115 +887,115 @@ export default function Demography() {
       </Card>
 
       <div id="demography-root">
-      {/* Summary Cards */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col xs={24} sm={12} md={8} lg={4}>
-          <Card>
-            <Statistic
-              title="Total Employees"
-              value={summaryData?.employees?.total ?? 0}
-              prefix={<TeamOutlined />}
-              loading={summaryLoading}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={4}>
-          <Card>
-            <Statistic
-              title="Terminated"
-              value={summaryData?.employees?.terminated ?? 0}
-              prefix={<CloseCircleOutlined />}
-              loading={summaryLoading}
-              valueStyle={{ color: '#f5222d' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={4}>
-          <Card>
-            <Statistic
-              title="Contracts Expiring (30d)"
-              value={summaryData?.situations?.contracts_expiring_30d ?? 0}
-              prefix={<UserOutlined />}
-              loading={summaryLoading}
-              valueStyle={{ color: '#722ed1' }}
-            />
-          </Card>
-        </Col>
-      </Row>
+        {/* Summary Cards */}
+        <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+          <Col xs={24} sm={12} md={8} lg={4}>
+            <Card>
+              <Statistic
+                title="Total Employees"
+                value={summaryData?.employees?.total ?? 0}
+                prefix={<TeamOutlined />}
+                loading={summaryLoading}
+                valueStyle={{ color: '#1890ff' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={4}>
+            <Card>
+              <Statistic
+                title="Terminated"
+                value={summaryData?.employees?.terminated ?? 0}
+                prefix={<CloseCircleOutlined />}
+                loading={summaryLoading}
+                valueStyle={{ color: '#f5222d' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={4}>
+            <Card>
+              <Statistic
+                title="Contracts Expiring (30d)"
+                value={summaryData?.situations?.contracts_expiring_30d ?? 0}
+                prefix={<UserOutlined />}
+                loading={summaryLoading}
+                valueStyle={{ color: '#722ed1' }}
+              />
+            </Card>
+          </Col>
+        </Row>
 
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col xs={24} md={12} lg={6}>
-          <Card title="Gender Breakdown">
-            <Space direction="vertical" style={{ width: '100%' }} size="small">
-              {genderSummary.map((row) => (
-                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Text>{row.label}</Text>
-                  <Tag color="gold">{row.count}</Tag>
-                </div>
-              ))}
-              {genderSummary.length === 0 && <Text type="secondary">No data</Text>}
-            </Space>
-          </Card>
-        </Col>
-        <Col xs={24} md={12} lg={6}>
-          <Card title="Age Groups">
-            <Space direction="vertical" style={{ width: '100%' }} size="small">
-              {ageSummary.map((row) => (
-                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Text>{row.label}</Text>
-                  <Tag color="blue">{row.count}</Tag>
-                </div>
-              ))}
-              {ageSummary.length === 0 && <Text type="secondary">No data</Text>}
-            </Space>
-          </Card>
-        </Col>
-        <Col xs={24} md={12} lg={6}>
-          <Card title="Top Nationalities">
-            <Space direction="vertical" style={{ width: '100%' }} size="small">
-              {nationalitySummary.map((row) => (
-                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Text>{row.label}</Text>
-                  <Tag color="green">{row.count}</Tag>
-                </div>
-              ))}
-              {nationalitySummary.length === 0 && <Text type="secondary">No data</Text>}
-            </Space>
-          </Card>
-        </Col>
-        <Col xs={24} md={12} lg={6}>
-          <Card title="Top Departments">
-            <Space direction="vertical" style={{ width: '100%' }} size="small">
-              {departmentSummary.map((row) => (
-                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Text>{row.label}</Text>
-                  <Tag color="purple">{row.count}</Tag>
-                </div>
-              ))}
-              {departmentSummary.length === 0 && <Text type="secondary">No data</Text>}
-            </Space>
-          </Card>
-        </Col>
-      </Row>
+        <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+          <Col xs={24} md={12} lg={6}>
+            <Card title="Gender Breakdown">
+              <Space direction="vertical" style={{ width: '100%' }} size="small">
+                {genderSummary.map((row) => (
+                  <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Text>{row.label}</Text>
+                    <Tag color="gold">{row.count}</Tag>
+                  </div>
+                ))}
+                {genderSummary.length === 0 && <Text type="secondary">No data</Text>}
+              </Space>
+            </Card>
+          </Col>
+          <Col xs={24} md={12} lg={6}>
+            <Card title="Age Groups">
+              <Space direction="vertical" style={{ width: '100%' }} size="small">
+                {ageSummary.map((row) => (
+                  <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Text>{row.label}</Text>
+                    <Tag color="blue">{row.count}</Tag>
+                  </div>
+                ))}
+                {ageSummary.length === 0 && <Text type="secondary">No data</Text>}
+              </Space>
+            </Card>
+          </Col>
+          <Col xs={24} md={12} lg={6}>
+            <Card title="Top Nationalities">
+              <Space direction="vertical" style={{ width: '100%' }} size="small">
+                {nationalitySummary.map((row) => (
+                  <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Text>{row.label}</Text>
+                    <Tag color="green">{row.count}</Tag>
+                  </div>
+                ))}
+                {nationalitySummary.length === 0 && <Text type="secondary">No data</Text>}
+              </Space>
+            </Card>
+          </Col>
+          <Col xs={24} md={12} lg={6}>
+            <Card title="Top Departments">
+              <Space direction="vertical" style={{ width: '100%' }} size="small">
+                {departmentSummary.map((row) => (
+                  <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Text>{row.label}</Text>
+                    <Tag color="purple">{row.count}</Tag>
+                  </div>
+                ))}
+                {departmentSummary.length === 0 && <Text type="secondary">No data</Text>}
+              </Space>
+            </Card>
+          </Col>
+        </Row>
 
-      <Card>
-        <Table
-          loading={listLoading}
-          columns={columns}
-          dataSource={filteredEmployees}
-          rowKey={(r: any) => r.id}
-          scroll={{ x: 1200 }}
-          pagination={{
-            pageSize: 50,
-            showSizeChanger: true,
-            pageSizeOptions: ['20', '50', '100', '200'],
-            showTotal: (total) => `Total ${total} employees`
-          }}
-          rowClassName={(record: any) => record.employment_status === 'TERMINATED' ? 'terminated-employee-row' : ''}
-        />
-      </Card>
-      <style>{`
+        <Card>
+          <Table
+            loading={listLoading}
+            columns={columns}
+            dataSource={filteredEmployees}
+            rowKey={(r: any) => r.id}
+            scroll={{ x: 1200 }}
+            pagination={{
+              pageSize: 50,
+              showSizeChanger: true,
+              pageSizeOptions: ['20', '50', '100', '200'],
+              showTotal: (total) => `Total ${total} employees`
+            }}
+            rowClassName={(record: any) => record.employment_status === 'TERMINATED' ? 'terminated-employee-row' : ''}
+          />
+        </Card>
+        <style>{`
         .terminated-employee-row {
           background-color: #3a3f47 !important;
           opacity: 0.7;
@@ -979,9 +1038,9 @@ export default function Demography() {
           <Space direction="vertical" style={{ width: '100%' }} size="large">
             {employeeDetail.photo && (
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                <Avatar 
-                  src={employeeDetail.photo} 
-                  size={120} 
+                <Avatar
+                  src={employeeDetail.photo}
+                  size={120}
                   icon={<UserOutlined />}
                   style={{ border: '3px solid #f5c400' }}
                 />
@@ -1318,13 +1377,18 @@ export default function Demography() {
             </Col>
           </Row>
 
-          <Card size="small" title="Beneficiaries" style={{ marginBottom: 12 }} extra={<Button onClick={()=>setBeneficiaryModalOpen(true)}>Add Beneficiary</Button>}>
+          <Card
+            size="small"
+            title="Beneficiaries"
+            style={{ marginBottom: 12 }}
+            extra={<Button disabled={!beneficiaryEmployeeId} onClick={() => setBeneficiaryModalOpen(true)}>Add Beneficiary</Button>}
+          >
             {beneficiaries.length === 0 ? (
               <Text type="secondary">No beneficiaries added yet.</Text>
             ) : (
               <Table
                 size="small"
-                rowKey={(_, idx) => (idx ?? 0).toString()}
+                rowKey="id"
                 dataSource={beneficiaries}
                 pagination={false}
                 columns={[
@@ -1332,13 +1396,15 @@ export default function Demography() {
                   { title: 'Relationship', dataIndex: 'relationship' },
                   { title: 'Phone', dataIndex: 'phone' },
                   { title: '%', dataIndex: 'percentage', width: 80 },
-                  { title: 'Action', width: 100, render: (_:any, __:any, idx:number) => (
-                    <Button danger size="small" onClick={()=> setBeneficiaries(prev => prev.filter((_,i)=>i!==idx))}>Remove</Button>
-                  )}
+                  {
+                    title: 'Action', width: 100, render: (_: any, row: EmployeeBeneficiary) => (
+                      <Button danger size="small" loading={deleteBeneficiaryMutation.isPending} onClick={() => deleteBeneficiaryMutation.mutate(row.id)}>Remove</Button>
+                    )
+                  }
                 ]}
               />
             )}
-            <Text type="secondary">Note: Beneficiaries are tracked locally for now; backend persistence can be added on request.</Text>
+            {!beneficiaryEmployeeId && <Text type="secondary">Save employee first to add beneficiaries.</Text>}
           </Card>
           <Space style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button onClick={() => employeeForm.resetFields()}>Reset</Button>
@@ -1354,12 +1420,9 @@ export default function Demography() {
         open={beneficiaryModalOpen}
         onCancel={() => { setBeneficiaryModalOpen(false); beneficiaryForm.resetFields(); }}
         onOk={() => beneficiaryForm.submit()}
+        okButtonProps={{ loading: addBeneficiaryMutation.isPending, disabled: !beneficiaryEmployeeId }}
       >
-        <Form form={beneficiaryForm} layout="vertical" onFinish={(vals)=>{
-          setBeneficiaries(prev => [...prev, vals]);
-          setBeneficiaryModalOpen(false);
-          beneficiaryForm.resetFields();
-        }}>
+        <Form form={beneficiaryForm} layout="vertical" onFinish={(vals) => addBeneficiaryMutation.mutate(vals)}>
           <Form.Item name="name" label="Full Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>

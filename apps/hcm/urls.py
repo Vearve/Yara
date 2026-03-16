@@ -8,7 +8,7 @@ from .views import (
     EmployeeViewSet, ContractViewSet, EngagementViewSet,
     TerminationViewSet, DepartmentViewSet, ContractTypeViewSet,
     TerminationReasonViewSet, EmploymentTypeViewSet, JobViewSet,
-    EmployeeCategoryViewSet, EmployeeDocumentViewSet
+    EmployeeCategoryViewSet, EmployeeDocumentViewSet, EmployeeBeneficiaryViewSet
 )
 
 app_name = 'hcm'
@@ -25,6 +25,7 @@ router.register(r'termination-reasons', TerminationReasonViewSet, basename='term
 router.register(r'employment-types', EmploymentTypeViewSet, basename='employment-type')
 router.register(r'employee-categories', EmployeeCategoryViewSet, basename='employee-category')
 router.register(r'employee-documents', EmployeeDocumentViewSet, basename='employee-document')
+router.register(r'employee-beneficiaries', EmployeeBeneficiaryViewSet, basename='employee-beneficiary')
 
 urlpatterns = [
     path('', include(router.urls)),
