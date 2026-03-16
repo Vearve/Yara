@@ -63,6 +63,26 @@ const buildTopCounts = (items: Array<string | null | undefined>, top = 5, fallba
   return [...head, { label: 'Other', count: tailCount }];
 };
 
+const toAbsoluteMediaUrl = (value?: string | null): string | null => {
+  if (!value) return null;
+  const trimmed = value.trim();
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    if (window.location.protocol === 'https:' && trimmed.startsWith('http://')) {
+      return `https://${trimmed.slice('http://'.length)}`;
+    }
+    return trimmed;
+  }
+
+  const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  const envBaseURL = (import.meta.env.VITE_API_BASE_URL || '').trim();
+  const apiOrigin = envBaseURL
+    ? envBaseURL.replace(/\/+$/, '').replace(/\/api$/, '')
+    : '';
+
+  return apiOrigin ? `${apiOrigin}${normalized}` : normalized;
+};
+
 type EmployeeRow = {
   id: number;
   employee_id: string;
@@ -351,6 +371,11 @@ export default function Demography() {
       return res.data as EmployeeDetail;
     },
   });
+
+  const employeePhotoUrl = useMemo(
+    () => toAbsoluteMediaUrl(employeeDetail?.photo),
+    [employeeDetail?.photo]
+  );
 
   const { data: engagementData, isFetching: engagementLoading } = useQuery<EngagementRecord | undefined>({
     queryKey: ['engagement', selectedId],
@@ -1036,10 +1061,10 @@ export default function Demography() {
           <Skeleton active />
         ) : employeeDetail ? (
           <Space direction="vertical" style={{ width: '100%' }} size="large">
-            {employeeDetail.photo && (
+            {employeePhotoUrl && (
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
                 <Avatar
-                  src={employeeDetail.photo}
+                  src={employeePhotoUrl}
                   size={120}
                   icon={<UserOutlined />}
                   style={{ border: '3px solid #f5c400' }}
