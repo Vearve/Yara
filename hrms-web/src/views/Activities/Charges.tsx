@@ -1,10 +1,30 @@
 import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Upload, Card } from 'antd';
 import { PlusOutlined, EyeOutlined, UploadOutlined, EditOutlined, DeleteOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import http from '../../lib/http';
 import dayjs from 'dayjs';
 import { exportChargeToPDF } from '../../lib/pdfExport';
+
+const toAbsoluteMediaUrl = (value?: string | null): string | null => {
+  if (!value) return null;
+  const trimmed = value.trim();
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    if (window.location.protocol === 'https:' && trimmed.startsWith('http://')) {
+      return `https://${trimmed.slice('http://'.length)}`;
+    }
+    return trimmed;
+  }
+
+  const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  const envBaseURL = (import.meta.env.VITE_API_BASE_URL || '').trim();
+  const apiOrigin = envBaseURL
+    ? envBaseURL.replace(/\/+$/, '').replace(/\/api$/, '')
+    : window.location.origin;
+
+  return `${apiOrigin}${normalized}`;
+};
 
 export default function Charges() {
   const queryClient = useQueryClient();
@@ -309,7 +329,7 @@ export default function Charges() {
             {viewingRecord.charges_document && (
               <div>
                 <strong>Document:</strong>{' '}
-                <a href={viewingRecord.charges_document} target="_blank" rel="noreferrer">
+                <a href={toAbsoluteMediaUrl(viewingRecord.charges_document) || '#'} target="_blank" rel="noreferrer">
                   Download
                 </a>
               </div>

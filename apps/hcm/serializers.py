@@ -198,6 +198,14 @@ class EmployeeDocumentSerializer(serializers.ModelSerializer):
         fields = ['id', 'employee', 'title', 'file', 'uploaded_at']
         read_only_fields = ['id', 'uploaded_at']
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        file_url = data.get('file')
+        request = self.context.get('request')
+        if file_url and request and file_url.startswith('/'):
+            data['file'] = request.build_absolute_uri(file_url)
+        return data
+
 
 class EmployeeBeneficiarySerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.full_name', read_only=True)

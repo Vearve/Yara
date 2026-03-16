@@ -30,6 +30,7 @@ class ReportViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'description', 'location']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -74,6 +75,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
     search_fields = ['candidate_name', 'position']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def perform_create(self, serializer):
         serializer.save()
@@ -87,6 +89,7 @@ class HearingViewSet(viewsets.ModelViewSet):
     filterset_fields = ['related_employee', 'hearing_date', 'status', 'case_study']
     ordering_fields = ['created_at', 'hearing_date']
     ordering = ['-hearing_date']
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -108,6 +111,7 @@ class InvestigationViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'description', 'investigator', 'findings', 'observations']
     ordering_fields = ['created_at', 'investigation_date']
     ordering = ['-investigation_date']
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -129,6 +133,7 @@ class CaseStudyViewSet(viewsets.ModelViewSet):
     search_fields = ['case_number', 'title']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -199,6 +204,7 @@ class AppraisalViewSet(viewsets.ModelViewSet):
     ]
     ordering_fields = ['review_end', 'created_at']
     ordering = ['-review_end']
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         qs = super().get_queryset()

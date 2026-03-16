@@ -2,6 +2,16 @@ from rest_framework import serializers
 from .models import LeaveRequest, SickNote, Absenteeism, DoubleTicketRequest
 
 
+def _absolutize_file_urls(data, request, fields):
+    if not request:
+        return data
+    for field in fields:
+        value = data.get(field)
+        if isinstance(value, str) and value.startswith('/'):
+            data[field] = request.build_absolute_uri(value)
+    return data
+
+
 class LeaveRequestSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source="employee.full_name", read_only=True)
     employee_code = serializers.CharField(source="employee.employee_id", read_only=True)
@@ -28,6 +38,10 @@ class LeaveRequestSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['doctor_note'])
+
 
 class SickNoteSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source="employee.full_name", read_only=True)
@@ -44,6 +58,10 @@ class SickNoteSerializer(serializers.ModelSerializer):
         if start and end and start > end:
             raise serializers.ValidationError("start_date cannot be after end_date")
         return attrs
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['document'])
 
 
 class LeaveSummarySerializer(serializers.Serializer):
@@ -68,6 +86,10 @@ class AbsenteeismSerializer(serializers.ModelSerializer):
         model = Absenteeism
         fields = "__all__"
         read_only_fields = ["created_at", "updated_at", "reported_by"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['supporting_document'])
 
 
 class DoubleTicketRequestSerializer(serializers.ModelSerializer):

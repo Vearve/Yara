@@ -4,6 +4,7 @@ Handles training, medicals, permits, probation, and compliance alerts.
 """
 
 from rest_framework import viewsets, filters
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Training, TrainingType, Medical, Permit, Probation, ComplianceAlert
 from .serializers import (
@@ -43,6 +44,7 @@ class TrainingViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'provider', 'employee__first_name', 'employee__last_name']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -60,6 +62,7 @@ class MedicalViewSet(viewsets.ModelViewSet):
     search_fields = ['employee__first_name', 'employee__last_name', 'employee__employee_id', 'medical_type']
     ordering_fields = ['created_at', 'expiry_date']
     ordering = ['-created_at']
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     
     def get_queryset(self):
         qs = Medical.objects.select_related('employee').all()
@@ -75,6 +78,7 @@ class PermitViewSet(viewsets.ModelViewSet):
     filterset_fields = ['employee', 'permit_type', 'status']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     
     def get_queryset(self):
         qs = Permit.objects.select_related('employee', 'permit_type').all()

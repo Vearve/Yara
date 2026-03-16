@@ -12,6 +12,16 @@ from apps.activities.models import (
 )
 
 
+def _absolutize_file_urls(data, request, fields):
+    if not request:
+        return data
+    for field in fields:
+        value = data.get(field)
+        if isinstance(value, str) and value.startswith('/'):
+            data[field] = request.build_absolute_uri(value)
+    return data
+
+
 class ReportTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportType
@@ -36,6 +46,10 @@ class ReportSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['attachments'])
+
 
 class InterviewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -47,6 +61,10 @@ class InterviewSerializer(serializers.ModelSerializer):
             'interview_document', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['interview_document'])
 
 
 class HearingSerializer(serializers.ModelSerializer):
@@ -66,6 +84,10 @@ class HearingSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['hearing_document'])
+
 
 class InvestigationSerializer(serializers.ModelSerializer):
     related_report_number = serializers.CharField(source='related_report.report_number', read_only=True)
@@ -82,6 +104,10 @@ class InvestigationSerializer(serializers.ModelSerializer):
             'investigation_document', 'supporting_documents', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['investigation_document', 'supporting_documents'])
 
 
 class CaseStudySerializer(serializers.ModelSerializer):
@@ -110,6 +136,10 @@ class CaseStudySerializer(serializers.ModelSerializer):
         linked = getattr(obj, 'investigation_links', None)
         return obj.investigations.count() + (linked.count() if linked is not None else 0)
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['charges_document'])
+
 
 class ChargeSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.full_name', read_only=True)
@@ -123,6 +153,10 @@ class ChargeSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['charges_document'])
 
 
 class KPISerializer(serializers.ModelSerializer):
@@ -191,6 +225,10 @@ class AppraisalSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['attachment'])
 
 
 class ScheduleEventSerializer(serializers.ModelSerializer):

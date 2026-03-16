@@ -9,6 +9,16 @@ from apps.tracking.models import (
 )
 
 
+def _absolutize_file_urls(data, request, fields):
+    if not request:
+        return data
+    for field in fields:
+        value = data.get(field)
+        if isinstance(value, str) and value.startswith('/'):
+            data[field] = request.build_absolute_uri(value)
+    return data
+
+
 class TrainingTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = TrainingType
@@ -30,6 +40,10 @@ class TrainingSerializer(serializers.ModelSerializer):
             'cost', 'notes', 'is_expired', 'days_until_expiry', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'is_expired', 'days_until_expiry']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['certificate_document'])
 
 
 class MedicalTypeSerializer(serializers.ModelSerializer):
@@ -55,6 +69,10 @@ class MedicalSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'is_expired', 'days_until_expiry']
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['report_document'])
+
 
 class PermitTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -76,6 +94,10 @@ class PermitSerializer(serializers.ModelSerializer):
             'issued_by', 'is_expired', 'days_until_expiry', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'is_expired', 'days_until_expiry']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return _absolutize_file_urls(data, self.context.get('request'), ['document'])
 
 
 class ProbationSerializer(serializers.ModelSerializer):

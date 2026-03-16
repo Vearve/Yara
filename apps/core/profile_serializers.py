@@ -24,11 +24,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         """Add profile fields from UserProfile model if it exists"""
         data = super().to_representation(instance)
+        request = self.context.get('request')
         
         # Try to get profile from related UserProfile model
         try:
             profile = instance.userprofile
-            data['profile_picture'] = profile.profile_picture.url if profile.profile_picture else None
+            picture_url = profile.profile_picture.url if profile.profile_picture else None
+            if picture_url and request and picture_url.startswith('/'):
+                picture_url = request.build_absolute_uri(picture_url)
+            data['profile_picture'] = picture_url
             data['job_title'] = profile.job_title
             data['bio'] = profile.bio
             data['personality_type'] = profile.personality_type

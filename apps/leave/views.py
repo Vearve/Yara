@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from .models import LeaveRequest, SickNote, Absenteeism, DoubleTicketRequest
 from .serializers import (
@@ -25,6 +26,7 @@ class LeaveRequestViewSet(viewsets.ModelViewSet):
     search_fields = ["employee__first_name", "employee__last_name", "employee__employee_number", "leave_type", "status"]
     ordering_fields = ["created_at", "start_date", "end_date", "status"]
     ordering = ["-created_at"]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -117,6 +119,7 @@ class SickNoteViewSet(viewsets.ModelViewSet):
     search_fields = ["employee__first_name", "employee__last_name", "employee__employee_id", "status", "diagnosis"]
     ordering_fields = ["created_at", "start_date", "end_date", "status"]
     ordering = ["-created_at"]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -192,6 +195,7 @@ class AbsenteeismViewSet(viewsets.ModelViewSet):
     ordering_fields = ["created_at", "date", "status"]
     ordering = ["-date"]
     filterset_fields = ["employee", "status", "date"]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         qs = super().get_queryset()
