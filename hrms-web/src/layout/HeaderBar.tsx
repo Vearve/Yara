@@ -26,9 +26,9 @@ const toAbsoluteLogoUrl = (value?: string | null): string | null => {
   const envBaseURL = (import.meta.env.VITE_API_BASE_URL || '').trim();
   const apiOrigin = envBaseURL
     ? envBaseURL.replace(/\/+$/, '').replace(/\/api$/, '')
-    : '';
+    : window.location.origin;
 
-  return apiOrigin ? `${apiOrigin}${normalized}` : value;
+  return `${apiOrigin}${normalized}`;
 };
 
 const withCacheBust = (value?: string | null): string | null => {
@@ -61,16 +61,18 @@ export default function HeaderBar() {
     try {
       const blobRes = await http.get(`/api/v1/core/workspaces/${workspaceId}/logo/`, { responseType: 'blob' });
       if (blobRes.data && blobRes.data.size > 0) {
-        applyLogoSrc(URL.createObjectURL(blobRes.data));
+        const blobUrl = URL.createObjectURL(blobRes.data);
+        applyLogoSrc(blobUrl);
         return;
       }
     } catch {
-      // Fall back to URL-based logo
     }
 
     try {
       const res = await http.get(`/api/v1/core/workspaces/${workspaceId}/`);
-      applyLogoSrc(withCacheBust(toAbsoluteLogoUrl(res.data?.logo)) || '/yara-bg.svg');
+      const logoUrl = res.data?.logo;
+      const finalUrl = withCacheBust(toAbsoluteLogoUrl(logoUrl)) || '/yara-bg.svg';
+      applyLogoSrc(finalUrl);
     } catch {
       applyLogoSrc('/yara-bg.svg');
     }
@@ -91,10 +93,11 @@ export default function HeaderBar() {
 
     try {
       await http.patch(`/api/v1/core/workspaces/${workspaceId}/`, formData);
+
       await loadWorkspaceLogo(workspaceId);
       window.dispatchEvent(new Event('companyLogoUpdated'));
       message.success('Company logo updated');
-    } catch (error) {
+    } catch {
       message.error('Failed to upload logo');
     }
   };

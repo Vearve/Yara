@@ -19,9 +19,9 @@ const toAbsoluteLogoUrl = (value?: string | null): string | null => {
   const envBaseURL = (import.meta.env.VITE_API_BASE_URL || '').trim();
   const apiOrigin = envBaseURL
     ? envBaseURL.replace(/\/+$/, '').replace(/\/api$/, '')
-    : '';
+    : window.location.origin;
 
-  return apiOrigin ? `${apiOrigin}${normalized}` : value;
+  return `${apiOrigin}${normalized}`;
 };
 
 const withCacheBust = (value?: string | null): string | null => {
@@ -104,6 +104,7 @@ export default function AppLayout() {
   useEffect(() => {
     const fetchLogo = async () => {
       const workspaceId = localStorage.getItem('workspaceId');
+
       if (!workspaceId) {
         applyLogoSrc('/yara-bg.svg');
         return;
@@ -112,17 +113,19 @@ export default function AppLayout() {
       try {
         const blobRes = await http.get(`/api/v1/core/workspaces/${workspaceId}/logo/`, { responseType: 'blob' });
         if (blobRes.data && blobRes.data.size > 0) {
-          applyLogoSrc(URL.createObjectURL(blobRes.data));
+          const blobUrl = URL.createObjectURL(blobRes.data);
+          applyLogoSrc(blobUrl);
           return;
         }
       } catch {
-        // Fall back to URL-based logo below
       }
 
       try {
         const res = await http.get(`/api/v1/core/workspaces/${workspaceId}/`);
-        applyLogoSrc(withCacheBust(toAbsoluteLogoUrl(res.data?.logo)) || '/yara-bg.svg');
-      } catch (error) {
+        const logoUrl = res.data?.logo;
+        const finalUrl = withCacheBust(toAbsoluteLogoUrl(logoUrl)) || '/yara-bg.svg';
+        applyLogoSrc(finalUrl);
+      } catch {
         applyLogoSrc('/yara-bg.svg');
       }
     };
