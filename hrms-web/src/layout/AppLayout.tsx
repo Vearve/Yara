@@ -30,6 +30,11 @@ const withCacheBust = (value?: string | null): string | null => {
   return `${value}${sep}v=${Date.now()}`;
 };
 
+const isImageResponse = (blob: Blob, contentType?: string): boolean => {
+  const detected = (blob?.type || contentType || '').toLowerCase();
+  return detected.startsWith('image/');
+};
+
 const { Content, Sider, Header } = Layout;
 const { Title } = Typography;
 
@@ -107,12 +112,21 @@ export default function AppLayout() {
 
       if (!workspaceId) {
         applyLogoSrc('/yara-bg.svg');
+        setTimeout(() => {
+          const lateWorkspaceId = localStorage.getItem('workspaceId');
+          if (lateWorkspaceId) {
+            fetchLogo();
+          }
+        }, 900);
         return;
       }
 
+      const cacheKey = `workspace-logo-url-${workspaceId}`;
+
       try {
         const blobRes = await http.get(`/api/v1/core/workspaces/${workspaceId}/logo/`, { responseType: 'blob' });
-        if (blobRes.data && blobRes.data.size > 0) {
+        const responseType = (blobRes.headers?.['content-type'] as string | undefined) || '';
+        if (blobRes.data && blobRes.data.size > 0 && isImageResponse(blobRes.data, responseType)) {
           const blobUrl = URL.createObjectURL(blobRes.data);
           applyLogoSrc(blobUrl);
           return;
@@ -124,8 +138,19 @@ export default function AppLayout() {
         const res = await http.get(`/api/v1/core/workspaces/${workspaceId}/`);
         const logoUrl = res.data?.logo;
         const finalUrl = withCacheBust(toAbsoluteLogoUrl(logoUrl)) || '/yara-bg.svg';
+        if (logoUrl) {
+          const absoluteLogo = toAbsoluteLogoUrl(logoUrl);
+          if (absoluteLogo) {
+            localStorage.setItem(cacheKey, absoluteLogo);
+          }
+        }
         applyLogoSrc(finalUrl);
       } catch {
+        const cachedLogo = localStorage.getItem(cacheKey);
+        if (cachedLogo) {
+          applyLogoSrc(withCacheBust(cachedLogo) || '/yara-bg.svg');
+          return;
+        }
         applyLogoSrc('/yara-bg.svg');
       }
     };

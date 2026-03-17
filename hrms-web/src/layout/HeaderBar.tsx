@@ -37,6 +37,11 @@ const withCacheBust = (value?: string | null): string | null => {
   return `${value}${sep}v=${Date.now()}`;
 };
 
+const isImageResponse = (blob: Blob, contentType?: string): boolean => {
+  const detected = (blob?.type || contentType || '').toLowerCase();
+  return detected.startsWith('image/');
+};
+
 export default function HeaderBar() {
   const nav = useNavigate();
   const [logo, setLogo] = useState<string>('/yara-bg.svg');
@@ -58,9 +63,12 @@ export default function HeaderBar() {
   };
 
   const loadWorkspaceLogo = async (workspaceId: string) => {
+    const cacheKey = `workspace-logo-url-${workspaceId}`;
+
     try {
       const blobRes = await http.get(`/api/v1/core/workspaces/${workspaceId}/logo/`, { responseType: 'blob' });
-      if (blobRes.data && blobRes.data.size > 0) {
+      const responseType = (blobRes.headers?.['content-type'] as string | undefined) || '';
+      if (blobRes.data && blobRes.data.size > 0 && isImageResponse(blobRes.data, responseType)) {
         const blobUrl = URL.createObjectURL(blobRes.data);
         applyLogoSrc(blobUrl);
         return;
@@ -72,8 +80,19 @@ export default function HeaderBar() {
       const res = await http.get(`/api/v1/core/workspaces/${workspaceId}/`);
       const logoUrl = res.data?.logo;
       const finalUrl = withCacheBust(toAbsoluteLogoUrl(logoUrl)) || '/yara-bg.svg';
+      if (logoUrl) {
+        const absoluteLogo = toAbsoluteLogoUrl(logoUrl);
+        if (absoluteLogo) {
+          localStorage.setItem(cacheKey, absoluteLogo);
+        }
+      }
       applyLogoSrc(finalUrl);
     } catch {
+      const cachedLogo = localStorage.getItem(cacheKey);
+      if (cachedLogo) {
+        applyLogoSrc(withCacheBust(cachedLogo) || '/yara-bg.svg');
+        return;
+      }
       applyLogoSrc('/yara-bg.svg');
     }
   };
@@ -107,6 +126,12 @@ export default function HeaderBar() {
       const workspaceId = localStorage.getItem('workspaceId');
       if (!workspaceId) {
         applyLogoSrc('/yara-bg.svg');
+        setTimeout(() => {
+          const lateWorkspaceId = localStorage.getItem('workspaceId');
+          if (lateWorkspaceId) {
+            loadWorkspaceLogo(lateWorkspaceId).catch(() => applyLogoSrc('/yara-bg.svg'));
+          }
+        }, 900);
         return;
       }
       await loadWorkspaceLogo(workspaceId);
