@@ -83,11 +83,12 @@ export default function EngagementsTerminations() {
   const applyFilters = (items: any[], dateKey: string) => {
     return items.filter((item) => {
       const emp = employeeMap.get(item.employee);
-      if (appliedFilters.dept && emp?.department !== appliedFilters.dept) return false;
+      const departmentId = emp?.department ?? item?.department;
+      if (appliedFilters.dept && departmentId !== appliedFilters.dept) return false;
       if (appliedFilters.search) {
         const term = appliedFilters.search.toLowerCase();
-        const name = `${emp?.first_name || ''} ${emp?.last_name || ''}`.toLowerCase();
-        const code = String(emp?.employee_id || '').toLowerCase();
+        const name = `${item?.first_name || emp?.first_name || ''} ${item?.last_name || emp?.last_name || ''}`.toLowerCase();
+        const code = String(item?.employee_id || emp?.employee_id || '').toLowerCase();
         if (!name.includes(term) && !code.includes(term)) return false;
       }
       if (appliedFilters.range?.[0] && appliedFilters.range?.[1]) {
@@ -104,44 +105,43 @@ export default function EngagementsTerminations() {
 
   const engagementRows = useMemo(() => {
     return applyFilters(engagements || [], 'engagement_date').map((item: any, idx: number) => {
-      const emp = employeeMap.get(item.employee) || {};
       return {
         key: item.id || idx,
         sn: idx + 1,
-        employee_id: emp.employee_id || '-',
-        first_name: emp.first_name || '',
-        surname: emp.last_name || '',
-        job_title: emp.job_title || '-',
-        gender: emp.gender || '-',
-        dob: emp.date_of_birth || '-',
-        department: emp.department_name || '-',
+        employee_id: item.employee_id || '-',
+        first_name: item.first_name || '',
+        surname: item.last_name || '',
+        job_title: item.job_title || '-',
+        gender: item.gender || '-',
+        dob: item.date_of_birth || '-',
+        department: item.department_name || '-',
         contract_type: item.contract_type_name || '-',
         engagement_date: item.engagement_date || '-',
         contract_duration: item.contract_duration_months ? `${item.contract_duration_months} months` : '-',
         contract_end_date: item.initial_contract_end_date || '-',
       };
     });
-  }, [engagements, employeeMap, appliedFilters]);
+  }, [engagements, appliedFilters, employeeMap]);
 
   const terminationRows = useMemo(() => {
     return applyFilters(terminations || [], 'termination_date').map((item: any, idx: number) => {
-      const emp = employeeMap.get(item.employee) || {};
       return {
         key: item.id || idx,
         sn: idx + 1,
-        employee_id: emp.employee_id || '-',
-        first_name: emp.first_name || '',
-        surname: emp.last_name || '',
-        job_title: emp.job_title || '-',
-        gender: emp.gender || '-',
-        dob: emp.date_of_birth || '-',
-        department: emp.department_name || '-',
+        employee_id: item.employee_id || '-',
+        first_name: item.first_name || '',
+        surname: item.last_name || '',
+        job_title: item.job_title || '-',
+        gender: item.gender || '-',
+        dob: item.date_of_birth || '-',
+        department: item.department_name || '-',
         payroll: item.payroll_final ? 'Yes' : 'No',
+        engagement_date: item.engagement_date || '-',
         termination_date: item.termination_date || '-',
         termination_reason: item.termination_reason_name || '-',
       };
     });
-  }, [terminations, employeeMap, appliedFilters]);
+  }, [terminations, appliedFilters, employeeMap]);
   const engagementCols = [
     { title: 'S/No', dataIndex: 'sn', width: 70 },
     { title: 'Employee ID', dataIndex: 'employee_id' },

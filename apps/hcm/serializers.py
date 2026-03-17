@@ -160,12 +160,20 @@ class ContractSerializer(serializers.ModelSerializer):
 
 class EngagementSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.full_name', read_only=True)
+    employee_id = serializers.CharField(source='employee.employee_id', read_only=True)
+    first_name = serializers.CharField(source='employee.first_name', read_only=True)
+    last_name = serializers.CharField(source='employee.last_name', read_only=True)
+    job_title = serializers.CharField(source='employee.job_title', read_only=True)
+    gender = serializers.CharField(source='employee.gender', read_only=True)
+    date_of_birth = serializers.DateField(source='employee.date_of_birth', read_only=True)
+    department_name = serializers.CharField(source='employee.department.name', read_only=True)
     contract_type_name = serializers.CharField(source='contract_type.name', read_only=True)
     
     class Meta:
         model = Engagement
         fields = [
-            'id', 'employee', 'employee_name', 'engagement_date',
+            'id', 'employee', 'employee_name', 'employee_id', 'first_name', 'last_name',
+            'job_title', 'gender', 'date_of_birth', 'department_name', 'engagement_date',
             'contract_type', 'contract_type_name', 'contract_duration_months',
             'initial_contract_end_date', 'notes', 'created_at', 'updated_at'
         ]
@@ -180,12 +188,20 @@ class TerminationReasonSerializer(serializers.ModelSerializer):
 
 class TerminationSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.full_name', read_only=True)
+    employee_id = serializers.CharField(source='employee.employee_id', read_only=True)
+    first_name = serializers.CharField(source='employee.first_name', read_only=True)
+    last_name = serializers.CharField(source='employee.last_name', read_only=True)
+    job_title = serializers.CharField(source='employee.job_title', read_only=True)
+    gender = serializers.CharField(source='employee.gender', read_only=True)
+    date_of_birth = serializers.DateField(source='employee.date_of_birth', read_only=True)
+    department_name = serializers.CharField(source='employee.department.name', read_only=True)
     termination_reason_name = serializers.CharField(source='termination_reason.name', read_only=True)
     
     class Meta:
         model = Termination
         fields = [
-            'id', 'employee', 'employee_name', 'termination_date',
+            'id', 'employee', 'employee_name', 'employee_id', 'first_name', 'last_name',
+            'job_title', 'gender', 'date_of_birth', 'department_name', 'termination_date',
             'termination_reason', 'termination_reason_name', 'payroll_final',
             'comments', 'created_at', 'updated_at'
         ]

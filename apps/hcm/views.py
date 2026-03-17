@@ -585,7 +585,7 @@ class ContractViewSet(viewsets.ModelViewSet):
 
 class EngagementViewSet(viewsets.ModelViewSet):
     """ViewSet for employee engagements."""
-    queryset = Engagement.objects.select_related('employee').all()
+    queryset = Engagement.objects.select_related('employee', 'employee__department', 'contract_type').all()
     serializer_class = EngagementSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['employee']
@@ -601,7 +601,7 @@ class EngagementViewSet(viewsets.ModelViewSet):
 
 class TerminationViewSet(viewsets.ModelViewSet):
     """ViewSet for employee terminations."""
-    queryset = Termination.objects.select_related('employee', 'termination_reason').all()
+    queryset = Termination.objects.select_related('employee', 'employee__department', 'termination_reason').all()
     serializer_class = TerminationSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['employee', 'termination_reason']
