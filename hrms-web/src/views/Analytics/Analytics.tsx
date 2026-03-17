@@ -111,10 +111,10 @@ export default function Analytics() {
   const employeeTrend = employeeTrendData && employeeTrendData.length > 0
     ? employeeTrendData
     : [
-        { month: 'Jan', active: 0, inactive: 0, on_leave: 0 },
-        { month: 'Feb', active: 0, inactive: 0, on_leave: 0 },
-        { month: 'Mar', active: 0, inactive: 0, on_leave: 0 },
-      ];
+      { month: 'Jan', active: 0, inactive: 0, on_leave: 0 },
+      { month: 'Feb', active: 0, inactive: 0, on_leave: 0 },
+      { month: 'Mar', active: 0, inactive: 0, on_leave: 0 },
+    ];
 
   const departmentDist = departmentData && departmentData.length > 0
     ? departmentData
@@ -123,19 +123,19 @@ export default function Analytics() {
   const trainingCompletion = trainingData && trainingData.length > 0
     ? trainingData
     : [
-        { month: 'Jan', completed: 0, pending: 0 },
-        { month: 'Feb', completed: 0, pending: 0 },
-        { month: 'Mar', completed: 0, pending: 0 },
-      ];
+      { month: 'Jan', completed: 0, pending: 0 },
+      { month: 'Feb', completed: 0, pending: 0 },
+      { month: 'Mar', completed: 0, pending: 0 },
+    ];
 
   const recruitmentFunnel = recruitmentFunnelData && recruitmentFunnelData.length > 0
     ? recruitmentFunnelData
     : [
-        { stage: 'Applicants', value: 0 },
-        { stage: 'Screened', value: 0 },
-        { stage: 'Interviews', value: 0 },
-        { stage: 'Offers', value: 0 },
-      ];
+      { stage: 'Applicants', value: 0 },
+      { stage: 'Screened', value: 0 },
+      { stage: 'Interviews', value: 0 },
+      { stage: 'Offers', value: 0 },
+    ];
 
   const colors = ['#f5c400', '#3ee7ff', '#ff4fd8', '#7cff6b', '#ffb547'];
 
@@ -228,15 +228,15 @@ export default function Analytics() {
             Monitor HR metrics, recruitment funnels, payroll insights, and workforce performance across your entire organization with live data visualization.
           </p>
           <div className="flex flex-wrap gap-3 mt-2">
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               size="large"
               icon={<Download size={18} />}
               onClick={exportPdf}
-              style={{ 
-                background: '#f5c400', 
-                borderColor: '#f5c400', 
-                color: '#05060a', 
+              style={{
+                background: '#f5c400',
+                borderColor: '#f5c400',
+                color: '#05060a',
                 fontWeight: 600,
                 height: 44,
                 paddingLeft: 24,
@@ -245,16 +245,16 @@ export default function Analytics() {
             >
               Export Report
             </Button>
-            <Button 
+            <Button
               size="large"
               icon={<RefreshCw size={18} />}
               onClick={() => {
                 setPendingFilters(defaultFilters);
                 setAppliedFilters(defaultFilters);
               }}
-              style={{ 
-                background: 'rgba(255,255,255,0.06)', 
-                borderColor: 'rgba(245,196,0,0.4)', 
+              style={{
+                background: 'rgba(255,255,255,0.06)',
+                borderColor: 'rgba(245,196,0,0.4)',
                 color: '#f7f8fb',
                 height: 44,
               }}
@@ -303,9 +303,9 @@ export default function Analytics() {
               value={pendingFilters.employeeId}
               onChange={(value) => setPendingFilters({ ...pendingFilters, employeeId: value })}
               optionFilterProp="label"
-              options={(employees || []).map((e: any) => ({ 
-                label: `${e.first_name} ${e.last_name} (${e.employee_id})`, 
-                value: e.id 
+              options={(employees || []).map((e: any) => ({
+                label: `${e.first_name} ${e.last_name} (${e.employee_id})`,
+                value: e.id
               }))}
             />
           </Col>
@@ -344,10 +344,10 @@ export default function Analytics() {
           const gradient = card.color === '#7cff6b'
             ? 'lime'
             : card.color === '#ff4fd8'
-            ? 'pink'
-            : card.color === '#ffb547'
-            ? 'amber'
-            : 'cyan';
+              ? 'pink'
+              : card.color === '#ffb547'
+                ? 'amber'
+                : 'cyan';
           return (
             <Col xs={24} sm={12} xl={6} key={card.label}>
               <KPICard
@@ -371,7 +371,7 @@ export default function Analytics() {
             </div>
             <div className="text-xs text-[var(--text-dim)]">Total Employees</div>
             <div className="text-2xl font-semibold">{hcmData.total_employees}</div>
-            <div className="text-xs text-[var(--text-dim)]">Active: {hcmData.active_engagements} · Departments: {hcmData.departments}</div>
+            <div className="text-xs text-[var(--text-dim)]">Active: {hcmData.active_employees} · Departments: {hcmData.departments}</div>
           </GlassCard>
         </Col>
         <Col xs={24} sm={12} lg={8} xl={6}>
@@ -420,63 +420,63 @@ export default function Analytics() {
       <Row gutter={[14, 14]}>
         <Col xs={24} xl={12}>
           <GlassCard gradient="gold" style={{ height: '100%' }}>
-          <div className="text-sm text-[var(--text-dim)] mb-3">Employee Status Trend</div>
-          <div style={{ width: '100%', height: '320px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={employeeTrend}>
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  stroke="rgba(245, 196, 0, 0.08)" 
-                  vertical={false}
-                />
-                <XAxis dataKey="month" stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
-                <YAxis stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
-                <Tooltip 
-                  contentStyle={{ 
-                    background: 'rgba(5, 6, 10, 0.95)', 
-                    border: '1px solid rgba(245, 196, 0, 0.35)',
-                    borderRadius: '10px',
-                    color: '#f7f8fb',
-                  }}
-                  labelStyle={{ color: '#f5c400' }}
-                />
-                <Legend wrapperStyle={{ color: '#c4c8d4' }} />
-                <Line type="monotone" dataKey="active" stroke="#7cff6b" name="Active" strokeWidth={3} dot={{ fill: '#7cff6b', r: 4 }} />
-                <Line type="monotone" dataKey="inactive" stroke="#ff4fd8" name="Inactive" strokeWidth={3} dot={{ fill: '#ff4fd8', r: 4 }} />
-                <Line type="monotone" dataKey="on_leave" stroke="#ffb547" name="On Leave" strokeWidth={3} dot={{ fill: '#ffb547', r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+            <div className="text-sm text-[var(--text-dim)] mb-3">Employee Status Trend</div>
+            <div style={{ width: '100%', height: '320px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={employeeTrend}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(245, 196, 0, 0.08)"
+                    vertical={false}
+                  />
+                  <XAxis dataKey="month" stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
+                  <YAxis stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'rgba(5, 6, 10, 0.95)',
+                      border: '1px solid rgba(245, 196, 0, 0.35)',
+                      borderRadius: '10px',
+                      color: '#f7f8fb',
+                    }}
+                    labelStyle={{ color: '#f5c400' }}
+                  />
+                  <Legend wrapperStyle={{ color: '#c4c8d4' }} />
+                  <Line type="monotone" dataKey="active" stroke="#7cff6b" name="Active" strokeWidth={3} dot={{ fill: '#7cff6b', r: 4 }} />
+                  <Line type="monotone" dataKey="inactive" stroke="#ff4fd8" name="Inactive" strokeWidth={3} dot={{ fill: '#ff4fd8', r: 4 }} />
+                  <Line type="monotone" dataKey="on_leave" stroke="#ffb547" name="On Leave" strokeWidth={3} dot={{ fill: '#ffb547', r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </GlassCard>
         </Col>
         <Col xs={24} xl={12}>
           <GlassCard gradient="cyan" style={{ height: '100%' }}>
-          <div className="text-sm text-[var(--text-dim)] mb-3">Department Distribution</div>
-          <div style={{ width: '100%', height: '360px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={departmentDist}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={120}
-                  dataKey="value"
-                >
-                  {departmentDist.map((_: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                  ))}
-                </Pie>
-                  <Tooltip contentStyle={{ 
-                    background: 'rgba(5, 6, 10, 0.95)', 
+            <div className="text-sm text-[var(--text-dim)] mb-3">Department Distribution</div>
+            <div style={{ width: '100%', height: '360px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={departmentDist}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}`}
+                    outerRadius={120}
+                    dataKey="value"
+                  >
+                    {departmentDist.map((_: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{
+                    background: 'rgba(5, 6, 10, 0.95)',
                     border: '1px solid rgba(245, 196, 0, 0.35)',
                     borderRadius: '10px',
                     color: '#f7f8fb',
                   }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </GlassCard>
         </Col>
       </Row>
@@ -484,54 +484,54 @@ export default function Analytics() {
       <Row gutter={[14, 14]}>
         <Col xs={24} xl={12}>
           <GlassCard gradient="lime" style={{ height: '100%' }}>
-          <div className="text-sm text-[var(--text-dim)] mb-3">Training Completion Rate</div>
-          <div style={{ width: '100%', height: '320px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={trainingCompletion}>
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  stroke="rgba(245, 196, 0, 0.08)" 
-                  vertical={false}
-                />
-                <XAxis dataKey="month" stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
-                <YAxis stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
-                <Tooltip contentStyle={{ 
-                  background: 'rgba(5, 6, 10, 0.95)', 
-                  border: '1px solid rgba(245, 196, 0, 0.35)',
-                  borderRadius: '10px',
-                  color: '#f7f8fb',
-                }} labelStyle={{ color: '#f5c400' }} />
-                <Legend wrapperStyle={{ color: '#c4c8d4' }} />
-                <Bar dataKey="completed" stackId="a" fill="#7cff6b" name="Completed" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="pending" stackId="a" fill="#f5c400" name="Pending" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+            <div className="text-sm text-[var(--text-dim)] mb-3">Training Completion Rate</div>
+            <div style={{ width: '100%', height: '320px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={trainingCompletion}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(245, 196, 0, 0.08)"
+                    vertical={false}
+                  />
+                  <XAxis dataKey="month" stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
+                  <YAxis stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
+                  <Tooltip contentStyle={{
+                    background: 'rgba(5, 6, 10, 0.95)',
+                    border: '1px solid rgba(245, 196, 0, 0.35)',
+                    borderRadius: '10px',
+                    color: '#f7f8fb',
+                  }} labelStyle={{ color: '#f5c400' }} />
+                  <Legend wrapperStyle={{ color: '#c4c8d4' }} />
+                  <Bar dataKey="completed" stackId="a" fill="#7cff6b" name="Completed" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="pending" stackId="a" fill="#f5c400" name="Pending" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </GlassCard>
         </Col>
         <Col xs={24} xl={12}>
           <GlassCard gradient="amber" style={{ height: '100%' }}>
-          <div className="text-sm text-[var(--text-dim)] mb-3">Recruitment Funnel</div>
-          <div style={{ width: '100%', height: '320px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={recruitmentFunnel} layout="vertical">
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  stroke="rgba(245, 196, 0, 0.08)" 
-                  horizontal={false}
-                />
-                <XAxis type="number" stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
-                <YAxis dataKey="stage" type="category" width={120} stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
-                <Tooltip contentStyle={{ 
-                  background: 'rgba(5, 6, 10, 0.95)', 
-                  border: '1px solid rgba(245, 196, 0, 0.35)',
-                  borderRadius: '10px',
-                  color: '#f7f8fb',
-                }} labelStyle={{ color: '#f5c400' }} />
-                <Bar dataKey="count" fill="#3ee7ff" radius={[0, 8, 8, 0]} barSize={24} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+            <div className="text-sm text-[var(--text-dim)] mb-3">Recruitment Funnel</div>
+            <div style={{ width: '100%', height: '320px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={recruitmentFunnel} layout="vertical">
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(245, 196, 0, 0.08)"
+                    horizontal={false}
+                  />
+                  <XAxis type="number" stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
+                  <YAxis dataKey="stage" type="category" width={120} stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
+                  <Tooltip contentStyle={{
+                    background: 'rgba(5, 6, 10, 0.95)',
+                    border: '1px solid rgba(245, 196, 0, 0.35)',
+                    borderRadius: '10px',
+                    color: '#f7f8fb',
+                  }} labelStyle={{ color: '#f5c400' }} />
+                  <Bar dataKey="count" fill="#3ee7ff" radius={[0, 8, 8, 0]} barSize={24} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </GlassCard>
         </Col>
       </Row>

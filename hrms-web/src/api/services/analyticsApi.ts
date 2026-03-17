@@ -18,7 +18,7 @@ export interface AnalyticsData {
   // Module statistics
   hcm: {
     total_employees: number;
-    active_engagements: number;
+    active_employees: number;
     pending_terminations: number;
     departments: number;
   };
@@ -358,9 +358,9 @@ export const analyticsApi = {
         kpis,
         hcm: {
           total_employees: totalEmployees,
-          active_engagements: activeEngagements,
+          active_employees: filteredEmployees.filter((e: any) => e.employment_status === 'ACTIVE').length,
           pending_terminations: pendingTerminations,
-          departments: filteredDepartments.length,
+          departments: Object.keys(deptCounts).filter(k => k !== 'Unassigned' && deptCounts[k] > 0).length,
         },
         recruitment: {
           active_atrs: activeAtrs,
