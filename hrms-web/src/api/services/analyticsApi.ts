@@ -357,7 +357,7 @@ export const analyticsApi = {
       return {
         kpis,
         hcm: {
-          total_employees: totalEmployees,
+          total_employees: totalAllEmployees,
           active_employees: filteredEmployees.filter((e: any) => e.employment_status === 'ACTIVE').length,
           pending_terminations: pendingTerminations,
           departments: Object.keys(deptCounts).filter(k => k !== 'Unassigned' && deptCounts[k] > 0).length,
