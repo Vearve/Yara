@@ -469,11 +469,15 @@ export default function Analytics() {
                     ))}
                   </Pie>
                   <Tooltip contentStyle={{
-                    background: 'rgba(5, 6, 10, 0.95)',
-                    border: '1px solid rgba(245, 196, 0, 0.35)',
+                    backgroundColor: '#f7f8fb',
+                    border: '1px solid rgba(15, 18, 28, 0.2)',
                     borderRadius: '10px',
-                    color: '#f7f8fb',
-                  }} />
+                    color: '#0f121c',
+                  }}
+                  labelStyle={{ color: '#0f121c', fontWeight: 600 }}
+                  itemStyle={{ color: '#0f121c' }}
+                  formatter={(value: any, name: any) => [String(value), String(name)]}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
