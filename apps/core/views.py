@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.db.models import Count, Q
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth import get_user_model
 
@@ -122,11 +122,21 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def logo(self, request, pk=None):
         workspace = self.get_object()
+        if workspace.logo_data:
+            response = HttpResponse(
+                workspace.logo_data,
+                content_type=workspace.logo_content_type or 'image/png'
+            )
+            response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            return response
+
         if not workspace.logo:
             return Response({'detail': 'No logo uploaded'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            return FileResponse(workspace.logo.open('rb'))
+            response = FileResponse(workspace.logo.open('rb'))
+            response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            return response
         except FileNotFoundError:
             return Response({'detail': 'Logo file not found'}, status=status.HTTP_404_NOT_FOUND)
     

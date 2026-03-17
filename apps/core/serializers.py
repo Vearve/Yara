@@ -28,12 +28,51 @@ class WorkspaceSerializer(serializers.ModelSerializer):
     def get_employee_count(self, obj):
         return obj.employees.filter(employment_status='ACTIVE').count()
 
+    def _extract_logo_payload(self, logo_file):
+        if logo_file in (None, serializers.empty):
+            return logo_file, ''
+        try:
+            logo_file.seek(0)
+        except Exception:
+            pass
+        payload = logo_file.read()
+        try:
+            logo_file.seek(0)
+        except Exception:
+            pass
+        return payload, getattr(logo_file, 'content_type', '') or 'image/png'
+
+    def create(self, validated_data):
+        logo_file = validated_data.get('logo', serializers.empty)
+        logo_payload, logo_content_type = self._extract_logo_payload(logo_file)
+        instance = super().create(validated_data)
+        if logo_payload not in (None, serializers.empty):
+            instance.logo_data = logo_payload
+            instance.logo_content_type = logo_content_type
+            instance.save(update_fields=['logo_data', 'logo_content_type', 'updated_at'])
+        return instance
+
+    def update(self, instance, validated_data):
+        logo_file = validated_data.get('logo', serializers.empty)
+        logo_payload, logo_content_type = self._extract_logo_payload(logo_file)
+        instance = super().update(instance, validated_data)
+
+        if logo_file is None:
+            instance.logo_data = None
+            instance.logo_content_type = ''
+            instance.save(update_fields=['logo_data', 'logo_content_type', 'updated_at'])
+        elif logo_file is not serializers.empty:
+            instance.logo_data = logo_payload
+            instance.logo_content_type = logo_content_type
+            instance.save(update_fields=['logo_data', 'logo_content_type', 'updated_at'])
+
+        return instance
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        logo_url = data.get('logo')
         request = self.context.get('request')
-        if logo_url and request and logo_url.startswith('/'):
-            data['logo'] = request.build_absolute_uri(logo_url)
+        if request and (instance.logo or instance.logo_data):
+            data['logo'] = request.build_absolute_uri(f'/api/v1/core/workspaces/{instance.pk}/logo/')
         return data
 
 

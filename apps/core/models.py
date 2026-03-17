@@ -32,6 +32,8 @@ class Workspace(models.Model):
 
     # Branding
     logo = models.ImageField(upload_to='workspace_logos/', blank=True, null=True)
+    logo_data = models.BinaryField(blank=True, null=True, editable=False)
+    logo_content_type = models.CharField(max_length=100, blank=True)
     
     # Status
     is_active = models.BooleanField(default=True)
