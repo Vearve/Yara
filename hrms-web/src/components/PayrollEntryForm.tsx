@@ -37,7 +37,7 @@ export default function PayrollEntryForm({ visible, onClose, onSuccess, entry }:
   const { data: employeesRaw } = useQuery({
     queryKey: ['employees'],
     queryFn: () =>
-      http.get('/api/v1/hcm/employees/').then((res) =>
+      http.get('/api/v1/hcm/employees/', { params: { page_size: 1000 } }).then((res) =>
         res.data.results || res.data || []
       ),
     enabled: visible,
