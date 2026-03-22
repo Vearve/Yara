@@ -35,10 +35,10 @@ _raw_allowed_hosts = config(
     'ALLOWED_HOSTS',
     default='localhost,127.0.0.1,*.onrender.com',
     cast=Csv()
-)
+)  # type: ignore[assignment]
 ALLOWED_HOSTS = [
     host if host.startswith('*.') else _normalize_host(host)
-    for host in _raw_allowed_hosts
+    for host in _raw_allowed_hosts  # type: ignore[union-attr]
 ]
 ALLOWED_HOSTS = [host for host in ALLOWED_HOSTS if host]
 

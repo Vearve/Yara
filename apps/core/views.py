@@ -3,12 +3,14 @@ Core API ViewSets for assignments: Sites, Projects, Clients, Assignments.
 Workspace management endpoints.
 """
 
+from typing import Any, Optional
 from rest_framework import viewsets, filters, status, mixins
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.request import Request
 from django.db.models import Count, Q
 from django.http import FileResponse, HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -45,10 +47,11 @@ class WorkspacePermissionMixin:
     Checks user's role and allows/denies operations accordingly.
     """
     permission_required = None  # Set to permission key string in subclass, e.g., 'can_manage_employees'
+    request: Request  # type: ignore[assignment]
     
-    def check_workspace_permission(self, permission_key=None):
+    def check_workspace_permission(self, permission_key: Optional[str] = None):
         """Verify user has required permission in workspace"""
-        workspace = getattr(self.request, 'workspace', None)
+        workspace = getattr(self.request, 'workspace', None)  # type: ignore[attr-defined]
         if not workspace:
             raise PermissionDenied('Workspace context required')
         
@@ -58,11 +61,14 @@ class WorkspacePermissionMixin:
     
     def filter_queryset(self, queryset):
         """Filter by workspace"""
-        workspace = getattr(self.request, 'workspace', None)
+        workspace = getattr(self.request, 'workspace', None)  # type: ignore[attr-defined]
         if workspace:
             if hasattr(queryset.model, 'workspace'):
                 queryset = queryset.filter(workspace=workspace)
-        return super().filter_queryset(queryset)
+        super_filter = getattr(super(), 'filter_queryset', None)
+        if callable(super_filter):
+            return super_filter(queryset)
+        return queryset
 
 
 class WorkspaceViewSet(viewsets.ModelViewSet):
@@ -160,8 +166,8 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
     def current_workspace_debug(self, request):
         """DEBUG: Show current workspace context from middleware"""
         workspace_header = request.META.get('HTTP_X_WORKSPACE_ID', 'NOT SENT')
-        current_workspace = getattr(request, 'workspace', None)
-        current_workspace_id = getattr(request, 'workspace_id', None)
+        current_workspace = getattr(request, 'workspace', None)  # type: ignore[attr-defined]
+        current_workspace_id = getattr(request, 'workspace_id', None)  # type: ignore[attr-defined]
         
         return Response({
             'user': request.user.username,
@@ -169,7 +175,7 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
             'backend_workspace_id': current_workspace_id,
             'backend_workspace_name': current_workspace.name if current_workspace else 'NONE',
             'all_user_workspaces': [{
-                'id': m.workspace_id,
+                'id': m.workspace_id,  # type: ignore[attr-defined]
                 'name': m.workspace.name,
                 'is_default': m.is_default
             } for m in WorkspaceMembership.objects.filter(user=request.user, is_active=True).select_related('workspace')]
@@ -182,7 +188,7 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
         serializer = WorkspaceSwitchSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        workspace_id = serializer.validated_data['workspace_id']
+        workspace_id = serializer.validated_data.get('workspace_id')  # type: ignore[union-attr]
         
         try:
             membership = WorkspaceMembership.objects.select_related('workspace').get(
@@ -272,9 +278,9 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
             compliance_percent = round((compliant / total_compliance) * 100, 2) if total_compliance else None
             if total_compliance == 0:
                 compliance_level = 'Unknown'
-            elif compliance_percent >= 95:
+            elif compliance_percent is not None and compliance_percent >= 95:
                 compliance_level = 'Good'
-            elif compliance_percent >= 80:
+            elif compliance_percent is not None and compliance_percent >= 80:
                 compliance_level = 'Medium'
             else:
                 compliance_level = 'Poor'
@@ -419,8 +425,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
-        if hasattr(self.request, 'workspace') and self.request.workspace:
-            serializer.save(workspace=self.request.workspace)
+        if hasattr(self.request, 'workspace') and getattr(self.request, 'workspace', None):  # type: ignore[attr-defined]
+            serializer.save(workspace=getattr(self.request, 'workspace'))  # type: ignore[attr-defined]
         else:
             serializer.save()
 
@@ -537,9 +543,10 @@ class UserViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.Gener
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        workspace = getattr(self.request, 'workspace', None)
+        workspace = getattr(self.request, 'workspace', None)  # type: ignore[attr-defined]
         current_user = self.request.user
-        print(f"[UserViewSet] workspace={workspace}, user={current_user.email}")
+        user_email = getattr(current_user, 'email', 'anonymous') if current_user.is_authenticated else 'anonymous'
+        print(f"[UserViewSet] workspace={workspace}, user={user_email}")
         
         if workspace:
             # Return users from the current workspace AND users from other workspaces where current user also exists
@@ -548,7 +555,7 @@ class UserViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.Gener
                 members__user=current_user,
                 members__is_active=True
             )
-            print(f"[UserViewSet] User's workspaces: {[w.id for w in user_workspaces]}")
+            print(f"[UserViewSet] User's workspaces: {[w.id for w in user_workspaces]}")  # type: ignore[attr-defined]
             
             # Get all users from any workspace the current user belongs to
             qs = User.objects.filter(
@@ -563,7 +570,7 @@ class UserViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.Gener
                 members__user=current_user,
                 members__is_active=True
             )
-            print(f"[UserViewSet] No workspace specified, user's workspaces: {[w.id for w in user_workspaces]}")
+            print(f"[UserViewSet] No workspace specified, user's workspaces: {[w.id for w in user_workspaces]}")  # type: ignore[attr-defined]
             qs = User.objects.filter(
                 workspace_memberships__workspace__in=user_workspaces,
                 workspace_memberships__is_active=True
