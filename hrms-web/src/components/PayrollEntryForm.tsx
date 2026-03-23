@@ -43,6 +43,8 @@ export default function PayrollEntryForm({ visible, onClose, onSuccess, entry }:
     enabled: visible,
   });
 
+  const employeesData = Array.isArray(employeesRaw) ? employeesRaw : [];
+
   // Handle employee selection change
   const handleEmployeeChange = (employeeId: number) => {
     const selectedEmployee = employeesData.find((emp: any) => emp.id === employeeId);
