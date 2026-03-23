@@ -474,9 +474,9 @@ export default function Analytics() {
                     borderRadius: '10px',
                     color: '#0f121c',
                   }}
-                  labelStyle={{ color: '#0f121c', fontWeight: 600 }}
-                  itemStyle={{ color: '#0f121c' }}
-                  formatter={(value: any, name: any) => [String(value), String(name)]}
+                    labelStyle={{ color: '#0f121c', fontWeight: 600 }}
+                    itemStyle={{ color: '#0f121c' }}
+                    formatter={(value: any, name: any) => [String(value), String(name)]}
                   />
                 </PieChart>
               </ResponsiveContainer>
