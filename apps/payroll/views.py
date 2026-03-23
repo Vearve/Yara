@@ -441,24 +441,15 @@ class PayslipViewSet(viewsets.ModelViewSet):
             # Try to get salary structure from PayrollEntry (Salary Management Dashboard)
             payroll_entry = employee.payroll_entries.order_by('-updated_at', '-created_at').first()
             
-            if payroll_entry:
-                # Use comprehensive salary structure from PayrollEntry
-                basic_salary = payroll_entry.basic
-                housing_allowance = payroll_entry.housing
-                transportation_allowance = payroll_entry.transportation
-                lunch_allowance = payroll_entry.lunch
-            else:
-                # Fallback to engagement salary if no PayrollEntry exists
-                engagement = getattr(employee, 'engagement', None)
-                if not engagement or engagement.status != 'ACTIVE' or not engagement.salary:
-                    errors.append(f"No salary data for {employee.full_name}")
-                    continue
-                
-                # Use engagement salary as basic, set allowances to 0
-                basic_salary = engagement.salary
-                housing_allowance = 0
-                transportation_allowance = 0
-                lunch_allowance = 0
+            if not payroll_entry:
+                errors.append(f"No salary data found for {employee.full_name}. Please add employee to payroll first.")
+                continue
+            
+            # Use comprehensive salary structure from PayrollEntry
+            basic_salary = payroll_entry.basic
+            housing_allowance = payroll_entry.housing
+            transportation_allowance = payroll_entry.transportation
+            lunch_allowance = payroll_entry.lunch
             
             # Calculate unpaid leave days for this period
             unpaid_leave_days = 0
