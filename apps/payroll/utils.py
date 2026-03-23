@@ -96,31 +96,19 @@ def calculate_zambian_payroll(gross_salary, unpaid_leave_deduction=0, custom_ded
     # --- 3. Calculate Chargeable Income for PAYE ---
     chargeable_income = adjusted_gross - employee_napsa
     
-    # --- 4. Calculate PAYE (Tiered Tax Bands) ---
+    # --- 4. Calculate PAYE (progressive tax bands) ---
     paye_tax = 0
-    income = chargeable_income
-    
+    remaining_income = chargeable_income
+    prev_max = 0
     for max_amount, rate in TAX_BANDS:
-        if income <= 0:
+        if remaining_income <= prev_max:
             break
-        
-        # Find previous band max or 0
-        band_index = TAX_BANDS.index((max_amount, rate))
-        if band_index == 0:
-            prev_max = 0
+        if max_amount == float('inf'):
+            taxable = remaining_income - prev_max
         else:
-            prev_max = TAX_BANDS[band_index - 1][0]
-        
-        # Calculate taxable amount in this band
-        if income > max_amount:
-            taxable_in_band = max_amount - prev_max
-            paye_tax += taxable_in_band * rate
-            income -= taxable_in_band
-        else:
-            taxable_in_band = income - prev_max
-            if taxable_in_band > 0:
-                paye_tax += taxable_in_band * rate
-            break
+            taxable = min(remaining_income - prev_max, max_amount - prev_max)
+        paye_tax += taxable * rate
+        prev_max = max_amount
     
     # --- 5. Calculate NHIMA (rate of adjusted gross) ---
     employee_nhima = adjusted_gross * NHIMA_RATE
