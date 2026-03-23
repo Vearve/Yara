@@ -43,7 +43,17 @@ export default function PayrollEntryForm({ visible, onClose, onSuccess, entry }:
     enabled: visible,
   });
 
-  const employeesData = Array.isArray(employeesRaw) ? employeesRaw : [];
+  // Handle employee selection change
+  const handleEmployeeChange = (employeeId: number) => {
+    const selectedEmployee = employeesData.find((emp: any) => emp.id === employeeId);
+    if (selectedEmployee) {
+      form.setFieldsValue({
+        department: selectedEmployee.department_name || '',
+        date_of_hire: selectedEmployee.hire_date || '',
+        resident: selectedEmployee.residential_area || '',
+      });
+    }
+  };
 
   // Auto-calculate from net when it changes
   const handleNetChange = async (changedValues: any, allValues: any) => {
@@ -226,6 +236,7 @@ export default function PayrollEntryForm({ visible, onClose, onSuccess, entry }:
             showSearch
             placeholder="Select employee"
             disabled={!!entry}
+            onChange={handleEmployeeChange}
             filterOption={(input, option) => {
               const label = String(option?.label ?? '');
               return label.toLowerCase().includes(input.toLowerCase());
