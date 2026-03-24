@@ -500,10 +500,14 @@ export default function HeaderBar() {
           style={{
             fontSize: 18,
             cursor: 'pointer',
-            color: '#f5c400',
+            color: theme === 'dark' ? '#f5c400' : '#3b82f6',
             transition: 'all 0.3s ease',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.textShadow = '0 0 10px rgba(245, 196, 0, 0.4)'; }}
+          onMouseEnter={(e) => { 
+            e.currentTarget.style.textShadow = theme === 'dark' 
+              ? '0 0 10px rgba(245, 196, 0, 0.4)' 
+              : '0 0 10px rgba(59, 130, 246, 0.3)'; 
+          }}
           onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
           onClick={() => setSearchOpen((v) => !v)}
         />
@@ -512,10 +516,14 @@ export default function HeaderBar() {
             style={{
               fontSize: 18,
               cursor: 'pointer',
-              color: '#3ee7ff',
+              color: theme === 'dark' ? '#3ee7ff' : '#2563eb',
               transition: 'all 0.3s ease',
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.textShadow = '0 0 10px rgba(62, 231, 255, 0.4)'; }}
+            onMouseEnter={(e) => { 
+              e.currentTarget.style.textShadow = theme === 'dark'
+                ? '0 0 10px rgba(62, 231, 255, 0.4)'
+                : '0 0 10px rgba(37, 99, 235, 0.3)'; 
+            }}
             onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
             onClick={() => nav('/messaging')}
           />
@@ -538,10 +546,10 @@ export default function HeaderBar() {
             style={{
               fontSize: 18,
               cursor: 'pointer',
-              color: '#ca8a04',
+              color: '#3b82f6',
               transition: 'all 0.3s ease',
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.textShadow = '0 0 10px rgba(202, 138, 4, 0.4)'; }}
+            onMouseEnter={(e) => { e.currentTarget.style.textShadow = '0 0 10px rgba(59, 130, 246, 0.4)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
             onClick={toggleTheme}
             title="Switch to Dark Mode"
@@ -551,21 +559,29 @@ export default function HeaderBar() {
           style={{
             fontSize: 18,
             cursor: 'pointer',
-            color: '#7cff6b',
+            color: theme === 'dark' ? '#7cff6b' : '#059669',
             transition: 'all 0.3s ease',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.textShadow = '0 0 10px rgba(124, 255, 107, 0.4)'; }}
+          onMouseEnter={(e) => { 
+            e.currentTarget.style.textShadow = theme === 'dark'
+              ? '0 0 10px rgba(124, 255, 107, 0.4)'
+              : '0 0 10px rgba(5, 150, 105, 0.3)'; 
+          }}
           onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
           onClick={() => setSettingsOpen(true)}
         />
         <Dropdown menu={{ items: accountMenu, onClick: onAccountClick }} placement="bottomRight" trigger={['click']}>
           <Avatar
             style={{
-              backgroundColor: '#f5c400',
-              color: '#05060a',
+              backgroundColor: theme === 'dark' ? '#f5c400' : '#3b82f6',
+              color: theme === 'dark' ? '#05060a' : '#ffffff',
               cursor: 'pointer',
-              border: '2px solid rgba(245, 196, 0, 0.3)',
-              boxShadow: '0 0 12px rgba(245, 196, 0, 0.2)',
+              border: theme === 'dark' 
+                ? '2px solid rgba(245, 196, 0, 0.3)' 
+                : '2px solid rgba(59, 130, 246, 0.3)',
+              boxShadow: theme === 'dark'
+                ? '0 0 12px rgba(245, 196, 0, 0.2)'
+                : '0 0 12px rgba(59, 130, 246, 0.15)',
               fontWeight: 600,
             }}
           >

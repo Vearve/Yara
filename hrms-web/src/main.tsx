@@ -65,10 +65,10 @@ const AppWithTheme = () => {
     : {
       algorithm,
       token: {
-        colorPrimary: '#ca8a04',
-        colorBgBase: '#ffffff',
-        colorBgContainer: '#f9fafb',
-        colorBorder: 'rgba(202, 138, 4, 0.15)',
+        colorPrimary: '#3b82f6',
+        colorBgBase: '#f8fafc',
+        colorBgContainer: '#f1f5f9',
+        colorBorder: 'rgba(59, 130, 246, 0.12)',
         colorText: '#1f2937',
         colorTextSecondary: '#6b7280',
         borderRadius: 12,
@@ -76,22 +76,24 @@ const AppWithTheme = () => {
       },
       components: {
         Layout: {
-          siderBg: '#ffffff',
+          siderBg: '#05060a',
           headerBg: '#ffffff',
-          bodyBg: '#f9fafb',
+          bodyBg: '#f1f5f9',
         },
         Menu: {
-          itemBg: '#ffffff',
-          itemSelectedBg: 'rgba(202, 138, 4, 0.1)',
-          itemHoverBg: 'rgba(202, 138, 4, 0.06)',
+          itemBg: '#05060a',
+          itemSelectedBg: 'rgba(59, 130, 246, 0.2)',
+          itemHoverBg: 'rgba(59, 130, 246, 0.1)',
+          itemSelectedColor: '#3b82f6',
+          itemColor: '#e5e7eb',
         },
         Card: {
-          colorBgContainer: 'rgba(243, 244, 246, 0.8)',
-          colorBorderSecondary: 'rgba(202, 138, 4, 0.15)',
+          colorBgContainer: '#ffffff',
+          colorBorderSecondary: 'rgba(59, 130, 246, 0.12)',
         },
         Table: {
-          headerBg: 'rgba(202, 138, 4, 0.06)',
-          rowHoverBg: 'rgba(202, 138, 4, 0.03)',
+          headerBg: 'rgba(59, 130, 246, 0.06)',
+          rowHoverBg: 'rgba(59, 130, 246, 0.03)',
         },
         Button: {
           controlHeight: 40,

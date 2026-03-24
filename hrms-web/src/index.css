@@ -22,20 +22,24 @@
   --text-dim: #c4c8d4;
   --border: rgba(255, 227, 122, 0.25);
   --glow: 0 10px 50px rgba(245, 196, 0, 0.15);
+  --sidebar-bg: #05060a;
+  --header-bg: #05060a;
 }
 
 /* Light Mode */
 :root.light-mode {
   color-scheme: light;
-  --bg-base: #ffffff;
-  --bg-panel: #f9fafb;
-  --bg-card: #f3f4f6;
-  --accent: #ca8a04;
-  --accent-soft: #eab308;
+  --bg-base: #f8fafc;
+  --bg-panel: #f1f5f9;
+  --bg-card: #ffffff;
+  --accent: #3b82f6;
+  --accent-soft: #2563eb;
   --text: #1f2937;
   --text-dim: #6b7280;
-  --border: rgba(202, 138, 4, 0.15);
-  --glow: 0 10px 50px rgba(202, 138, 4, 0.1);
+  --border: rgba(59, 130, 246, 0.12);
+  --glow: 0 4px 20px rgba(59, 130, 246, 0.08);
+  --sidebar-bg: #05060a;
+  --header-bg: #ffffff;
 }
 
 /* Dark Mode Explicit */
@@ -50,6 +54,8 @@
   --text-dim: #c4c8d4;
   --border: rgba(255, 227, 122, 0.25);
   --glow: 0 10px 50px rgba(245, 196, 0, 0.15);
+  --sidebar-bg: #05060a;
+  --header-bg: #05060a;
 }
 
 * {
@@ -67,9 +73,9 @@ body {
 }
 
 :root.light-mode body {
-  background: radial-gradient(circle at 10% 20%, rgba(202, 138, 4, 0.06), transparent 30%),
-    radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.05), transparent 25%),
-    linear-gradient(145deg, #ffffff 0%, #f9fafb 40%, #ffffff 100%);
+  background: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.04), transparent 30%),
+    radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.03), transparent 25%),
+    linear-gradient(145deg, #f8fafc 0%, #f1f5f9 40%, #f8fafc 100%);
 }
 
 a {
