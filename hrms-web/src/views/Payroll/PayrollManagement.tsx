@@ -215,18 +215,18 @@ const PayrollManagement: React.FC = () => {
       http.post('/api/v1/payroll/payslips/bulk_create/', data),
     onSuccess: (response: any) => {
       queryClient.invalidateQueries({ queryKey: ['payslips'] });
-      
+
       const created = response.data?.created || 0;
       const errors = response.data?.errors || [];
-      
+
       if (created > 0) {
         message.success(`${created} payslips created successfully`);
       }
-      
+
       if (errors.length > 0) {
         message.warning(`${errors.length} employees skipped: ${errors.slice(0, 3).join('; ')}${errors.length > 3 ? '...' : ''}`);
       }
-      
+
       if (created === 0 && errors.length > 0) {
         message.error('No payslips could be created. Please ensure employees have salary data.');
       }

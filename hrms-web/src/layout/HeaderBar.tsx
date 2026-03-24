@@ -1,5 +1,5 @@
 import { Flex, Input, Avatar, Upload, Button, Space, Drawer, Switch, Dropdown, Tabs, Card, Spin, Empty, Divider, Typography, Modal, List, Select, Popconfirm, message, Tag, Badge } from 'antd';
-import { MessageOutlined, SettingOutlined, UploadOutlined, LogoutOutlined, UserOutlined, HomeOutlined, SearchOutlined, UserAddOutlined } from '@ant-design/icons';
+import { MessageOutlined, SettingOutlined, UploadOutlined, LogoutOutlined, UserOutlined, HomeOutlined, SearchOutlined, UserAddOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { hcmApi } from '../api/services/hcmApi';
 import { ApiService } from '../api/services/ApiService';
 import http from '../lib/http';
 import { canPerformAction, getRoleLabel, getRoleColor } from '../lib/permissions';
+import { useTheme } from '../contexts/ThemeContext';
 
 const { Text } = Typography;
 
@@ -44,6 +45,7 @@ const isImageResponse = (blob: Blob, contentType?: string): boolean => {
 
 export default function HeaderBar() {
   const nav = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [logo, setLogo] = useState<string>('/yara-bg.svg');
   const logoBlobUrlRef = useRef<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -518,6 +520,33 @@ export default function HeaderBar() {
             onClick={() => nav('/messaging')}
           />
         </Badge>
+        {theme === 'dark' ? (
+          <SunOutlined
+            style={{
+              fontSize: 18,
+              cursor: 'pointer',
+              color: '#eab308',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.textShadow = '0 0 10px rgba(234, 179, 8, 0.4)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
+            onClick={toggleTheme}
+            title="Switch to Light Mode"
+          />
+        ) : (
+          <MoonOutlined
+            style={{
+              fontSize: 18,
+              cursor: 'pointer',
+              color: '#ca8a04',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.textShadow = '0 0 10px rgba(202, 138, 4, 0.4)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
+            onClick={toggleTheme}
+            title="Switch to Dark Mode"
+          />
+        )}
         <SettingOutlined
           style={{
             fontSize: 18,
