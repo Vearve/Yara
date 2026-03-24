@@ -76,11 +76,17 @@ const toAbsoluteMediaUrl = (value?: string | null): string | null => {
 
   const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
   const envBaseURL = (import.meta.env.VITE_API_BASE_URL || '').trim();
-  const apiOrigin = envBaseURL
-    ? envBaseURL.replace(/\/+$/, '').replace(/\/api$/, '')
-    : '';
+  let apiOrigin = '';
 
-  return apiOrigin ? `${apiOrigin}${normalized}` : normalized;
+  if (envBaseURL) {
+    apiOrigin = envBaseURL.replace(/\/+$/, '').replace(/\/api$/, '');
+  }
+
+  if (!apiOrigin && typeof window !== 'undefined') {
+    apiOrigin = window.location.origin;
+  }
+
+  return `${apiOrigin}${normalized}`;
 };
 
 type EmployeeRow = {
