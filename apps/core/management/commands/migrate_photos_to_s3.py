@@ -2,6 +2,7 @@ import os
 import boto3
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+from django.core.files.storage import default_storage
 from apps.core.models import UserProfile
 from apps.hcm.models import Employee
 
@@ -85,7 +86,13 @@ class Command(BaseCommand):
 
         for profile in user_profiles:
             try:
-                local_path = profile.profile_picture.path
+                # Get local file path - try .path first, fall back to manual construction
+                try:
+                    local_path = profile.profile_picture.path
+                except Exception:
+                    # If .path fails (S3 storage backend), construct path manually
+                    local_path = os.path.join(settings.MEDIA_ROOT, profile.profile_picture.name)
+
                 if not os.path.exists(local_path):
                     self.stdout.write(
                         self.style.WARNING(
@@ -143,7 +150,13 @@ class Command(BaseCommand):
 
         for employee in employees:
             try:
-                local_path = employee.photo.path
+                # Get local file path - try .path first, fall back to manual construction
+                try:
+                    local_path = employee.photo.path
+                except Exception:
+                    # If .path fails (S3 storage backend), construct path manually
+                    local_path = os.path.join(settings.MEDIA_ROOT, employee.photo.name)
+
                 if not os.path.exists(local_path):
                     self.stdout.write(
                         self.style.WARNING(
