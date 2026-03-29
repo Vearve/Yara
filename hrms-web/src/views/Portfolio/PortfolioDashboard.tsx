@@ -26,7 +26,7 @@ export default function PortfolioDashboard() {
       window.removeEventListener('storage', handleWorkspaceChange);
     };
   }, []);
-  
+
   const { data: portfolioData } = useQuery({
     queryKey: ['portfolio-stats', workspaceId],
     queryFn: async () => (await http.get('/api/v1/core/workspaces/portfolio_stats/')).data,
@@ -46,7 +46,7 @@ export default function PortfolioDashboard() {
 
   // Calculate aggregate active ATRs and compliance
   const totalOpenRoles = workspaces.reduce((sum: number, w: any) => sum + (w.stats?.active_atrs || 0), 0);
-  const avgCompliance = workspaces.length > 0 
+  const avgCompliance = workspaces.length > 0
     ? Math.round((workspaces.filter((w: any) => w.stats?.compliance_level === 'Good').length / workspaces.length) * 100)
     : 0;
 
@@ -172,11 +172,11 @@ export default function PortfolioDashboard() {
           <Text style={{ margin: 0, color: '#c4c8d4', fontSize: '13px' }}>Tap a card to open the workspace</Text>
         </div>
         <div className="flex flex-wrap gap-2" style={{ gap: 10 }}>
-          <TagPill 
-            variant="gold" 
+          <TagPill
+            variant="gold"
             onClick={() => setComplianceFilter('all')}
-            style={{ 
-              cursor: 'pointer', 
+            style={{
+              cursor: 'pointer',
               opacity: complianceFilter === 'all' ? 1 : 0.6,
               transform: complianceFilter === 'all' ? 'scale(1.05)' : 'scale(1)',
               transition: 'all 0.2s ease',
@@ -184,11 +184,11 @@ export default function PortfolioDashboard() {
           >
             All
           </TagPill>
-          <TagPill 
-            variant="lime" 
+          <TagPill
+            variant="lime"
             onClick={() => setComplianceFilter('good')}
-            style={{ 
-              cursor: 'pointer', 
+            style={{
+              cursor: 'pointer',
               opacity: complianceFilter === 'good' ? 1 : 0.6,
               transform: complianceFilter === 'good' ? 'scale(1.05)' : 'scale(1)',
               transition: 'all 0.2s ease',
@@ -196,11 +196,11 @@ export default function PortfolioDashboard() {
           >
             Good
           </TagPill>
-          <TagPill 
-            variant="amber" 
+          <TagPill
+            variant="amber"
             onClick={() => setComplianceFilter('attention')}
-            style={{ 
-              cursor: 'pointer', 
+            style={{
+              cursor: 'pointer',
               opacity: complianceFilter === 'attention' ? 1 : 0.6,
               transform: complianceFilter === 'attention' ? 'scale(1.05)' : 'scale(1)',
               transition: 'all 0.2s ease',
