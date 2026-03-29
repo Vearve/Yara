@@ -59,18 +59,18 @@
   --sidebar-bg: linear-gradient(180deg, #2a163c 0%, #3a2151 100%);
   --sidebar-border: rgba(255, 255, 255, 0.16);
   --sidebar-text: #f3effa;
-  --sidebar-hover: rgba(255, 255, 255, 0.08);
-  --sidebar-active: rgba(255, 255, 255, 0.16);
+  --sidebar-hover: rgba(255, 255, 255, 0.045);
+  --sidebar-active: rgba(255, 255, 255, 0.11);
   --header-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(250, 247, 241, 0.97) 100%);
   --header-border: rgba(41, 28, 58, 0.08);
   --shell-bg: linear-gradient(180deg, #f6f5f2 0%, #edeae5 55%, #f6f5f2 100%);
-  --shell-glow: radial-gradient(ellipse 1100px 520px at center top, rgba(81, 62, 149, 0.08), transparent 70%);
+  --shell-glow: radial-gradient(ellipse 1100px 520px at center top, rgba(81, 62, 149, 0.08), transparent 70%), radial-gradient(circle at 88% 8%, rgba(143, 161, 255, 0.08), transparent 24%), radial-gradient(circle at 95% 1%, rgba(255, 255, 255, 0.7), transparent 12%);
   --shell-grid: repeating-linear-gradient(90deg, transparent, transparent 119px, rgba(44, 33, 69, 0.025) 119px, rgba(44, 33, 69, 0.025) 120px);
   --hero-bg: linear-gradient(140deg, rgba(255, 255, 255, 0.96) 0%, rgba(247, 243, 237, 0.98) 100%);
   --hero-border: rgba(65, 47, 126, 0.14);
   --hero-eyebrow: #71688a;
   --hero-title: #261f35;
-  --hero-description: #5f5772;
+  --hero-description: #564d69;
   --hero-orb: rgba(92, 73, 173, 0.12);
 }
 
@@ -122,7 +122,8 @@ body {
 
 :root.light-mode body {
   background: radial-gradient(circle at 12% 14%, rgba(77, 58, 154, 0.08), transparent 34%),
-    radial-gradient(circle at 88% 0%, rgba(124, 98, 205, 0.06), transparent 28%),
+    radial-gradient(circle at 89% 2%, rgba(129, 118, 235, 0.08), transparent 26%),
+    radial-gradient(circle at 96% 0%, rgba(255, 255, 255, 0.65), transparent 11%),
     linear-gradient(145deg, #f6f5f2 0%, #ebe8e2 44%, #f6f5f2 100%);
 }
 
@@ -173,6 +174,22 @@ a:hover {
   right: -120px;
   top: -140px;
   pointer-events: none;
+}
+
+.app-hero-banner::before {
+  content: '';
+  position: absolute;
+  width: 360px;
+  height: 220px;
+  right: -40px;
+  top: -36px;
+  background: radial-gradient(circle at 72% 28%, rgba(255, 255, 255, 0.78), transparent 18%), radial-gradient(circle at 58% 42%, rgba(142, 158, 255, 0.14), transparent 34%), radial-gradient(circle at 48% 35%, rgba(122, 108, 217, 0.12), transparent 42%);
+  pointer-events: none;
+  opacity: 0;
+}
+
+:root.light-mode .app-hero-banner::before {
+  opacity: 1;
 }
 
 .app-hero-eyebrow {
@@ -230,8 +247,14 @@ a:hover {
 :root.light-mode .ant-select-selector,
 :root.light-mode .ant-picker,
 :root.light-mode .ant-input-number {
-  border-color: rgba(53, 44, 70, 0.18);
+  border-color: rgba(53, 44, 70, 0.26);
   background: #ffffff;
+}
+
+:root.light-mode .ant-select-selection-placeholder,
+:root.light-mode .ant-picker-input>input::placeholder,
+:root.light-mode .ant-input::placeholder {
+  color: #756d80;
 }
 
 :root.light-mode .ant-input:focus,
@@ -251,6 +274,25 @@ a:hover {
 :root.light-mode .ant-btn-default {
   border-color: rgba(53, 44, 70, 0.2);
   color: #322946;
+}
+
+:root.light-mode .analytics-filter-card .ant-select-selector,
+:root.light-mode .analytics-filter-card .ant-picker,
+:root.light-mode .analytics-filter-card .ant-btn {
+  min-height: 42px;
+}
+
+:root.light-mode .analytics-filter-card .ant-select-selector,
+:root.light-mode .analytics-filter-card .ant-picker {
+  border-color: rgba(53, 44, 70, 0.3);
+}
+
+:root.light-mode .analytics-section-title {
+  color: #352c46;
+}
+
+:root.light-mode .analytics-helper-text {
+  color: #635a74;
 }
 
 /* Independent sidebar scrollbar styling */

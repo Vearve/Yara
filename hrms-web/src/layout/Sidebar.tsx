@@ -171,12 +171,13 @@ export default function Sidebar({ activePath }: { activePath: string }) {
         Menu: {
           colorBgBase: 'transparent',
           itemBg: 'transparent',
-          itemHoverBg: isDark ? 'rgba(245, 196, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)',
-          itemSelectedBg: isDark ? 'rgba(245, 196, 0, 0.12)' : 'rgba(255, 255, 255, 0.16)',
-          horizontalItemSelectedBg: isDark ? 'rgba(245, 196, 0, 0.12)' : 'rgba(255, 255, 255, 0.16)',
+          itemHoverBg: isDark ? 'rgba(245, 196, 0, 0.08)' : 'rgba(255, 255, 255, 0.045)',
+          itemSelectedBg: isDark ? 'rgba(245, 196, 0, 0.12)' : 'rgba(255, 255, 255, 0.11)',
+          horizontalItemSelectedBg: isDark ? 'rgba(245, 196, 0, 0.12)' : 'rgba(255, 255, 255, 0.11)',
           colorPrimaryBorder: isDark ? 'rgba(245, 196, 0, 0.2)' : 'rgba(255, 255, 255, 0.24)',
           itemColor: isDark ? '#f7f8fb' : '#f3effa',
-          itemSelectedColor: isDark ? '#f7f8fb' : '#ffffff',
+          itemSelectedColor: isDark ? '#f7f8fb' : '#f8f5ff',
+          subMenuItemBg: 'transparent',
         },
       },
     }}>

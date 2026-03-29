@@ -18,6 +18,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 export default function Analytics() {
   const queryClient = useQueryClient();
   const { theme } = useTheme();
+  const isLight = theme === 'light';
   const defaultFilters = {
     departmentId: null as number | null,
     jobTitle: null as string | null,
@@ -141,6 +142,16 @@ export default function Analytics() {
     ];
 
   const colors = ['#f5c400', '#3ee7ff', '#ff4fd8', '#7cff6b', '#ffb547'];
+  const sectionTitleColor = isLight ? '#352c46' : '#c4c8d4';
+  const helperTextColor = isLight ? '#635a74' : '#c4c8d4';
+  const axisStroke = isLight ? '#706881' : '#9195a3';
+  const axisTick = isLight ? '#4d465c' : '#c4c8d4';
+  const axisLine = isLight ? 'rgba(53, 44, 70, 0.18)' : 'rgba(245, 196, 0, 0.2)';
+  const gridStroke = isLight ? 'rgba(53, 44, 70, 0.08)' : 'rgba(245, 196, 0, 0.08)';
+  const tooltipBackground = isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(5, 6, 10, 0.95)';
+  const tooltipBorder = isLight ? '1px solid rgba(53, 44, 70, 0.16)' : '1px solid rgba(245, 196, 0, 0.35)';
+  const tooltipText = isLight ? '#211c2c' : '#f7f8fb';
+  const tooltipLabel = isLight ? '#352c46' : '#f5c400';
 
   const monthlySummaryRows = (analytics.monthly_summary || [])
     .filter((row: any) => {
@@ -236,10 +247,10 @@ export default function Analytics() {
       />
 
       {/* Filter Section */}
-      <GlassCard>
+      <GlassCard className="analytics-filter-card">
         <div className="flex items-center gap-3 mb-4">
-          <Filter className="h-5 w-5" style={{ color: '#f5c400' }} />
-          <span className="text-base font-semibold" style={{ color: '#f7f8fb' }}>Filter Data</span>
+          <Filter className="h-5 w-5" style={{ color: isLight ? '#4a3fcf' : '#f5c400' }} />
+          <span className="text-base font-semibold analytics-section-title" style={{ color: isLight ? '#302741' : '#f7f8fb' }}>Filter Data</span>
         </div>
         <Row gutter={[12, 12]}>
           <Col xs={24} sm={12} md={6}>
@@ -339,9 +350,9 @@ export default function Analytics() {
             <div className="flex items-center gap-2 text-sm" style={{ color: '#3ee7ff' }}>
               <Activity className="h-4 w-4" /> HCM
             </div>
-            <div className="text-xs text-[var(--text-dim)]">Total Employees</div>
+            <div className="text-xs" style={{ color: helperTextColor, fontWeight: isLight ? 600 : 500 }}>Total Employees</div>
             <div className="text-2xl font-semibold">{hcmData.total_employees}</div>
-            <div className="text-xs text-[var(--text-dim)]">Active: {hcmData.active_employees} · Departments: {hcmData.departments}</div>
+            <div className="text-xs" style={{ color: helperTextColor, fontWeight: isLight ? 600 : 500 }}>Active: {hcmData.active_employees} · Departments: {hcmData.departments}</div>
           </GlassCard>
         </Col>
         <Col xs={24} sm={12} lg={8} xl={6}>
@@ -349,9 +360,9 @@ export default function Analytics() {
             <div className="flex items-center gap-2 text-sm" style={{ color: '#ff4fd8' }}>
               <TrendingUp className="h-4 w-4" /> Recruitment
             </div>
-            <div className="text-xs text-[var(--text-dim)]">Active ATRs</div>
+            <div className="text-xs" style={{ color: helperTextColor, fontWeight: isLight ? 600 : 500 }}>Active ATRs</div>
             <div className="text-2xl font-semibold">{recruitmentData.active_atrs}</div>
-            <div className="text-xs text-[var(--text-dim)]">Candidates: {recruitmentData.total_candidates} · Interviews: {recruitmentData.interviews_scheduled}</div>
+            <div className="text-xs" style={{ color: helperTextColor, fontWeight: isLight ? 600 : 500 }}>Candidates: {recruitmentData.total_candidates} · Interviews: {recruitmentData.interviews_scheduled}</div>
           </GlassCard>
         </Col>
         <Col xs={24} sm={12} lg={8} xl={6}>
@@ -359,9 +370,9 @@ export default function Analytics() {
             <div className="flex items-center gap-2 text-sm" style={{ color: '#7cff6b' }}>
               <Flame className="h-4 w-4" /> Salaries
             </div>
-            <div className="text-xs text-[var(--text-dim)]">Avg Gross Salary</div>
+            <div className="text-xs" style={{ color: helperTextColor, fontWeight: isLight ? 600 : 500 }}>Avg Gross Salary</div>
             <div className="text-2xl font-semibold">ZMW {salaryData.avg_gross.toLocaleString()}</div>
-            <div className="text-xs text-[var(--text-dim)]">Total Payroll: ZMW {(salaryData.total_payroll / 1000).toFixed(0)}k</div>
+            <div className="text-xs" style={{ color: helperTextColor, fontWeight: isLight ? 600 : 500 }}>Total Payroll: ZMW {(salaryData.total_payroll / 1000).toFixed(0)}k</div>
           </GlassCard>
         </Col>
         <Col xs={24} sm={12} lg={8} xl={6}>
@@ -369,9 +380,9 @@ export default function Analytics() {
             <div className="flex items-center gap-2 text-sm" style={{ color: '#f5c400' }}>
               <Activity className="h-4 w-4" /> Case Studies
             </div>
-            <div className="text-xs text-[var(--text-dim)]">Under Review</div>
+            <div className="text-xs" style={{ color: helperTextColor, fontWeight: isLight ? 600 : 500 }}>Under Review</div>
             <div className="text-2xl font-semibold">{caseStudiesData.under_review}</div>
-            <div className="text-xs text-[var(--text-dim)]">Opened: {caseStudiesData.opened} · Resolved: {caseStudiesData.resolved}</div>
+            <div className="text-xs" style={{ color: helperTextColor, fontWeight: isLight ? 600 : 500 }}>Opened: {caseStudiesData.opened} · Resolved: {caseStudiesData.resolved}</div>
           </GlassCard>
         </Col>
         <Col xs={24} sm={12} lg={8} xl={6}>
@@ -379,7 +390,7 @@ export default function Analytics() {
             <div className="flex items-center gap-2 text-sm" style={{ color: '#ffe37a' }}>
               <TrendingUp className="h-4 w-4" /> Appraisals
             </div>
-            <div className="text-xs text-[var(--text-dim)]">In Progress</div>
+            <div className="text-xs" style={{ color: helperTextColor, fontWeight: isLight ? 600 : 500 }}>In Progress</div>
             <div className="text-2xl font-semibold">–</div>
             <Button type="primary" className="mt-1">Open Appraisals</Button>
           </GlassCard>
@@ -390,27 +401,27 @@ export default function Analytics() {
       <Row gutter={[14, 14]}>
         <Col xs={24} xl={12}>
           <GlassCard gradient="gold" style={{ height: '100%' }}>
-            <div className="text-sm text-[var(--text-dim)] mb-3">Employee Status Trend</div>
+            <div className="text-sm analytics-section-title mb-3" style={{ color: sectionTitleColor, fontWeight: 700 }}>Employee Status Trend</div>
             <div style={{ width: '100%', height: '320px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={employeeTrend}>
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="rgba(245, 196, 0, 0.08)"
+                    stroke={gridStroke}
                     vertical={false}
                   />
-                  <XAxis dataKey="month" stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
-                  <YAxis stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
+                  <XAxis dataKey="month" stroke={axisStroke} tick={{ fill: axisTick }} tickLine={false} axisLine={{ stroke: axisLine }} />
+                  <YAxis stroke={axisStroke} tick={{ fill: axisTick }} tickLine={false} axisLine={{ stroke: axisLine }} />
                   <Tooltip
                     contentStyle={{
-                      background: 'rgba(5, 6, 10, 0.95)',
-                      border: '1px solid rgba(245, 196, 0, 0.35)',
+                      background: tooltipBackground,
+                      border: tooltipBorder,
                       borderRadius: '10px',
-                      color: '#f7f8fb',
+                      color: tooltipText,
                     }}
-                    labelStyle={{ color: '#f5c400' }}
+                    labelStyle={{ color: tooltipLabel }}
                   />
-                  <Legend wrapperStyle={{ color: '#c4c8d4' }} />
+                  <Legend wrapperStyle={{ color: axisTick }} />
                   <Line type="monotone" dataKey="active" stroke="#7cff6b" name="Active" strokeWidth={3} dot={{ fill: '#7cff6b', r: 4 }} />
                   <Line type="monotone" dataKey="inactive" stroke="#ff4fd8" name="Inactive" strokeWidth={3} dot={{ fill: '#ff4fd8', r: 4 }} />
                   <Line type="monotone" dataKey="on_leave" stroke="#ffb547" name="On Leave" strokeWidth={3} dot={{ fill: '#ffb547', r: 4 }} />
@@ -421,7 +432,7 @@ export default function Analytics() {
         </Col>
         <Col xs={24} xl={12}>
           <GlassCard gradient="cyan" style={{ height: '100%' }}>
-            <div className="text-sm text-[var(--text-dim)] mb-3">Department Distribution</div>
+            <div className="text-sm analytics-section-title mb-3" style={{ color: sectionTitleColor, fontWeight: 700 }}>Department Distribution</div>
             <div style={{ width: '100%', height: '360px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -458,24 +469,24 @@ export default function Analytics() {
       <Row gutter={[14, 14]}>
         <Col xs={24} xl={12}>
           <GlassCard gradient="lime" style={{ height: '100%' }}>
-            <div className="text-sm text-[var(--text-dim)] mb-3">Training Completion Rate</div>
+            <div className="text-sm analytics-section-title mb-3" style={{ color: sectionTitleColor, fontWeight: 700 }}>Training Completion Rate</div>
             <div style={{ width: '100%', height: '320px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={trainingCompletion}>
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="rgba(245, 196, 0, 0.08)"
+                    stroke={gridStroke}
                     vertical={false}
                   />
-                  <XAxis dataKey="month" stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
-                  <YAxis stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
+                  <XAxis dataKey="month" stroke={axisStroke} tick={{ fill: axisTick }} tickLine={false} axisLine={{ stroke: axisLine }} />
+                  <YAxis stroke={axisStroke} tick={{ fill: axisTick }} tickLine={false} axisLine={{ stroke: axisLine }} />
                   <Tooltip contentStyle={{
-                    background: 'rgba(5, 6, 10, 0.95)',
-                    border: '1px solid rgba(245, 196, 0, 0.35)',
+                    background: tooltipBackground,
+                    border: tooltipBorder,
                     borderRadius: '10px',
-                    color: '#f7f8fb',
-                  }} labelStyle={{ color: '#f5c400' }} />
-                  <Legend wrapperStyle={{ color: '#c4c8d4' }} />
+                    color: tooltipText,
+                  }} labelStyle={{ color: tooltipLabel }} />
+                  <Legend wrapperStyle={{ color: axisTick }} />
                   <Bar dataKey="completed" stackId="a" fill="#7cff6b" name="Completed" radius={[8, 8, 0, 0]} />
                   <Bar dataKey="pending" stackId="a" fill="#f5c400" name="Pending" radius={[8, 8, 0, 0]} />
                 </BarChart>
@@ -485,23 +496,23 @@ export default function Analytics() {
         </Col>
         <Col xs={24} xl={12}>
           <GlassCard gradient="amber" style={{ height: '100%' }}>
-            <div className="text-sm text-[var(--text-dim)] mb-3">Recruitment Funnel</div>
+            <div className="text-sm analytics-section-title mb-3" style={{ color: sectionTitleColor, fontWeight: 700 }}>Recruitment Funnel</div>
             <div style={{ width: '100%', height: '320px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={recruitmentFunnel} layout="vertical">
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="rgba(245, 196, 0, 0.08)"
+                    stroke={gridStroke}
                     horizontal={false}
                   />
-                  <XAxis type="number" stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
-                  <YAxis dataKey="stage" type="category" width={120} stroke="#9195a3" tick={{ fill: '#c4c8d4' }} tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.2)' }} />
+                  <XAxis type="number" stroke={axisStroke} tick={{ fill: axisTick }} tickLine={false} axisLine={{ stroke: axisLine }} />
+                  <YAxis dataKey="stage" type="category" width={120} stroke={axisStroke} tick={{ fill: axisTick }} tickLine={false} axisLine={{ stroke: axisLine }} />
                   <Tooltip contentStyle={{
-                    background: 'rgba(5, 6, 10, 0.95)',
-                    border: '1px solid rgba(245, 196, 0, 0.35)',
+                    background: tooltipBackground,
+                    border: tooltipBorder,
                     borderRadius: '10px',
-                    color: '#f7f8fb',
-                  }} labelStyle={{ color: '#f5c400' }} />
+                    color: tooltipText,
+                  }} labelStyle={{ color: tooltipLabel }} />
                   <Bar dataKey="count" fill="#3ee7ff" radius={[0, 8, 8, 0]} barSize={24} />
                 </BarChart>
               </ResponsiveContainer>
@@ -513,7 +524,7 @@ export default function Analytics() {
       {/* Summary Table */}
       <div className="glass-panel rounded-2xl p-6 border border-[var(--border)] shadow-glow" style={{ marginTop: 4 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div className="text-sm text-[var(--text-dim)]">Monthly Performance Summary</div>
+          <div className="text-sm analytics-section-title" style={{ color: sectionTitleColor, fontWeight: 700 }}>Monthly Performance Summary</div>
           <DatePicker.RangePicker value={summaryRange} onChange={setSummaryRange as any} />
         </div>
         <Table
