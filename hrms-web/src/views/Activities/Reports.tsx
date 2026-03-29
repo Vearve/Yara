@@ -37,7 +37,7 @@ export default function Reports() {
   const [pendingFilters, setPendingFilters] = useState<{ employee?: string; type?: string; search?: string }>({});
   const [appliedFilters, setAppliedFilters] = useState<{ employee?: string; type?: string; search?: string }>({});
 
-  const { data: reports = [], isLoading } = useQuery({
+  const { data: reports = [], isLoading, refetch: refetchReports } = useQuery({
     queryKey: ['reports', workspaceId, appliedFilters],
     queryFn: async () => {
       const params: any = {};
@@ -85,12 +85,13 @@ export default function Reports() {
 
   const createMut = useMutation({
     mutationFn: async (payload: any) => createReport(payload),
-    onSuccess: () => {
+    onSuccess: async () => {
       message.success('Report created');
       setCreateOpen(false);
       form.resetFields();
       setFileList([]);
       qc.invalidateQueries({ queryKey: ['reports'], exact: false });
+      await refetchReports();
     },
     onError: (err: any) => {
       const data = err?.response?.data;
