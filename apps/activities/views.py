@@ -23,7 +23,7 @@ from .serializers import (
 
 class ReportViewSet(viewsets.ModelViewSet):
     """ViewSet for safety, complaint, grievance, and disciplinary reports."""
-    queryset = Report.objects.select_related('reported_by').all()
+    queryset = Report.objects.select_related('reported_by', 'workspace').all()
     serializer_class = ReportSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['report_type', 'severity', 'status', 'case_study']
@@ -35,11 +35,15 @@ class ReportViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         # Filter by workspace through reporter or reported employee
-        if hasattr(self.request, 'workspace') and self.request.workspace:
+        workspace = getattr(self.request, 'workspace', None)
+        if workspace:
             from django.db.models import Q
             qs = qs.filter(
-                Q(reported_by__workspace=self.request.workspace) |
-                Q(reported_employee__workspace=self.request.workspace)
+                Q(workspace=workspace)
+                |
+                Q(workspace__isnull=True, reported_by__workspace=workspace)
+                |
+                Q(workspace__isnull=True, reported_employee__workspace=workspace)
             )
         return qs
 
@@ -51,10 +55,15 @@ class ReportViewSet(viewsets.ModelViewSet):
         if not incident_date:
             serializer.validated_data['incident_date'] = timezone.now().date()
 
+        workspace = getattr(self.request, 'workspace', None)
+
         if not serializer.validated_data.get('reported_by'):
             user_email = getattr(self.request.user, 'email', None)
             if user_email:
-                reporter = Employee.objects.filter(email__iexact=user_email).first()
+                reporter_qs = Employee.objects.filter(email__iexact=user_email)
+                if workspace:
+                    reporter_qs = reporter_qs.filter(workspace=workspace)
+                reporter = reporter_qs.first()
                 if reporter:
                     serializer.validated_data['reported_by'] = reporter
 
@@ -76,7 +85,10 @@ class ReportViewSet(viewsets.ModelViewSet):
                 seq = 1
             serializer.validated_data['report_number'] = f"{prefix}-{seq:03d}"
 
-        serializer.save()
+        if workspace:
+            serializer.save(workspace=workspace)
+        else:
+            serializer.save()
 
 
 class ReportTypeViewSet(viewsets.ReadOnlyModelViewSet):

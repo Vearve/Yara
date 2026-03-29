@@ -47,6 +47,14 @@ class Report(models.Model):
     
     report_number = models.CharField(max_length=100, unique=True)
     report_type = models.ForeignKey(ReportType, on_delete=models.PROTECT)
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.CASCADE,
+        related_name='activity_reports',
+        null=True,
+        blank=True,
+        help_text="Organization/workspace this report belongs to"
+    )
     
     # People involved
     reported_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='reports_submitted')

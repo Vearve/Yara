@@ -38,7 +38,7 @@ class ReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         fields = [
-            'id', 'report_number', 'report_type', 'report_type_detail',
+            'id', 'workspace', 'report_number', 'report_type', 'report_type_detail',
             'reported_by', 'reported_by_name', 'reported_employee', 'reported_employee_name',
             'case_study', 'case_number',
             'title', 'description', 'location', 'incident_date', 'incident_time',
