@@ -4,7 +4,7 @@ import type { CSSProperties, ReactNode } from 'react';
 const cardThemes: Record<string, { style: CSSProperties; headerStyle: CSSProperties }> = {
   gold: {
     style: {
-      background: 'linear-gradient(145deg, rgba(15, 22, 40, 0.75) 0%, rgba(11, 15, 26, 0.55) 100%)',
+      background: 'linear-gradient(145deg, var(--bg-card-soft) 0%, var(--bg-card) 100%)',
       borderColor: 'rgba(245, 196, 0, 0.18)',
       borderRadius: 14,
     },
@@ -12,7 +12,7 @@ const cardThemes: Record<string, { style: CSSProperties; headerStyle: CSSPropert
   },
   cyan: {
     style: {
-      background: 'linear-gradient(145deg, rgba(15, 22, 40, 0.75) 0%, rgba(11, 15, 26, 0.55) 100%)',
+      background: 'linear-gradient(145deg, var(--bg-card-soft) 0%, var(--bg-card) 100%)',
       borderColor: 'rgba(62, 231, 255, 0.18)',
       borderRadius: 14,
     },
@@ -20,7 +20,7 @@ const cardThemes: Record<string, { style: CSSProperties; headerStyle: CSSPropert
   },
   lime: {
     style: {
-      background: 'linear-gradient(145deg, rgba(15, 22, 40, 0.75) 0%, rgba(11, 15, 26, 0.55) 100%)',
+      background: 'linear-gradient(145deg, var(--bg-card-soft) 0%, var(--bg-card) 100%)',
       borderColor: 'rgba(124, 255, 107, 0.18)',
       borderRadius: 14,
     },
@@ -28,7 +28,7 @@ const cardThemes: Record<string, { style: CSSProperties; headerStyle: CSSPropert
   },
   amber: {
     style: {
-      background: 'linear-gradient(145deg, rgba(15, 22, 40, 0.75) 0%, rgba(11, 15, 26, 0.55) 100%)',
+      background: 'linear-gradient(145deg, var(--bg-card-soft) 0%, var(--bg-card) 100%)',
       borderColor: 'rgba(255, 181, 71, 0.18)',
       borderRadius: 14,
     },
@@ -36,7 +36,7 @@ const cardThemes: Record<string, { style: CSSProperties; headerStyle: CSSPropert
   },
   pink: {
     style: {
-      background: 'linear-gradient(145deg, rgba(15, 22, 40, 0.75) 0%, rgba(11, 15, 26, 0.55) 100%)',
+      background: 'linear-gradient(145deg, var(--bg-card-soft) 0%, var(--bg-card) 100%)',
       borderColor: 'rgba(255, 77, 216, 0.18)',
       borderRadius: 14,
     },
@@ -44,7 +44,7 @@ const cardThemes: Record<string, { style: CSSProperties; headerStyle: CSSPropert
   },
   neutral: {
     style: {
-      background: 'linear-gradient(145deg, rgba(15, 22, 40, 0.75) 0%, rgba(11, 15, 26, 0.55) 100%)',
+      background: 'linear-gradient(145deg, var(--bg-card-soft) 0%, var(--bg-card) 100%)',
       borderColor: 'rgba(145, 149, 163, 0.18)',
       borderRadius: 14,
     },
@@ -98,9 +98,9 @@ const tagThemes: Record<TagVariant, CSSProperties> = {
     borderColor: 'rgba(255, 79, 216, 0.3)',
   },
   neutral: {
-    background: 'rgba(255, 255, 255, 0.06)',
-    color: '#f7f8fb',
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    background: 'rgba(94, 80, 132, 0.1)',
+    color: 'var(--text)',
+    borderColor: 'rgba(94, 80, 132, 0.22)',
   },
 };
 
@@ -115,7 +115,7 @@ export interface TagPillProps {
 export function TagPill({ variant = 'neutral', style, children, className, onClick }: TagPillProps) {
   const theme = tagThemes[variant];
   return (
-    <Tag 
+    <Tag
       color="default"
       className={className}
       onClick={onClick}

@@ -1,11 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  font-family: 'Manrope', 'Space Grotesk', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: dark;
@@ -16,30 +16,62 @@
   --bg-base: #05060a;
   --bg-panel: #0b0f1a;
   --bg-card: #0f1628;
+  --bg-card-soft: rgba(15, 22, 40, 0.82);
   --accent: #f5c400;
   --accent-soft: #ffe37a;
   --text: #f7f8fb;
   --text-dim: #c4c8d4;
+  --text-muted: #8e95aa;
   --border: rgba(255, 227, 122, 0.25);
   --glow: 0 10px 50px rgba(245, 196, 0, 0.15);
-  --sidebar-bg: #05060a;
-  --header-bg: #05060a;
+  --sidebar-bg: linear-gradient(180deg, rgba(11, 15, 26, 0.95) 0%, rgba(15, 22, 40, 0.9) 100%);
+  --sidebar-border: rgba(245, 196, 0, 0.15);
+  --sidebar-text: #f7f8fb;
+  --sidebar-hover: rgba(245, 196, 0, 0.08);
+  --sidebar-active: rgba(245, 196, 0, 0.14);
+  --header-bg: linear-gradient(90deg, rgba(11, 15, 26, 0.95) 0%, rgba(15, 22, 40, 0.92) 50%, rgba(11, 15, 26, 0.95) 100%);
+  --header-border: rgba(245, 196, 0, 0.15);
+  --shell-bg: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-panel) 50%, var(--bg-base) 100%);
+  --shell-glow: radial-gradient(ellipse 1200px 600px at center top, rgba(245, 196, 0, 0.05), transparent 70%);
+  --shell-grid: repeating-linear-gradient(90deg, transparent, transparent 99px, rgba(245, 196, 0, 0.03) 99px, rgba(245, 196, 0, 0.03) 100px);
+  --hero-bg: linear-gradient(145deg, rgba(15, 22, 40, 0.78) 0%, rgba(11, 15, 26, 0.65) 100%);
+  --hero-border: rgba(245, 196, 0, 0.18);
+  --hero-eyebrow: #a6aec3;
+  --hero-title: #f7f8fb;
+  --hero-description: #c4c8d4;
+  --hero-orb: rgba(245, 196, 0, 0.09);
 }
 
 /* Light Mode */
 :root.light-mode {
   color-scheme: light;
-  --bg-base: #f8fafc;
-  --bg-panel: #f1f5f9;
+  --bg-base: #f6f5f2;
+  --bg-panel: #ece9e3;
   --bg-card: #ffffff;
-  --accent: #3b82f6;
-  --accent-soft: #2563eb;
-  --text: #1f2937;
-  --text-dim: #6b7280;
-  --border: rgba(59, 130, 246, 0.12);
-  --glow: 0 4px 20px rgba(59, 130, 246, 0.08);
-  --sidebar-bg: #05060a;
-  --header-bg: #ffffff;
+  --bg-card-soft: #fdfcfa;
+  --accent: #4a3fcf;
+  --accent-soft: #695ff0;
+  --text: #202022;
+  --text-dim: #5c5865;
+  --text-muted: #8b8696;
+  --border: rgba(74, 63, 207, 0.12);
+  --glow: 0 14px 32px rgba(29, 24, 47, 0.07);
+  --sidebar-bg: linear-gradient(180deg, #2a163c 0%, #3a2151 100%);
+  --sidebar-border: rgba(255, 255, 255, 0.16);
+  --sidebar-text: #f3effa;
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
+  --sidebar-active: rgba(255, 255, 255, 0.16);
+  --header-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(250, 247, 241, 0.97) 100%);
+  --header-border: rgba(41, 28, 58, 0.08);
+  --shell-bg: linear-gradient(180deg, #f6f5f2 0%, #edeae5 55%, #f6f5f2 100%);
+  --shell-glow: radial-gradient(ellipse 1100px 520px at center top, rgba(81, 62, 149, 0.08), transparent 70%);
+  --shell-grid: repeating-linear-gradient(90deg, transparent, transparent 119px, rgba(44, 33, 69, 0.025) 119px, rgba(44, 33, 69, 0.025) 120px);
+  --hero-bg: linear-gradient(140deg, rgba(255, 255, 255, 0.96) 0%, rgba(247, 243, 237, 0.98) 100%);
+  --hero-border: rgba(65, 47, 126, 0.14);
+  --hero-eyebrow: #71688a;
+  --hero-title: #261f35;
+  --hero-description: #5f5772;
+  --hero-orb: rgba(92, 73, 173, 0.12);
 }
 
 /* Dark Mode Explicit */
@@ -48,14 +80,30 @@
   --bg-base: #05060a;
   --bg-panel: #0b0f1a;
   --bg-card: #0f1628;
+  --bg-card-soft: rgba(15, 22, 40, 0.82);
   --accent: #f5c400;
   --accent-soft: #ffe37a;
   --text: #f7f8fb;
   --text-dim: #c4c8d4;
+  --text-muted: #8e95aa;
   --border: rgba(255, 227, 122, 0.25);
   --glow: 0 10px 50px rgba(245, 196, 0, 0.15);
-  --sidebar-bg: #05060a;
-  --header-bg: #05060a;
+  --sidebar-bg: linear-gradient(180deg, rgba(11, 15, 26, 0.95) 0%, rgba(15, 22, 40, 0.9) 100%);
+  --sidebar-border: rgba(245, 196, 0, 0.15);
+  --sidebar-text: #f7f8fb;
+  --sidebar-hover: rgba(245, 196, 0, 0.08);
+  --sidebar-active: rgba(245, 196, 0, 0.14);
+  --header-bg: linear-gradient(90deg, rgba(11, 15, 26, 0.95) 0%, rgba(15, 22, 40, 0.92) 50%, rgba(11, 15, 26, 0.95) 100%);
+  --header-border: rgba(245, 196, 0, 0.15);
+  --shell-bg: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-panel) 50%, var(--bg-base) 100%);
+  --shell-glow: radial-gradient(ellipse 1200px 600px at center top, rgba(245, 196, 0, 0.05), transparent 70%);
+  --shell-grid: repeating-linear-gradient(90deg, transparent, transparent 99px, rgba(245, 196, 0, 0.03) 99px, rgba(245, 196, 0, 0.03) 100px);
+  --hero-bg: linear-gradient(145deg, rgba(15, 22, 40, 0.78) 0%, rgba(11, 15, 26, 0.65) 100%);
+  --hero-border: rgba(245, 196, 0, 0.18);
+  --hero-eyebrow: #a6aec3;
+  --hero-title: #f7f8fb;
+  --hero-description: #c4c8d4;
+  --hero-orb: rgba(245, 196, 0, 0.09);
 }
 
 * {
@@ -73,9 +121,9 @@ body {
 }
 
 :root.light-mode body {
-  background: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.04), transparent 30%),
-    radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.03), transparent 25%),
-    linear-gradient(145deg, #f8fafc 0%, #f1f5f9 40%, #f8fafc 100%);
+  background: radial-gradient(circle at 12% 14%, rgba(77, 58, 154, 0.08), transparent 34%),
+    radial-gradient(circle at 88% 0%, rgba(124, 98, 205, 0.06), transparent 28%),
+    linear-gradient(145deg, #f6f5f2 0%, #ebe8e2 44%, #f6f5f2 100%);
 }
 
 a {
@@ -88,7 +136,7 @@ a:hover {
 }
 
 .glass-panel {
-  background: rgba(15, 22, 40, 0.8);
+  background: var(--bg-card-soft);
   border: 1px solid var(--border);
   backdrop-filter: blur(10px);
   box-shadow: var(--glow);
@@ -100,16 +148,109 @@ a:hover {
 }
 
 .chart-surface {
-  background: linear-gradient(135deg, #0f1628 0%, #0b0f1a 100%);
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card-soft) 100%);
   border: 1px solid var(--border);
   border-radius: 16px;
   box-shadow: var(--glow);
 }
 
+.app-hero-banner {
+  position: relative;
+  overflow: hidden;
+  background: var(--hero-bg);
+  border: 1px solid var(--hero-border);
+  border-radius: 16px;
+  box-shadow: var(--glow);
+}
+
+.app-hero-banner::after {
+  content: '';
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, var(--hero-orb) 0%, transparent 70%);
+  right: -120px;
+  top: -140px;
+  pointer-events: none;
+}
+
+.app-hero-eyebrow {
+  color: var(--hero-eyebrow);
+}
+
+.app-hero-title {
+  color: var(--hero-title);
+}
+
+.app-hero-description {
+  color: var(--hero-description);
+}
+
 .ant-typography,
 .ant-statistic-title,
 .ant-statistic-content {
-  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  font-family: 'Manrope', 'Space Grotesk', system-ui, -apple-system, sans-serif;
+}
+
+:root.light-mode .ant-layout,
+:root.light-mode .ant-layout-content,
+:root.light-mode .ant-layout-header {
+  color: var(--text);
+}
+
+:root.light-mode .ant-card,
+:root.light-mode .ant-table-wrapper,
+:root.light-mode .ant-picker-panel,
+:root.light-mode .ant-modal-content,
+:root.light-mode .ant-drawer-content {
+  box-shadow: 0 14px 30px rgba(34, 24, 55, 0.07);
+}
+
+:root.light-mode .ant-table {
+  background: #ffffff;
+}
+
+:root.light-mode .ant-table-thead>tr>th {
+  background: #f4f0eb;
+  color: #352c46;
+  border-bottom: 1px solid rgba(53, 44, 70, 0.12);
+}
+
+:root.light-mode .ant-table-tbody>tr>td {
+  border-bottom: 1px solid rgba(53, 44, 70, 0.08);
+}
+
+:root.light-mode .ant-table-tbody>tr:hover>td {
+  background: #f8f4ef;
+}
+
+:root.light-mode .ant-input,
+:root.light-mode .ant-input-affix-wrapper,
+:root.light-mode .ant-select-selector,
+:root.light-mode .ant-picker,
+:root.light-mode .ant-input-number {
+  border-color: rgba(53, 44, 70, 0.18);
+  background: #ffffff;
+}
+
+:root.light-mode .ant-input:focus,
+:root.light-mode .ant-input-affix-wrapper-focused,
+:root.light-mode .ant-select-focused .ant-select-selector,
+:root.light-mode .ant-picker-focused,
+:root.light-mode .ant-input-number-focused {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(74, 63, 207, 0.12);
+}
+
+:root.light-mode .ant-btn-primary {
+  background: linear-gradient(135deg, #4a3fcf 0%, #6055e1 100%);
+  border-color: #4a3fcf;
+}
+
+:root.light-mode .ant-btn-default {
+  border-color: rgba(53, 44, 70, 0.2);
+  color: #322946;
 }
 
 /* Independent sidebar scrollbar styling */
@@ -134,6 +275,16 @@ a:hover {
 
 .ant-layout-sider::-webkit-scrollbar-thumb:hover {
   background: rgba(245, 196, 0, 0.6);
+  background-clip: padding-box;
+}
+
+:root.light-mode .ant-layout-sider::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.24);
+  background-clip: padding-box;
+}
+
+:root.light-mode .ant-layout-sider::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45);
   background-clip: padding-box;
 }
 

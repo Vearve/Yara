@@ -26,17 +26,17 @@ export function HeroBanner({
   gradient = 'gold',
 }: HeroBannerProps) {
   return (
-    <GlassCard gradient={gradient} className="relative overflow-hidden" style={{ padding: 24 }}>
+    <GlassCard gradient={gradient} className="app-hero-banner" style={{ padding: 24 }}>
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-3 flex-1 min-w-0">
-          <div className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.2em]" style={{ color: '#c4c8d4' }}>
+          <div className="app-hero-eyebrow inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] font-semibold">
             {eyebrow}
           </div>
-          <div className="flex items-center gap-3" style={{ color: '#f7f8fb', fontSize: '32px', fontWeight: 800, lineHeight: 1.1 }}>
+          <div className="app-hero-title flex items-center gap-3" style={{ fontSize: '32px', fontWeight: 800, lineHeight: 1.08 }}>
             {icon}
             <span className="truncate">{title}</span>
           </div>
-          <div className="text-sm" style={{ color: '#c4c8d4', maxWidth: 780 }}>
+          <div className="app-hero-description text-sm" style={{ maxWidth: 780 }}>
             {description}
           </div>
           {tags.length > 0 ? (

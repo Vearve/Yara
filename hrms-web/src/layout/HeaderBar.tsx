@@ -461,9 +461,9 @@ export default function HeaderBar() {
               window.location.href = '/portfolio';
             }}
             style={{
-              background: 'rgba(245, 196, 0, 0.1)',
-              borderColor: 'rgba(245, 196, 0, 0.3)',
-              color: '#f5c400',
+              background: theme === 'dark' ? 'rgba(245, 196, 0, 0.1)' : 'rgba(74, 63, 207, 0.12)',
+              borderColor: theme === 'dark' ? 'rgba(245, 196, 0, 0.3)' : 'rgba(74, 63, 207, 0.24)',
+              color: theme === 'dark' ? '#f5c400' : '#4437b8',
             }}
           >
             Home
@@ -491,8 +491,8 @@ export default function HeaderBar() {
       </Flex>
 
       <Flex vertical style={{ flex: 1, minWidth: 0, marginLeft: 16 }}>
-        <Text strong style={{ color: '#D4AF37', fontSize: 16 }}>Yello, {displayName}</Text>
-        <Text type="secondary" style={{ fontSize: 12 }}>What are we doing today?</Text>
+        <Text strong style={{ color: theme === 'dark' ? '#D4AF37' : '#352b47', fontSize: 16 }}>Hello, {displayName}</Text>
+        <Text type="secondary" style={{ fontSize: 12, color: theme === 'dark' ? '#c4c8d4' : '#70697f' }}>What are we doing today?</Text>
       </Flex>
 
       <Flex align="center" gap={20} style={{ flex: 0, marginLeft: 'auto' }}>
@@ -506,7 +506,7 @@ export default function HeaderBar() {
           onMouseEnter={(e) => {
             e.currentTarget.style.textShadow = theme === 'dark'
               ? '0 0 10px rgba(245, 196, 0, 0.4)'
-              : '0 0 10px rgba(59, 130, 246, 0.3)';
+              : '0 0 10px rgba(74, 63, 207, 0.28)';
           }}
           onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
           onClick={() => setSearchOpen((v) => !v)}
@@ -516,13 +516,13 @@ export default function HeaderBar() {
             style={{
               fontSize: 18,
               cursor: 'pointer',
-              color: theme === 'dark' ? '#3ee7ff' : '#2563eb',
+              color: theme === 'dark' ? '#3ee7ff' : '#4a3fcf',
               transition: 'all 0.3s ease',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.textShadow = theme === 'dark'
                 ? '0 0 10px rgba(62, 231, 255, 0.4)'
-                : '0 0 10px rgba(37, 99, 235, 0.3)';
+                : '0 0 10px rgba(74, 63, 207, 0.28)';
             }}
             onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
             onClick={() => nav('/messaging')}
@@ -546,10 +546,10 @@ export default function HeaderBar() {
             style={{
               fontSize: 18,
               cursor: 'pointer',
-              color: '#3b82f6',
+              color: '#4a3fcf',
               transition: 'all 0.3s ease',
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.textShadow = '0 0 10px rgba(59, 130, 246, 0.4)'; }}
+            onMouseEnter={(e) => { e.currentTarget.style.textShadow = '0 0 10px rgba(74, 63, 207, 0.35)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
             onClick={toggleTheme}
             title="Switch to Dark Mode"
@@ -559,13 +559,13 @@ export default function HeaderBar() {
           style={{
             fontSize: 18,
             cursor: 'pointer',
-            color: theme === 'dark' ? '#7cff6b' : '#059669',
+            color: theme === 'dark' ? '#7cff6b' : '#3f8a63',
             transition: 'all 0.3s ease',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.textShadow = theme === 'dark'
               ? '0 0 10px rgba(124, 255, 107, 0.4)'
-              : '0 0 10px rgba(5, 150, 105, 0.3)';
+              : '0 0 10px rgba(63, 138, 99, 0.3)';
           }}
           onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
           onClick={() => setSettingsOpen(true)}
@@ -573,15 +573,15 @@ export default function HeaderBar() {
         <Dropdown menu={{ items: accountMenu, onClick: onAccountClick }} placement="bottomRight" trigger={['click']}>
           <Avatar
             style={{
-              backgroundColor: theme === 'dark' ? '#f5c400' : '#3b82f6',
+              backgroundColor: theme === 'dark' ? '#f5c400' : '#4a3fcf',
               color: theme === 'dark' ? '#05060a' : '#ffffff',
               cursor: 'pointer',
               border: theme === 'dark'
                 ? '2px solid rgba(245, 196, 0, 0.3)'
-                : '2px solid rgba(59, 130, 246, 0.3)',
+                : '2px solid rgba(74, 63, 207, 0.24)',
               boxShadow: theme === 'dark'
                 ? '0 0 12px rgba(245, 196, 0, 0.2)'
-                : '0 0 12px rgba(59, 130, 246, 0.15)',
+                : '0 0 12px rgba(74, 63, 207, 0.16)',
               fontWeight: 600,
             }}
           >
@@ -597,12 +597,16 @@ export default function HeaderBar() {
             top: 64,
             right: 24,
             padding: '10px 12px',
-            background: 'linear-gradient(135deg, rgba(11, 15, 26, 0.95) 0%, rgba(15, 22, 40, 0.9) 100%)',
+            background: theme === 'dark'
+              ? 'linear-gradient(135deg, rgba(11, 15, 26, 0.95) 0%, rgba(15, 22, 40, 0.9) 100%)'
+              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(247, 243, 237, 0.98) 100%)',
             borderRadius: 10,
             width: 360,
             zIndex: 100,
-            border: '1px solid rgba(245, 196, 0, 0.2)',
-            boxShadow: '0 8px 24px rgba(245, 196, 0, 0.15), 0 0 16px rgba(62, 231, 255, 0.1)',
+            border: theme === 'dark' ? '1px solid rgba(245, 196, 0, 0.2)' : '1px solid rgba(53, 44, 70, 0.14)',
+            boxShadow: theme === 'dark'
+              ? '0 8px 24px rgba(245, 196, 0, 0.15), 0 0 16px rgba(62, 231, 255, 0.1)'
+              : '0 10px 24px rgba(35, 26, 53, 0.13)',
           }}
         >
           <Input.Search
@@ -636,9 +640,11 @@ export default function HeaderBar() {
                 left: 0,
                 width: 360,
                 zIndex: 10,
-                background: 'linear-gradient(135deg, rgba(15, 22, 40, 0.95) 0%, rgba(11, 15, 26, 0.92) 100%)',
-                border: '1px solid rgba(245, 196, 0, 0.2)',
-                boxShadow: '0 8px 20px rgba(245, 196, 0, 0.1)',
+                background: theme === 'dark'
+                  ? 'linear-gradient(135deg, rgba(15, 22, 40, 0.95) 0%, rgba(11, 15, 26, 0.92) 100%)'
+                  : 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 245, 240, 0.98) 100%)',
+                border: theme === 'dark' ? '1px solid rgba(245, 196, 0, 0.2)' : '1px solid rgba(53, 44, 70, 0.14)',
+                boxShadow: theme === 'dark' ? '0 8px 20px rgba(245, 196, 0, 0.1)' : '0 8px 20px rgba(35, 26, 53, 0.1)',
                 borderRadius: 10,
               }}
               styles={{ body: { padding: 10, maxHeight: 260, overflowY: 'auto' } }}
@@ -656,8 +662,8 @@ export default function HeaderBar() {
                       style={{
                         padding: '8px 12px',
                         borderRadius: 8,
-                        background: 'rgba(245, 196, 0, 0.06)',
-                        border: '1px solid rgba(245, 196, 0, 0.12)',
+                        background: theme === 'dark' ? 'rgba(245, 196, 0, 0.06)' : 'rgba(53, 44, 70, 0.05)',
+                        border: theme === 'dark' ? '1px solid rgba(245, 196, 0, 0.12)' : '1px solid rgba(53, 44, 70, 0.1)',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
                       }}

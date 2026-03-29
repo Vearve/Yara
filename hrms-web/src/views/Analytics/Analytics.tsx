@@ -7,14 +7,17 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { GlassCard, TagPill } from '../../components/NeonPrimitives';
 import { KPICard } from '../../components/KPICard';
+import { HeroBanner } from '../../components/HeroBanner';
 import { analyticsApi } from '../../api/services/analyticsApi';
 import type { AnalyticsData } from '../../api/services/analyticsApi';
 import http from '../../lib/http';
 import dayjs from 'dayjs';
 import { exportTableToPDF } from '../../lib/pdfExport';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function Analytics() {
   const queryClient = useQueryClient();
+  const { theme } = useTheme();
   const defaultFilters = {
     departmentId: null as number | null,
     jobTitle: null as string | null,
@@ -184,7 +187,7 @@ export default function Analytics() {
   const exportPdf = async () => {
     const el = document.getElementById('analytics-root');
     if (!el) return;
-    const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#0b0f1a' });
+    const canvas = await html2canvas(el, { scale: 2, backgroundColor: theme === 'dark' ? '#0b0f1a' : '#f6f5f2' });
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -202,47 +205,20 @@ export default function Analytics() {
 
   return (
     <div id="analytics-root" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}>
-      {/* Hero Section */}
-      <div className="relative rounded-2xl overflow-hidden" style={{ padding: '32px 40px' }}>
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(135deg, rgba(245, 196, 0, 0.12) 0%, rgba(62, 231, 255, 0.08) 50%, rgba(124, 255, 107, 0.06) 100%)',
-          border: '1px solid rgba(245, 196, 0, 0.2)',
-        }} />
-        <div className="absolute inset-0 blur-3xl opacity-30" style={{
-          background: 'radial-gradient(at top right, rgba(245, 196, 0, 0.3), transparent 70%)',
-        }} />
-        <div className="relative flex flex-col gap-4">
-          <div className="text-xs uppercase tracking-[0.25em] font-medium" style={{ color: '#9195a3' }}>
-            Dashboard
-          </div>
-          <div className="text-sm uppercase tracking-[0.3em] font-semibold" style={{ color: '#f5c400' }}>
-            Performance Metrics
-          </div>
-          <div className="flex items-center gap-4">
-            <Activity className="h-12 w-12" style={{ color: '#f5c400' }} />
-            <h1 className="text-5xl font-extrabold" style={{ color: '#f7f8fb', lineHeight: 1.1 }}>
-              Real-Time Analytics Dashboard
-            </h1>
-          </div>
-          <p className="text-base max-w-2xl" style={{ color: '#c4c8d4' }}>
-            Monitor HR metrics, recruitment funnels, payroll insights, and workforce performance across your entire organization with live data visualization.
-          </p>
-          <div className="flex flex-wrap gap-3 mt-2">
-            <Button
-              type="primary"
-              size="large"
-              icon={<Download size={18} />}
-              onClick={exportPdf}
-              style={{
-                background: '#f5c400',
-                borderColor: '#f5c400',
-                color: '#05060a',
-                fontWeight: 600,
-                height: 44,
-                paddingLeft: 24,
-                paddingRight: 24,
-              }}
-            >
+      <HeroBanner
+        eyebrow="Dashboard"
+        title="Real-Time Analytics Dashboard"
+        description="Monitor HR metrics, recruitment funnels, payroll insights, and workforce performance across your organization with live data visualization."
+        icon={<Activity className="h-9 w-9" style={{ color: 'var(--accent)' }} />}
+        gradient="neutral"
+        tags={[
+          { label: 'Performance Metrics', variant: 'neutral' },
+          { label: 'Live Data', variant: 'cyan' },
+          { label: 'Cross-Module Insights', variant: 'lime' },
+        ]}
+        actions={(
+          <>
+            <Button type="primary" size="large" icon={<Download size={18} />} onClick={exportPdf}>
               Export Report
             </Button>
             <Button
@@ -252,18 +228,12 @@ export default function Analytics() {
                 setPendingFilters(defaultFilters);
                 setAppliedFilters(defaultFilters);
               }}
-              style={{
-                background: 'rgba(255,255,255,0.06)',
-                borderColor: 'rgba(245,196,0,0.4)',
-                color: '#f7f8fb',
-                height: 44,
-              }}
             >
               Reset Filters
             </Button>
-          </div>
-        </div>
-      </div>
+          </>
+        )}
+      />
 
       {/* Filter Section */}
       <GlassCard>

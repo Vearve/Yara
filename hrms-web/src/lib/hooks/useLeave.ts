@@ -3,8 +3,8 @@ import { leaveApi } from '@/api/services/leaveApi';
 
 export const useLeaveRequests = () => {
   const workspaceId = localStorage.getItem('workspaceId');
-  return useQuery({ 
-    queryKey: ['leaveRequests', workspaceId], 
+  return useQuery({
+    queryKey: ['leaveRequests', workspaceId],
     queryFn: () => leaveApi.getLeaveRequests(),
     enabled: !!workspaceId,
   });
@@ -12,8 +12,8 @@ export const useLeaveRequests = () => {
 
 export const useLeaveSummary = (employee?: number) => {
   const workspaceId = localStorage.getItem('workspaceId');
-  return useQuery({ 
-    queryKey: ['leaveSummary', workspaceId, employee], 
+  return useQuery({
+    queryKey: ['leaveSummary', workspaceId, employee],
     queryFn: () => leaveApi.getLeaveSummary(employee),
     enabled: !!workspaceId,
   });
@@ -21,7 +21,7 @@ export const useLeaveSummary = (employee?: number) => {
 
 export const useCreateLeaveRequest = () => {
   const qc = useQueryClient();
-    const workspaceId = localStorage.getItem('workspaceId');
+  const workspaceId = localStorage.getItem('workspaceId');
   return useMutation({
     mutationFn: (data: Parameters<typeof leaveApi.createLeaveRequest>[0]) => leaveApi.createLeaveRequest(data),
     onSuccess: () => {
@@ -32,7 +32,7 @@ export const useCreateLeaveRequest = () => {
 };
 
 export const useApproveLeave = () => {
-    const workspaceId = localStorage.getItem('workspaceId');
+  const workspaceId = localStorage.getItem('workspaceId');
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => leaveApi.approveLeave(id),
@@ -44,7 +44,7 @@ export const useApproveLeave = () => {
 };
 
 export const useRejectLeave = () => {
-    const workspaceId = localStorage.getItem('workspaceId');
+  const workspaceId = localStorage.getItem('workspaceId');
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => leaveApi.rejectLeave(id),
@@ -56,7 +56,7 @@ export const useRejectLeave = () => {
 };
 
 export const useCancelLeave = () => {
-    const workspaceId = localStorage.getItem('workspaceId');
+  const workspaceId = localStorage.getItem('workspaceId');
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => leaveApi.cancelLeave(id),
@@ -105,8 +105,8 @@ export const useDeleteDoubleTicket = () => {
 
 export const useSickNotes = () => {
   const workspaceId = localStorage.getItem('workspaceId');
-  return useQuery({ 
-    queryKey: ['sickNotes', workspaceId], 
+  return useQuery({
+    queryKey: ['sickNotes', workspaceId],
     queryFn: () => leaveApi.getSickNotes(),
     enabled: !!workspaceId,
   });
@@ -114,15 +114,15 @@ export const useSickNotes = () => {
 
 export const useSickNoteSummary = (employee?: number) => {
   const workspaceId = localStorage.getItem('workspaceId');
-  return useQuery({ 
-    queryKey: ['sickNoteSummary', workspaceId, employee], 
+  return useQuery({
+    queryKey: ['sickNoteSummary', workspaceId, employee],
     queryFn: () => leaveApi.getSickNoteSummary(employee),
     enabled: !!workspaceId,
   });
 };
 
 export const useCreateSickNote = () => {
-    const workspaceId = localStorage.getItem('workspaceId');
+  const workspaceId = localStorage.getItem('workspaceId');
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Parameters<typeof leaveApi.createSickNote>[0]) => leaveApi.createSickNote(data),
@@ -134,7 +134,7 @@ export const useCreateSickNote = () => {
 };
 
 export const useApproveSickNote = () => {
-    const workspaceId = localStorage.getItem('workspaceId');
+  const workspaceId = localStorage.getItem('workspaceId');
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => leaveApi.approveSickNote(id),
@@ -146,7 +146,7 @@ export const useApproveSickNote = () => {
 };
 
 export const useRejectSickNote = () => {
-    const workspaceId = localStorage.getItem('workspaceId');
+  const workspaceId = localStorage.getItem('workspaceId');
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => leaveApi.rejectSickNote(id),
@@ -160,15 +160,15 @@ export const useRejectSickNote = () => {
 // Double Ticket Hooks
 export const useDoubleTickets = () => {
   const workspaceId = localStorage.getItem('workspaceId');
-  return useQuery({ 
-    queryKey: ['doubleTickets', workspaceId], 
+  return useQuery({
+    queryKey: ['doubleTickets', workspaceId],
     queryFn: () => leaveApi.getDoubleTickets(),
     enabled: !!workspaceId,
   });
 };
 
 export const useCreateDoubleTicket = () => {
-    const workspaceId = localStorage.getItem('workspaceId');
+  const workspaceId = localStorage.getItem('workspaceId');
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Parameters<typeof leaveApi.createDoubleTicket>[0]) => leaveApi.createDoubleTicket(data),
@@ -180,7 +180,7 @@ export const useCreateDoubleTicket = () => {
 };
 
 export const useApproveDoubleTicket = () => {
-    const workspaceId = localStorage.getItem('workspaceId');
+  const workspaceId = localStorage.getItem('workspaceId');
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => leaveApi.approveDoubleTicket(id),
@@ -192,7 +192,7 @@ export const useApproveDoubleTicket = () => {
 };
 
 export const useRejectDoubleTicket = () => {
-    const workspaceId = localStorage.getItem('workspaceId');
+  const workspaceId = localStorage.getItem('workspaceId');
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => leaveApi.rejectDoubleTicket(id),
@@ -205,8 +205,8 @@ export const useRejectDoubleTicket = () => {
 
 export const useDoubleTicketSummary = (employee?: number) => {
   const workspaceId = localStorage.getItem('workspaceId');
-  return useQuery({ 
-    queryKey: ['doubleTicketSummary', workspaceId, employee], 
+  return useQuery({
+    queryKey: ['doubleTicketSummary', workspaceId, employee],
     queryFn: () => leaveApi.getDoubleTicketSummary(employee),
     enabled: !!workspaceId,
   });

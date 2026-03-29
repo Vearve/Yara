@@ -136,7 +136,7 @@ export const leaveApi = {
     const res = await http.post(`/api/v1/leave/sick-notes/${id}/reject/`, {});
     return res.data;
   },
-  
+
   // Double Ticket API
   getDoubleTickets: async (): Promise<DoubleTicketRequest[]> => {
     const res = await http.get('/api/v1/leave/double-tickets/');

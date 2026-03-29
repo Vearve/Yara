@@ -177,7 +177,7 @@ export default function AppLayout() {
     <Layout
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(180deg, var(--bg-base) 0%, var(--bg-panel) 50%, var(--bg-base) 100%)',
+        background: 'var(--shell-bg)',
         position: 'relative',
       }}
     >
@@ -186,7 +186,7 @@ export default function AppLayout() {
         style={{
           position: 'fixed',
           inset: 0,
-          background: 'radial-gradient(ellipse 1200px 600px at center top, rgba(245, 196, 0, 0.05), transparent 70%)',
+          background: 'var(--shell-glow)',
           pointerEvents: 'none',
           zIndex: 0,
         }}
@@ -196,7 +196,7 @@ export default function AppLayout() {
         style={{
           position: 'fixed',
           inset: 0,
-          background: 'repeating-linear-gradient(90deg, transparent, transparent 99px, rgba(245, 196, 0, 0.03) 99px, rgba(245, 196, 0, 0.03) 100px)',
+          background: 'var(--shell-grid)',
           pointerEvents: 'none',
           zIndex: 0,
         }}
@@ -205,9 +205,9 @@ export default function AppLayout() {
       <Sider
         width={240}
         style={{
-          background: 'linear-gradient(180deg, rgba(11, 15, 26, 0.95) 0%, rgba(15, 22, 40, 0.9) 100%)',
-          borderRight: '1px solid rgba(245, 196, 0, 0.15)',
-          boxShadow: '4px 0 12px rgba(245, 196, 0, 0.1), inset -1px 0 12px rgba(62, 231, 255, 0.05)',
+          background: 'var(--sidebar-bg)',
+          borderRight: '1px solid var(--sidebar-border)',
+          boxShadow: '4px 0 12px rgba(25, 17, 42, 0.18)',
           position: 'fixed',
           zIndex: 1,
           overflowY: 'auto',
@@ -219,8 +219,8 @@ export default function AppLayout() {
         <div style={{
           padding: '24px 16px',
           textAlign: 'center',
-          borderBottom: '1px solid rgba(245, 196, 0, 0.2)',
-          background: 'linear-gradient(180deg, rgba(245, 196, 0, 0.05) 0%, transparent 100%)',
+          borderBottom: '1px solid var(--sidebar-border)',
+          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%)',
         }}>
           <img
             src={logoSrc}
@@ -241,11 +241,11 @@ export default function AppLayout() {
       <Layout style={{ background: 'transparent', position: 'relative', zIndex: 1, marginLeft: 240 }}>
         <Header
           style={{
-            background: 'linear-gradient(90deg, rgba(11, 15, 26, 0.95) 0%, rgba(15, 22, 40, 0.92) 50%, rgba(11, 15, 26, 0.95) 100%)',
+            background: 'var(--header-bg)',
             backdropFilter: 'blur(12px)',
             padding: 0,
-            borderBottom: '1px solid rgba(245, 196, 0, 0.15)',
-            boxShadow: '0 4px 16px rgba(245, 196, 0, 0.08), 0 1px 0 rgba(62, 231, 255, 0.05)',
+            borderBottom: '1px solid var(--header-border)',
+            boxShadow: '0 4px 16px rgba(28, 22, 44, 0.08)',
             position: 'sticky',
             top: 0,
             zIndex: 2,
@@ -269,21 +269,21 @@ export default function AppLayout() {
           position: 'fixed',
           right: 12,
           bottom: 12,
-          background: 'linear-gradient(135deg, rgba(11, 15, 26, 0.85) 0%, rgba(15, 22, 40, 0.8) 100%)',
-          color: '#f5c400',
+          background: 'var(--bg-card-soft)',
+          color: 'var(--text-dim)',
           padding: '10px 14px',
-          border: '1px solid rgba(245, 196, 0, 0.3)',
+          border: '1px solid var(--border)',
           borderRadius: 8,
           fontSize: 10,
           letterSpacing: '0.05em',
-          boxShadow: '0 4px 12px rgba(245, 196, 0, 0.1)',
+          boxShadow: '0 4px 12px rgba(27, 20, 41, 0.12)',
           zIndex: 3,
           fontWeight: 500,
         }}
       >
         <span>HRMS</span>
         <span style={{ margin: '0 8px', opacity: 0.5 }}>•</span>
-        <span>Neon Edition</span>
+        <span>Workspace Suite</span>
       </div>
     </Layout>
   );
