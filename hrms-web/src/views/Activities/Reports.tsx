@@ -92,7 +92,15 @@ export default function Reports() {
       setFileList([]);
       qc.invalidateQueries({ queryKey: ['reports'], exact: false });
     },
-    onError: () => message.error('Failed to create report'),
+    onError: (err: any) => {
+      const data = err?.response?.data;
+      if (data && typeof data === 'object') {
+        const msgs = Object.entries(data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join(' | ');
+        message.error(`Failed to create report: ${msgs}`);
+      } else {
+        message.error('Failed to create report');
+      }
+    },
   });
 
   const updateMut = useMutation({
@@ -109,7 +117,15 @@ export default function Reports() {
       setEditingRecord(null);
       qc.invalidateQueries({ queryKey: ['reports'] });
     },
-    onError: () => message.error('Failed to update report'),
+    onError: (err: any) => {
+      const data = err?.response?.data;
+      if (data && typeof data === 'object') {
+        const msgs = Object.entries(data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join(' | ');
+        message.error(`Failed to update report: ${msgs}`);
+      } else {
+        message.error('Failed to update report');
+      }
+    },
   });
 
   const deleteMut = useMutation({
@@ -341,6 +357,7 @@ export default function Reports() {
           setEditingRecord(null);
         }}
         onOk={() => editForm.submit()}
+        confirmLoading={updateMut.isPending}
         width={600}
       >
         <Form form={editForm} layout="vertical" onFinish={handleEditSubmit}>
@@ -399,12 +416,14 @@ export default function Reports() {
         open={createOpen}
         onCancel={() => { setCreateOpen(false); form.resetFields(); }}
         onOk={() => form.submit()}
+        confirmLoading={createMut.isPending}
         width={600}
       >
         <Form form={form} layout="vertical" onFinish={(vals) => {
           const fd = new FormData();
           Object.entries(vals).forEach(([k, v]: any) => {
             if (v === undefined || v === null) return;
+            if (k === 'report_number' && !String(v).trim()) return; // let backend auto-generate
             if (typeof v === 'object' && typeof v.format === 'function') {
               fd.append(k, v.format('YYYY-MM-DD'));
               return;
@@ -416,8 +435,8 @@ export default function Reports() {
           }
           createMut.mutate(fd as any);
         }}>
-          <Form.Item name="report_number" label="Report Number" rules={[{ required: true }]}>
-            <Input placeholder="e.g., RPT-2025-001" />
+          <Form.Item name="report_number" label="Report Number (auto-generated if left blank)">
+            <Input placeholder="e.g., RPT-2026-03-001 (leave blank to auto-generate)" />
           </Form.Item>
           <Form.Item name="report_type" label="Type" rules={[{ required: true }]}>
             <Select

@@ -89,7 +89,7 @@ class ContractType(models.Model):
         verbose_name_plural = "Contract Types"
     
     def __str__(self):
-        return self.get_name_display()
+        return self.get_name_display()  # type: ignore[attr-defined]
 
 
 class TerminationReason(models.Model):

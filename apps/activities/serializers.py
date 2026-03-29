@@ -33,6 +33,7 @@ class ReportSerializer(serializers.ModelSerializer):
     reported_by_name = serializers.CharField(source='reported_by.full_name', read_only=True)
     reported_employee_name = serializers.CharField(source='reported_employee.full_name', read_only=True)
     case_number = serializers.CharField(source='case_study.case_number', read_only=True)
+    report_number = serializers.CharField(required=False, allow_blank=True, max_length=100, validators=[])
     
     class Meta:
         model = Report

@@ -503,10 +503,10 @@ export default function HeaderBar() {
             color: theme === 'dark' ? '#f5c400' : '#3b82f6',
             transition: 'all 0.3s ease',
           }}
-          onMouseEnter={(e) => { 
-            e.currentTarget.style.textShadow = theme === 'dark' 
-              ? '0 0 10px rgba(245, 196, 0, 0.4)' 
-              : '0 0 10px rgba(59, 130, 246, 0.3)'; 
+          onMouseEnter={(e) => {
+            e.currentTarget.style.textShadow = theme === 'dark'
+              ? '0 0 10px rgba(245, 196, 0, 0.4)'
+              : '0 0 10px rgba(59, 130, 246, 0.3)';
           }}
           onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
           onClick={() => setSearchOpen((v) => !v)}
@@ -519,10 +519,10 @@ export default function HeaderBar() {
               color: theme === 'dark' ? '#3ee7ff' : '#2563eb',
               transition: 'all 0.3s ease',
             }}
-            onMouseEnter={(e) => { 
+            onMouseEnter={(e) => {
               e.currentTarget.style.textShadow = theme === 'dark'
                 ? '0 0 10px rgba(62, 231, 255, 0.4)'
-                : '0 0 10px rgba(37, 99, 235, 0.3)'; 
+                : '0 0 10px rgba(37, 99, 235, 0.3)';
             }}
             onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
             onClick={() => nav('/messaging')}
@@ -562,10 +562,10 @@ export default function HeaderBar() {
             color: theme === 'dark' ? '#7cff6b' : '#059669',
             transition: 'all 0.3s ease',
           }}
-          onMouseEnter={(e) => { 
+          onMouseEnter={(e) => {
             e.currentTarget.style.textShadow = theme === 'dark'
               ? '0 0 10px rgba(124, 255, 107, 0.4)'
-              : '0 0 10px rgba(5, 150, 105, 0.3)'; 
+              : '0 0 10px rgba(5, 150, 105, 0.3)';
           }}
           onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none'; }}
           onClick={() => setSettingsOpen(true)}
@@ -576,8 +576,8 @@ export default function HeaderBar() {
               backgroundColor: theme === 'dark' ? '#f5c400' : '#3b82f6',
               color: theme === 'dark' ? '#05060a' : '#ffffff',
               cursor: 'pointer',
-              border: theme === 'dark' 
-                ? '2px solid rgba(245, 196, 0, 0.3)' 
+              border: theme === 'dark'
+                ? '2px solid rgba(245, 196, 0, 0.3)'
                 : '2px solid rgba(59, 130, 246, 0.3)',
               boxShadow: theme === 'dark'
                 ? '0 0 12px rgba(245, 196, 0, 0.2)'

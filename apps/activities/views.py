@@ -58,6 +58,24 @@ class ReportViewSet(viewsets.ModelViewSet):
                 if reporter:
                     serializer.validated_data['reported_by'] = reporter
 
+        if not serializer.validated_data.get('report_number'):
+            today = timezone.now()
+            prefix = f"RPT-{today.year}-{today.month:02d}"
+            last = (
+                Report.objects.filter(report_number__startswith=prefix)
+                .order_by('-report_number')
+                .values_list('report_number', flat=True)
+                .first()
+            )
+            if last:
+                try:
+                    seq = int(last.rsplit('-', 1)[-1]) + 1
+                except ValueError:
+                    seq = 1
+            else:
+                seq = 1
+            serializer.validated_data['report_number'] = f"{prefix}-{seq:03d}"
+
         serializer.save()
 
 
@@ -280,14 +298,14 @@ class ScheduleEventViewSet(viewsets.ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
-        if hasattr(self.request, 'workspace') and self.request.workspace:
-            serializer.save(workspace=self.request.workspace)
+        if hasattr(self.request, 'workspace') and self.request.workspace:  # type: ignore[attr-defined]
+            serializer.save(workspace=self.request.workspace)  # type: ignore[attr-defined]
         else:
             serializer.save()
     
     def perform_update(self, serializer):
         # Preserve workspace on update
-        if hasattr(self.request, 'workspace') and self.request.workspace:
-            serializer.save(workspace=self.request.workspace)
+        if hasattr(self.request, 'workspace') and self.request.workspace:  # type: ignore[attr-defined]
+            serializer.save(workspace=self.request.workspace)  # type: ignore[attr-defined]
         else:
             serializer.save()
