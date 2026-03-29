@@ -67,6 +67,42 @@ export const useCancelLeave = () => {
   });
 };
 
+export const useDeleteLeaveRequest = () => {
+  const workspaceId = localStorage.getItem('workspaceId');
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => leaveApi.deleteLeaveRequest(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['leaveRequests', workspaceId] });
+      qc.invalidateQueries({ queryKey: ['leaveSummary', workspaceId] });
+    },
+  });
+};
+
+export const useDeleteSickNote = () => {
+  const workspaceId = localStorage.getItem('workspaceId');
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => leaveApi.deleteSickNote(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['sickNotes', workspaceId] });
+      qc.invalidateQueries({ queryKey: ['sickNoteSummary', workspaceId] });
+    },
+  });
+};
+
+export const useDeleteDoubleTicket = () => {
+  const workspaceId = localStorage.getItem('workspaceId');
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => leaveApi.deleteDoubleTicket(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['doubleTickets', workspaceId] });
+      qc.invalidateQueries({ queryKey: ['doubleTicketSummary', workspaceId] });
+    },
+  });
+};
+
 export const useSickNotes = () => {
   const workspaceId = localStorage.getItem('workspaceId');
   return useQuery({ 

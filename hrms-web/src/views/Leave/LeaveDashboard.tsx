@@ -7,7 +7,7 @@ import http from '../../lib/http';
 import type { ColumnsType } from 'antd/es/table';
 import { Dayjs } from 'dayjs';
 import { exportTableToPDF } from '@/lib/pdfExport';
-import { useLeaveRequests, useCreateLeaveRequest, useSickNotes, useCreateSickNote, useApproveLeave, useRejectLeave, useCancelLeave, useApproveSickNote, useRejectSickNote, useDoubleTickets, useCreateDoubleTicket, useApproveDoubleTicket, useRejectDoubleTicket } from '@/lib/hooks/useLeave';
+import { useLeaveRequests, useCreateLeaveRequest, useSickNotes, useCreateSickNote, useApproveLeave, useRejectLeave, useCancelLeave, useApproveSickNote, useRejectSickNote, useDoubleTickets, useCreateDoubleTicket, useApproveDoubleTicket, useRejectDoubleTicket, useDeleteLeaveRequest, useDeleteSickNote, useDeleteDoubleTicket } from '@/lib/hooks/useLeave';
 import type { LeaveRequest, SickNote, DoubleTicketRequest } from '@/api/services/leaveApi';
 
 const leaveTypeOptions = [
@@ -68,6 +68,9 @@ export default function LeaveDashboard() {
   const rejectSick = useRejectSickNote();
   const approveDoubleTicket = useApproveDoubleTicket();
   const rejectDoubleTicket = useRejectDoubleTicket();
+  const deleteLeave = useDeleteLeaveRequest();
+  const deleteSickNote = useDeleteSickNote();
+  const deleteDoubleTicket = useDeleteDoubleTicket();
 
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
   const [sickModalOpen, setSickModalOpen] = useState(false);
@@ -117,8 +120,8 @@ export default function LeaveDashboard() {
       render: (_, r) => (
         <Space size="small">
           <Button size="small" icon={<EyeOutlined />} onClick={() => { setSelectedLeave(r); setViewLeaveOpen(true); }} />
-          <Button size="small" icon={<EditOutlined />} onClick={() => { setSelectedLeave(r); setViewLeaveOpen(true); }} disabled={r.status !== 'PENDING'} />
-          <Button size="small" icon={<DeleteOutlined />} danger onClick={() => cancelLeave.mutate(r.id)} disabled={r.status !== 'PENDING'} />
+          <Button size="small" icon={<EditOutlined />} onClick={() => { setSelectedLeave(r); setViewLeaveOpen(true); }} />
+          <Button size="small" icon={<DeleteOutlined />} danger onClick={() => { Modal.confirm({ title: 'Delete Leave Request', content: 'Are you sure you want to delete this leave request?', okText: 'Delete', okType: 'danger', onOk: () => deleteLeave.mutate(r.id) }); }} />
           <Button size="small" onClick={() => approveLeave.mutate(r.id)} disabled={r.status !== 'PENDING'}>Approve</Button>
           <Button size="small" danger onClick={() => rejectLeave.mutate(r.id)} disabled={r.status !== 'PENDING'}>Reject</Button>
         </Space>
@@ -139,8 +142,8 @@ export default function LeaveDashboard() {
       render: (_, r) => (
         <Space size="small">
           <Button size="small" icon={<EyeOutlined />} onClick={() => { setSelectedSick(r); setViewSickOpen(true); }} />
-          <Button size="small" icon={<EditOutlined />} onClick={() => { setSelectedSick(r); setViewSickOpen(true); }} disabled={r.status !== 'PENDING'} />
-          <Button size="small" icon={<DeleteOutlined />} danger onClick={() => { if (window.confirm('Delete this sick note?')) rejectSick.mutate(r.id); }} disabled={r.status !== 'PENDING'} />
+          <Button size="small" icon={<EditOutlined />} onClick={() => { setSelectedSick(r); setViewSickOpen(true); }} />
+          <Button size="small" icon={<DeleteOutlined />} danger onClick={() => { Modal.confirm({ title: 'Delete Sick Note', content: 'Are you sure you want to delete this sick note?', okText: 'Delete', okType: 'danger', onOk: () => deleteSickNote.mutate(r.id) }); }} />
           <Button size="small" onClick={() => approveSick.mutate(r.id)} disabled={r.status !== 'PENDING'}>Approve</Button>
           <Button size="small" danger onClick={() => rejectSick.mutate(r.id)} disabled={r.status !== 'PENDING'}>Reject</Button>
         </Space>
@@ -161,9 +164,9 @@ export default function LeaveDashboard() {
       render: (_, r) => (
         <Space size="small">
           <Button size="small" icon={<EyeOutlined />} onClick={() => { setSelectedDoubleTicket(r); setViewDoubleTicketOpen(true); }} />
-          <Button size="small" icon={<EditOutlined />} onClick={() => { setSelectedDoubleTicket(r); setViewDoubleTicketOpen(true); }} disabled={r.status !== 'PENDING'} />
-          <Button size="small" icon={<DeleteOutlined />} danger onClick={() => { if (window.confirm('Delete this double ticket request?')) rejectDoubleTicket.mutate(r.id); }} disabled={r.status !== 'PENDING'} />
-          <Button size="small" onClick={() => approveDoubleTicket.mutate(r.id)} disabled={r.status !== 'PENDING'}>Approve</Button>
+          <Button size="small" icon={<EditOutlined />} onClick={() => { setSelectedDoubleTicket(r); setViewDoubleTicketOpen(true); }} />
+          <Button size="small" icon={<DeleteOutlined />} danger onClick={() => { Modal.confirm({ title: 'Delete Double Ticket', content: 'Are you sure you want to delete this double ticket request?', okText: 'Delete', okType: 'danger', onOk: () => deleteDoubleTicket.mutate(r.id) }); }} />
+          <Button size="small" onClick={() => approveDoubleTicket.mutate(r.id)} disabled={r.status === 'APPROVED'}>Approve</Button>
           <Button size="small" danger onClick={() => rejectDoubleTicket.mutate(r.id)} disabled={r.status !== 'PENDING'}>Reject</Button>
         </Space>
       )

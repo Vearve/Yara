@@ -154,6 +154,15 @@ export const leaveApi = {
     const res = await http.post(`/api/v1/leave/double-tickets/${id}/reject/`, {});
     return res.data;
   },
+  deleteLeaveRequest: async (id: number): Promise<void> => {
+    await http.delete(`/api/v1/leave/requests/${id}/`);
+  },
+  deleteSickNote: async (id: number): Promise<void> => {
+    await http.delete(`/api/v1/leave/sick-notes/${id}/`);
+  },
+  deleteDoubleTicket: async (id: number): Promise<void> => {
+    await http.delete(`/api/v1/leave/double-tickets/${id}/`);
+  },
   getDoubleTicketSummary: async (employee?: number): Promise<any[]> => {
     const res = await http.get('/api/v1/leave/double-tickets/summary', { params: employee ? { employee } : {} });
     return res.data?.results || res.data;
