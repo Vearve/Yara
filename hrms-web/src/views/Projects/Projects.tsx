@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { GlassCard, TagPill } from '../../components/NeonPrimitives';
+import { HeroBanner } from '../../components/HeroBanner';
 import { coreApi } from '../../api/services/coreApi';
 import type { Project as ApiProject } from '../../api/services/coreApi';
 
@@ -180,52 +181,23 @@ export default function Projects() {
 
   return (
     <div style={{ padding: '24px' }}>
-      {/* Hero Section */}
-      <div className="relative rounded-2xl overflow-hidden" style={{ padding: '32px 40px', marginBottom: '24px' }}>
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(135deg, rgba(245, 196, 0, 0.12) 0%, rgba(62, 231, 255, 0.08) 50%, rgba(124, 255, 107, 0.06) 100%)',
-          border: '1px solid rgba(245, 196, 0, 0.2)',
-        }} />
-        <div className="absolute inset-0 blur-3xl opacity-30" style={{
-          background: 'radial-gradient(at top right, rgba(245, 196, 0, 0.3), transparent 70%)',
-        }} />
-        <div className="relative flex flex-col gap-4">
-          <div className="text-xs uppercase tracking-[0.25em] font-medium" style={{ color: '#9195a3' }}>
-            Dashboard
-          </div>
-          <div className="text-sm uppercase tracking-[0.3em] font-semibold" style={{ color: '#f5c400' }}>
-            HR Projects & Programs
-          </div>
-          <div className="flex items-center gap-4">
-            <FolderKanban className="h-12 w-12" style={{ color: '#f5c400' }} />
-            <h1 className="text-5xl font-extrabold" style={{ color: '#f7f8fb', lineHeight: 1.1 }}>
-              Organizational Initiatives
-            </h1>
-          </div>
-          <p className="text-base max-w-2xl" style={{ color: '#c4c8d4' }}>
-            Manage and track all HR projects, programs, and organizational initiatives across your teams.
-          </p>
-          <div className="flex flex-wrap gap-3 mt-2">
-            <Button
-              type="primary"
-              size="large"
-              icon={<PlusOutlined />}
-              onClick={openCreate}
-              style={{
-                background: '#f5c400',
-                borderColor: '#f5c400',
-                color: '#05060a',
-                fontWeight: 600,
-                height: 44,
-                paddingLeft: 24,
-                paddingRight: 24,
-              }}
-            >
-              Add New Program
-            </Button>
-          </div>
-        </div>
-      </div>
+      <HeroBanner
+        eyebrow="Projects"
+        title="Organizational Initiatives"
+        description="Manage and track all HR projects, programs, and organizational initiatives across your teams."
+        icon={<FolderKanban className="h-9 w-9" style={{ color: 'var(--accent)' }} />}
+        gradient="neutral"
+        tags={[
+          { label: 'Programs', variant: 'neutral' },
+          { label: 'Delivery Tracking', variant: 'cyan' },
+          { label: 'Priorities', variant: 'lime' },
+        ]}
+        actions={(
+          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={openCreate}>
+            Add New Program
+          </Button>
+        )}
+      />
 
       <Row gutter={[20, 20]}>
         {projects.map((project) => (

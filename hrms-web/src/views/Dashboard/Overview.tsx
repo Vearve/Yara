@@ -6,9 +6,13 @@ import ReactECharts from 'echarts-for-react';
 import { Filter, Users, BriefcaseBusiness, Activity, Stethoscope, RefreshCw, Search } from 'lucide-react';
 import { GlassCard } from '../../components/NeonPrimitives';
 import { KPICard } from '../../components/KPICard';
+import { HeroBanner } from '../../components/HeroBanner';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function Overview() {
   const queryClient = useQueryClient();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const hasToken = !!localStorage.getItem('access');
   const [workspaceId, setWorkspaceId] = useState<string | null>(() => localStorage.getItem('workspaceId'));
   const [pendingDepartment, setPendingDepartment] = useState<number | null>(null);
@@ -95,12 +99,20 @@ export default function Overview() {
 
   // Only show charts if there's actual data
   const hasProjectData = projectStats && (projectStats.PLANNING > 0 || projectStats.ACTIVE > 0 || projectStats.ON_HOLD > 0 || projectStats.COMPLETED > 0);
+  const sectionTitleColor = isLight ? '#352c46' : '#c4c8d4';
+  const helperTextColor = isLight ? '#635a74' : '#c4c8d4';
+  const chartLabelColor = isLight ? '#4d465c' : '#c4c8d4';
+  const chartAxisColor = isLight ? '#706881' : '#c4c8d4';
+  const chartAxisLine = isLight ? 'rgba(53, 44, 70, 0.2)' : 'rgba(245, 196, 0, 0.3)';
+  const tooltipBackground = isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(5, 6, 10, 0.95)';
+  const tooltipBorder = isLight ? '1px solid rgba(53, 44, 70, 0.16)' : '1px solid rgba(245, 196, 0, 0.25)';
+  const tooltipLabel = isLight ? '#2e2640' : '#f7f8fb';
 
   const projectChartOpts = hasProjectData ? {
     backgroundColor: 'transparent',
-    title: { text: 'Project Statistics', left: 'center', textStyle: { fontSize: 14, fontWeight: 600, color: '#f7f8fb' } },
+    title: { text: 'Project Statistics', left: 'center', textStyle: { fontSize: 14, fontWeight: 700, color: isLight ? '#352c46' : '#f7f8fb' } },
     tooltip: { trigger: 'item' },
-    legend: { bottom: 0, textStyle: { color: '#c4c8d4' } },
+    legend: { bottom: 0, textStyle: { color: chartLabelColor } },
     series: [
       {
         type: 'pie',
@@ -136,40 +148,25 @@ export default function Overview() {
 
   return (
     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}>
-      {/* Hero Section */}
-      <div className="relative rounded-2xl overflow-hidden" style={{ padding: '32px 40px' }}>
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(135deg, rgba(245, 196, 0, 0.12) 0%, rgba(62, 231, 255, 0.08) 50%, rgba(124, 255, 107, 0.06) 100%)',
-          border: '1px solid rgba(245, 196, 0, 0.2)',
-        }} />
-        <div className="absolute inset-0 blur-3xl opacity-30" style={{
-          background: 'radial-gradient(at top right, rgba(245, 196, 0, 0.3), transparent 70%)',
-        }} />
-        <div className="relative flex flex-col gap-4">
-          <div className="text-xs uppercase tracking-[0.25em] font-medium" style={{ color: '#9195a3' }}>
-            Dashboard
-          </div>
-          <div className="text-sm uppercase tracking-[0.3em] font-semibold" style={{ color: '#f5c400' }}>
-            Workspace Overview
-          </div>
-          <div className="flex items-center gap-4">
-            <Activity className="h-12 w-12" style={{ color: '#f5c400' }} />
-            <h1 className="text-5xl font-extrabold" style={{ color: '#f7f8fb', lineHeight: 1.1 }}>
-              Workforce Health & Compliance
-            </h1>
-          </div>
-          <p className="text-base max-w-2xl" style={{ color: '#c4c8d4' }}>
-            Real-time snapshot of workforce health, active projects, and organizational compliance across all your workspaces.
-          </p>
-        </div>
-      </div>
+      <HeroBanner
+        eyebrow="Dashboard"
+        title="Workforce Health & Compliance"
+        description="Real-time snapshot of workforce health, active projects, and organizational compliance across your workspace."
+        icon={<Activity className="h-9 w-9" style={{ color: 'var(--accent)' }} />}
+        gradient="neutral"
+        tags={[
+          { label: 'Workspace Overview', variant: 'neutral' },
+          { label: `Employees ${hcmSummary?.employees?.active ?? 0}`, variant: 'cyan' },
+          { label: `Projects ${projectStats?.ACTIVE ?? 0}`, variant: 'amber' },
+        ]}
+      />
 
       {/* Filters */}
       <GlassCard gradient="neutral" style={{ padding: 16 }}>
         <div className="flex flex-wrap items-center gap-3" style={{ rowGap: 6 }}>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: 'rgba(245, 196, 0, 0.08)', border: '1px solid rgba(245, 196, 0, 0.18)' }}>
-            <Filter className="h-4 w-4" style={{ color: '#f5c400' }} />
-            <span className="text-sm" style={{ color: '#f7f8fb' }}>Filters</span>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: isLight ? 'rgba(74, 63, 207, 0.07)' : 'rgba(245, 196, 0, 0.08)', border: isLight ? '1px solid rgba(74, 63, 207, 0.16)' : '1px solid rgba(245, 196, 0, 0.18)' }}>
+            <Filter className="h-4 w-4" style={{ color: isLight ? '#4a3fcf' : '#f5c400' }} />
+            <span className="text-sm" style={{ color: isLight ? '#352c46' : '#f7f8fb', fontWeight: 700 }}>Filters</span>
           </div>
           <Select
             allowClear
@@ -232,14 +229,14 @@ export default function Overview() {
       <Row gutter={[18, 18]}>
         <Col xs={24} xl={12}>
           <GlassCard gradient="cyan" style={{ height: '100%', padding: 16 }}>
-            <div className="text-sm" style={{ color: '#c4c8d4', marginBottom: 8 }}>Salary Statistics Performance</div>
+            <div className="text-sm" style={{ color: sectionTitleColor, fontWeight: 700, marginBottom: 8 }}>Salary Statistics Performance</div>
             {!salaryRanges || salaryRanges.length === 0 ? (
-              <div className="text-center" style={{ color: '#c4c8d4', padding: '24px 0' }}>No salary data available</div>
+              <div className="text-center" style={{ color: helperTextColor, padding: '24px 0' }}>No salary data available</div>
             ) : (
               <div style={{ display: 'grid', gap: 8 }}>
                 {salaryRanges.map((item: any) => (
                   <div key={item.label} className="flex items-center justify-between" style={{ paddingLeft: 0, paddingRight: 0 }}>
-                    <span style={{ color: '#c4c8d4' }}>{item.label}</span>
+                    <span style={{ color: helperTextColor }}>{item.label}</span>
                     <Tag color="cyan">{item.employee_count} employees</Tag>
                   </div>
                 ))}
@@ -249,7 +246,7 @@ export default function Overview() {
         </Col>
         <Col xs={24} xl={12}>
           <GlassCard gradient="amber" style={{ height: '100%', padding: 16 }}>
-            <div className="text-sm" style={{ color: '#c4c8d4', marginBottom: 8 }}>Current Situations</div>
+            <div className="text-sm" style={{ color: sectionTitleColor, fontWeight: 700, marginBottom: 8 }}>Current Situations</div>
             <div style={{ display: 'grid', gap: 8 }}>
               {[
                 { label: 'Contracts expiring (30d)', value: hcmSummary?.situations?.contracts_expiring_30d ?? 0, color: 'blue' },
@@ -257,7 +254,7 @@ export default function Overview() {
                 { label: 'Active investigations', value: hcmSummary?.situations?.investigations_active ?? 0, color: 'magenta' },
               ].map((item) => (
                 <div key={item.label} className="flex items-center justify-between">
-                  <span style={{ color: '#c4c8d4' }}>{item.label}</span>
+                  <span style={{ color: helperTextColor }}>{item.label}</span>
                   <Tag color={item.color}>{item.value}</Tag>
                 </div>
               ))}
@@ -270,9 +267,9 @@ export default function Overview() {
       <Row gutter={[18, 18]}>
         <Col xs={24} xl={12}>
           <GlassCard gradient="gold" style={{ height: '100%', padding: 16 }}>
-            <div className="text-sm" style={{ color: '#c4c8d4', marginBottom: 8 }}>Project Statistics</div>
+            <div className="text-sm" style={{ color: sectionTitleColor, fontWeight: 700, marginBottom: 8 }}>Project Statistics</div>
             {!projectChartOpts ? (
-              <div className="text-center" style={{ color: '#c4c8d4', padding: '24px 0' }}>No project data available</div>
+              <div className="text-center" style={{ color: helperTextColor, padding: '24px 0' }}>No project data available</div>
             ) : (
               <ReactECharts option={projectChartOpts} style={{ height: 320, width: '100%' }} />
             )}
@@ -280,14 +277,14 @@ export default function Overview() {
         </Col>
         <Col xs={24} xl={12}>
           <GlassCard gradient="cyan" style={{ height: '100%', padding: 16 }}>
-            <div className="text-sm" style={{ color: '#c4c8d4', marginBottom: 8 }}>Medical Examinations</div>
+            <div className="text-sm" style={{ color: sectionTitleColor, fontWeight: 700, marginBottom: 8 }}>Medical Examinations</div>
             {!medicals || medicals.length === 0 ? (
-              <div className="text-center" style={{ color: '#c4c8d4', padding: '24px 0' }}>No medical examination data available</div>
+              <div className="text-center" style={{ color: helperTextColor, padding: '24px 0' }}>No medical examination data available</div>
             ) : (
               <div style={{ display: 'grid', gap: 8 }}>
                 {medicals.slice(0, 5).map((item: any) => (
                   <div key={item.id} className="flex items-center justify-between">
-                    <span style={{ color: '#c4c8d4' }}>
+                    <span style={{ color: helperTextColor }}>
                       {item.employee_name || 'Unknown'}{' '}
                       <span style={{ opacity: 0.7 }}>• {item.medical_type_name || item.medical_type || 'Medical'}</span>
                     </span>

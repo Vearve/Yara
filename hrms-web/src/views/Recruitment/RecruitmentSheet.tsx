@@ -7,6 +7,7 @@ import { recruitmentApi, type Candidate as ApiCandidate } from '../../api/servic
 import http from '../../lib/http';
 import dayjs from 'dayjs';
 import { exportCandidateToPDF } from '../../lib/pdfExport';
+import { HeroBanner } from '../../components/HeroBanner';
 
 interface RecruitmentData {
   id: number;
@@ -234,21 +235,22 @@ export default function RecruitmentSheet() {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div className="mb-6 flex flex-col gap-2">
-        <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Recruitment</div>
-        <div className="flex justify-between items-center">
-          <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Recruitment Data Sheet</h1>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setModalVisible(true)}
-            style={{ background: '#f5c400', borderColor: '#f5c400', color: '#05060a', fontWeight: 600 }}
-          >
+      <HeroBanner
+        eyebrow="Recruitment"
+        title="Recruitment Data Sheet"
+        description="Manage recruitment records, interviews, and candidate status progression from pipeline to onboarding."
+        gradient="neutral"
+        tags={[
+          { label: 'Candidate Pipeline', variant: 'neutral' },
+          { label: 'Interview Readiness', variant: 'cyan' },
+          { label: 'Hiring Outcomes', variant: 'lime' },
+        ]}
+        actions={(
+          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setModalVisible(true)}>
             Add Candidate
           </Button>
-        </div>
-        <p style={{ margin: '8px 0 0 0', color: '#c4c8d4', fontSize: '14px' }}>Manage recruitment records and candidate information</p>
-      </div>
+        )}
+      />
 
       <Card
         style={{

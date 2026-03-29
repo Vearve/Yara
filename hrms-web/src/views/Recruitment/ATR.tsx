@@ -6,6 +6,7 @@ import { recruitmentApi, type ATR as ApiATR } from '../../api/services/recruitme
 import { exportAtrToPDF } from '../../lib/pdfExport';
 import http from '../../lib/http';
 import dayjs from 'dayjs';
+import { HeroBanner } from '../../components/HeroBanner';
 
 // ATR = Approval To Recruit: department request for labour, not candidate intake
 interface ATRRequest {
@@ -33,10 +34,10 @@ export default function ATR() {
   const queryClient = useQueryClient();
   const selectedDepartment = Form.useWatch('department', form);
   const selectedRoles = Form.useWatch('role', form);
-  
+
   // Position-specific data: { [position: string]: { currentHeadcount: number, vacancies: number } }
   const [positionData, setPositionData] = useState<Record<string, { currentHeadcount: number; vacancies: number }>>({});
-  
+
   // Filters
   const [pendingFilters, setPendingFilters] = useState<{ department?: number; status?: string }>({});
   const [appliedFilters, setAppliedFilters] = useState<{ department?: number; status?: string }>({});
@@ -248,7 +249,7 @@ export default function ATR() {
 
   const handleAddRequest = async (values: any) => {
     const roles = Array.isArray(values.role) ? values.role : [values.role];
-    
+
     // Create an ATR for each selected role with their specific data
     const payloads = roles.map((role: string) => {
       const roleData = positionData[role] || { currentHeadcount: 0, vacancies: 0 };
@@ -302,26 +303,22 @@ export default function ATR() {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div className="mb-6 flex flex-col gap-2">
-        <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Recruitment</div>
-        <div className="flex justify-between items-center">
-          <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Approval To Recruit (ATR)</h1>
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />} 
-            onClick={() => setModalVisible(true)}
-            style={{
-              background: '#f5c400',
-              borderColor: '#f5c400',
-              color: '#05060a',
-              fontWeight: 600,
-            }}
-          >
+      <HeroBanner
+        eyebrow="Recruitment"
+        title="Approval To Recruit (ATR)"
+        description="Department labour request intake with role demand, current versus needed headcount, and approval status."
+        gradient="neutral"
+        tags={[
+          { label: 'Headcount Planning', variant: 'neutral' },
+          { label: 'Approvals', variant: 'cyan' },
+          { label: 'Department Demand', variant: 'lime' },
+        ]}
+        actions={(
+          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setModalVisible(true)}>
             New ATR
           </Button>
-        </div>
-        <p style={{ margin: '0', color: '#c4c8d4', fontSize: '14px' }}>Department labour request: capture reason, hiring manager, current vs needed headcount, and differential.</p>
-      </div>
+        )}
+      />
 
       {/* Filters */}
       <Card
@@ -496,10 +493,10 @@ export default function ATR() {
                 label="Role / Position (Select Multiple)"
                 rules={[{ required: true, message: 'Please select at least one role' }]}
               >
-                <Select 
+                <Select
                   mode="multiple"
-                  placeholder="Select roles (can select multiple from same department)" 
-                  showSearch 
+                  placeholder="Select roles (can select multiple from same department)"
+                  showSearch
                   optionFilterProp="label"
                 >
                   {(jobs || []).map((job: any) => (
@@ -550,14 +547,14 @@ export default function ATR() {
                   border: '1px solid rgba(245, 196, 0, 0.15)',
                 }}
               >
-                <Table.Column 
-                  title="Position" 
-                  dataIndex="role" 
+                <Table.Column
+                  title="Position"
+                  dataIndex="role"
                   key="role"
                   width="40%"
                 />
-                <Table.Column 
-                  title="Current Headcount" 
+                <Table.Column
+                  title="Current Headcount"
                   key="currentHeadcount"
                   width="30%"
                   render={(_: any, record: any) => (
@@ -579,8 +576,8 @@ export default function ATR() {
                     />
                   )}
                 />
-                <Table.Column 
-                  title="Vacancies Needed" 
+                <Table.Column
+                  title="Vacancies Needed"
                   key="vacancies"
                   width="30%"
                   render={(_: any, record: any) => (

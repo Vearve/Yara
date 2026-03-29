@@ -4,12 +4,16 @@ import { coreApi, type PortfolioStats } from '../../api/services/coreApi';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { GlassCard, TagPill } from '../../components/NeonPrimitives';
 import { KPICard } from '../../components/KPICard';
+import { HeroBanner } from '../../components/HeroBanner';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const { Title, Text } = Typography;
 
 const COLORS = ['#f5c400', '#3ee7ff', '#7cff6b', '#ff4fd8', '#ffb547', '#ff6b9d'];
 
 export default function ManagerDashboard() {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [stats, setStats] = useState<PortfolioStats | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -27,46 +31,38 @@ export default function ManagerDashboard() {
 
   const projData = stats ? Object.entries(stats.projects_by_status).map(([status, count]) => ({ name: status, value: count })) : [];
   const compData = stats ? Object.entries(stats.compliance_by_status).map(([status, count]) => ({ name: status, value: count })) : [];
+  const sectionTitleColor = isLight ? '#352c46' : '#f7f8fb';
+  const helperTextColor = isLight ? '#635a74' : '#c4c8d4';
+  const chartAxisColor = isLight ? '#4d465c' : '#c4c8d4';
+  const chartAxisLine = isLight ? 'rgba(53, 44, 70, 0.2)' : 'rgba(245, 196, 0, 0.3)';
+  const tooltipBackground = isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(5, 6, 10, 0.95)';
+  const tooltipBorder = isLight ? '1px solid rgba(53, 44, 70, 0.16)' : '1px solid rgba(255, 181, 71, 0.25)';
 
   return (
     <div style={{ padding: '24px' }}>
-      {/* Hero */}
-      <div
-        className="relative overflow-hidden rounded-2xl border shadow-glow mb-6"
-        style={{
-          background: 'linear-gradient(135deg, rgba(245, 196, 0, 0.08) 0%, rgba(62, 231, 255, 0.05) 100%)',
-          borderColor: 'rgba(245, 196, 0, 0.18)',
-        }}
-      >
-        <div
-          className="absolute inset-0 blur-3xl"
-          style={{ background: 'radial-gradient(at 20% 20%, rgba(245, 196, 0, 0.2), transparent 45%)' }}
+      <div style={{ marginBottom: 24 }}>
+        <HeroBanner
+          eyebrow="Manager Control"
+          title="Portfolio Command Center"
+          description={`Track portfolio-wide health, staffing, and compliance. Live totals: ${stats?.clients_count ?? 0} clients, ${stats?.employees_count ?? 0} employees, ${stats?.assignments_count ?? 0} assignments.`}
+          gradient="neutral"
+          tags={[
+            { label: `Active projects: ${stats?.projects_count ?? 0}`, variant: 'gold' },
+            { label: `Contractors: ${stats?.contractors_count ?? 0}`, variant: 'cyan' },
+            { label: `Compliant: ${compData.reduce((acc, c) => acc + (c.name.toLowerCase() === 'good' ? c.value : 0), 0)}`, variant: 'lime' },
+          ]}
+          actions={(
+            <>
+              <Button type="primary">Create Assignment</Button>
+              <Button>Compliance Center</Button>
+            </>
+          )}
         />
-        <div className="relative flex flex-col gap-3 p-6 md:p-8">
-          <div className="text-sm uppercase tracking-[0.2em]" style={{ color: '#c4c8d4' }}>Manager Control</div>
-          <Title level={2} style={{ margin: 0, color: '#f7f8fb' }}>Portfolio Command Center</Title>
-          <Text style={{ color: '#c4c8d4', maxWidth: 720 }}>
-            Track portfolio-wide health, staffing, and compliance. Live totals: {stats?.clients_count ?? 0} clients, {stats?.employees_count ?? 0} employees, {stats?.assignments_count ?? 0} assignments.
-          </Text>
-          <div className="flex flex-wrap gap-3 mt-1">
-            <Button type="primary" style={{ background: '#f5c400', borderColor: '#f5c400', color: '#05060a', fontWeight: 600 }}>
-              Create Assignment
-            </Button>
-            <Button style={{ color: '#f7f8fb', borderColor: 'rgba(245, 196, 0, 0.25)' }}>
-              Compliance Center
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-2 mt-2">
-            <TagPill variant="gold">Active projects: {stats?.projects_count ?? 0}</TagPill>
-            <TagPill variant="cyan">Contractors: {stats?.contractors_count ?? 0}</TagPill>
-            <TagPill variant="lime">Compliant: {compData.reduce((acc, c) => acc + (c.name.toLowerCase() === 'good' ? c.value : 0), 0)}</TagPill>
-          </div>
-        </div>
       </div>
 
       <Row gutter={[20, 20]}>
         <Col xs={24} sm={12} lg={6}>
-          <KPICard 
+          <KPICard
             title="Clients"
             value={stats?.clients_count ?? 0}
             color="#f5c400"
@@ -76,7 +72,7 @@ export default function ManagerDashboard() {
           />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <KPICard 
+          <KPICard
             title="Employees"
             value={stats?.employees_count ?? 0}
             color="#3ee7ff"
@@ -86,7 +82,7 @@ export default function ManagerDashboard() {
           />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <KPICard 
+          <KPICard
             title="Assignments"
             value={stats?.assignments_count ?? 0}
             color="#7cff6b"
@@ -96,7 +92,7 @@ export default function ManagerDashboard() {
           />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <KPICard 
+          <KPICard
             title="Compliance (Contractors)"
             value={stats?.contractors_count ?? 0}
             color="#ffb547"
@@ -109,10 +105,11 @@ export default function ManagerDashboard() {
 
       <Row gutter={[20, 20]} style={{ marginTop: 20 }}>
         <Col xs={24} lg={12}>
-          <GlassCard 
-            loading={loading} 
+          <GlassCard
+            loading={loading}
             title="Compliance Distribution"
             gradient="amber"
+            styles={{ header: { color: sectionTitleColor, fontWeight: 700 } }}
           >
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
@@ -121,9 +118,9 @@ export default function ManagerDashboard() {
                     <Cell key={`c-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ background: 'rgba(5, 6, 10, 0.95)', border: '1px solid rgba(255, 181, 71, 0.25)', borderRadius: '8px' }}
-                  labelStyle={{ color: '#f7f8fb' }}
+                <Tooltip
+                  contentStyle={{ background: tooltipBackground, border: tooltipBorder, borderRadius: '8px' }}
+                  labelStyle={{ color: sectionTitleColor }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -136,18 +133,19 @@ export default function ManagerDashboard() {
         </Col>
 
         <Col xs={24} lg={12}>
-          <GlassCard 
-            loading={loading} 
+          <GlassCard
+            loading={loading}
             title="Projects by Status"
             gradient="gold"
+            styles={{ header: { color: sectionTitleColor, fontWeight: 700 } }}
           >
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={projData}>
-                <XAxis dataKey="name" stroke="#c4c8d4" tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.3)' }} />
-                <YAxis allowDecimals={false} stroke="#c4c8d4" tickLine={false} axisLine={{ stroke: 'rgba(245, 196, 0, 0.3)' }} />
-                <Tooltip 
-                  contentStyle={{ background: 'rgba(5, 6, 10, 0.9)', border: '1px solid rgba(245, 196, 0, 0.2)', borderRadius: '8px' }}
-                  labelStyle={{ color: '#f7f8fb' }}
+                <XAxis dataKey="name" stroke={chartAxisColor} tickLine={false} axisLine={{ stroke: chartAxisLine }} />
+                <YAxis allowDecimals={false} stroke={chartAxisColor} tickLine={false} axisLine={{ stroke: chartAxisLine }} />
+                <Tooltip
+                  contentStyle={{ background: tooltipBackground, border: isLight ? '1px solid rgba(53, 44, 70, 0.16)' : '1px solid rgba(245, 196, 0, 0.2)', borderRadius: '8px' }}
+                  labelStyle={{ color: sectionTitleColor }}
                 />
                 <Bar dataKey="value" fill="#f5c400" radius={[8, 8, 0, 0]} barSize={28} />
               </BarChart>
@@ -156,18 +154,19 @@ export default function ManagerDashboard() {
         </Col>
 
         <Col xs={24} lg={12}>
-          <GlassCard 
-            loading={loading} 
+          <GlassCard
+            loading={loading}
             title="Top Clients (Assignments)"
             gradient="cyan"
+            styles={{ header: { color: sectionTitleColor, fontWeight: 700 } }}
           >
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={stats?.assignments_by_client || []}>
-                <XAxis dataKey="client__name" stroke="#c4c8d4" tickLine={false} axisLine={{ stroke: 'rgba(62, 231, 255, 0.3)' }} />
-                <YAxis allowDecimals={false} stroke="#c4c8d4" tickLine={false} axisLine={{ stroke: 'rgba(62, 231, 255, 0.3)' }} />
-                <Tooltip 
-                  contentStyle={{ background: 'rgba(5, 6, 10, 0.9)', border: '1px solid rgba(62, 231, 255, 0.2)', borderRadius: '8px' }}
-                  labelStyle={{ color: '#f7f8fb' }}
+                <XAxis dataKey="client__name" stroke={chartAxisColor} tickLine={false} axisLine={{ stroke: isLight ? 'rgba(53, 44, 70, 0.2)' : 'rgba(62, 231, 255, 0.3)' }} />
+                <YAxis allowDecimals={false} stroke={chartAxisColor} tickLine={false} axisLine={{ stroke: isLight ? 'rgba(53, 44, 70, 0.2)' : 'rgba(62, 231, 255, 0.3)' }} />
+                <Tooltip
+                  contentStyle={{ background: tooltipBackground, border: isLight ? '1px solid rgba(53, 44, 70, 0.16)' : '1px solid rgba(62, 231, 255, 0.2)', borderRadius: '8px' }}
+                  labelStyle={{ color: sectionTitleColor }}
                 />
                 <Bar dataKey="count" fill="#3ee7ff" radius={[8, 8, 0, 0]} barSize={28} />
               </BarChart>

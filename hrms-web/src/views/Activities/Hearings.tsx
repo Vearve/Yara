@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { listHearings, createHearing } from '../../api/activities';
 import http from '../../lib/http';
 import { exportHearingToPDF } from '../../lib/pdfExport';
+import { HeroBanner } from '../../components/HeroBanner';
 
 export default function Hearings() {
   const queryClient = useQueryClient();
@@ -234,26 +235,22 @@ export default function Hearings() {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div className="mb-6 flex flex-col gap-2">
-        <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Activities</div>
-        <div className="flex justify-between items-center">
-          <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Hearings</h1>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalOpen(true)}
-            style={{
-              background: '#f5c400',
-              borderColor: '#f5c400',
-              color: '#05060a',
-              fontWeight: 600,
-            }}
-          >
+      <HeroBanner
+        eyebrow="Activities"
+        title="Hearings"
+        description="Schedule, document, and track disciplinary hearings from planning through conclusion."
+        gradient="neutral"
+        tags={[
+          { label: 'Hearings Calendar', variant: 'neutral' },
+          { label: 'Committee Notes', variant: 'cyan' },
+          { label: 'Outcomes', variant: 'lime' },
+        ]}
+        actions={(
+          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
             Schedule Hearing
           </Button>
-        </div>
-        <p style={{ margin: '0', color: '#c4c8d4', fontSize: '14px' }}>Track and manage employee disciplinary hearings</p>
-      </div>
+        )}
+      />
 
       {/* Filter Section */}
       <div style={{

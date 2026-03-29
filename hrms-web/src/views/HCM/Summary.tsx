@@ -7,6 +7,7 @@ import jsPDF from 'jspdf';
 import http from '../../lib/http';
 import { KPICard } from '../../components/KPICard';
 import { GlassCard } from '../../components/NeonPrimitives';
+import { HeroBanner } from '../../components/HeroBanner';
 
 type TurnoverDetails = {
   engagements: number;
@@ -143,11 +144,17 @@ export default function Summary() {
 
   return (
     <div id="summary-root" style={{ padding: '24px' }}>
-      <div className="mb-6 flex flex-col gap-2">
-        <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Human Capital</div>
-        <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Turnover Summary</h1>
-        <p style={{ margin: '8px 0 0 0', color: '#c4c8d4', fontSize: '14px' }}>Engagements, terminations, and workforce metrics</p>
-      </div>
+      <HeroBanner
+        eyebrow="Human Capital"
+        title="Turnover Summary"
+        description="Engagements, terminations, and workforce metrics with classification and headcount movement."
+        gradient="neutral"
+        tags={[
+          { label: 'Turnover', variant: 'neutral' },
+          { label: 'Engagement vs Termination', variant: 'cyan' },
+          { label: 'Classification', variant: 'lime' },
+        ]}
+      />
 
 
       <Space style={{ marginBottom: 16 }} wrap>

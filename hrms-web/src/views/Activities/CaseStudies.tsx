@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import http from '../../lib/http';
 import { createCaseStudy, updateHearing, updateInvestigation, updateReport } from '../../api/activities';
 import { exportCaseStudyToPDF, exportHearingToPDF, exportInvestigationToPDF, exportReportToPDF } from '../../lib/pdfExport';
+import { HeroBanner } from '../../components/HeroBanner';
 
 interface CaseStudy {
   id: number;
@@ -282,52 +283,23 @@ export default function CaseStudies() {
 
   return (
     <div style={{ padding: '24px' }}>
-      {/* Hero Section */}
-      <div className="relative rounded-2xl overflow-hidden" style={{ padding: '32px 40px', marginBottom: '24px' }}>
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(135deg, rgba(245, 196, 0, 0.12) 0%, rgba(62, 231, 255, 0.08) 50%, rgba(124, 255, 107, 0.06) 100%)',
-          border: '1px solid rgba(245, 196, 0, 0.2)',
-        }} />
-        <div className="absolute inset-0 blur-3xl opacity-30" style={{
-          background: 'radial-gradient(at top right, rgba(245, 196, 0, 0.3), transparent 70%)',
-        }} />
-        <div className="relative flex flex-col gap-4">
-          <div className="text-xs uppercase tracking-[0.25em] font-medium" style={{ color: '#9195a3' }}>
-            Dashboard
-          </div>
-          <div className="text-sm uppercase tracking-[0.3em] font-semibold" style={{ color: '#f5c400' }}>
-            Case Studies
-          </div>
-          <div className="flex items-center gap-4">
-            <FileText className="h-12 w-12" style={{ color: '#f5c400' }} />
-            <h1 className="text-5xl font-extrabold" style={{ color: '#f7f8fb', lineHeight: 1.1 }}>
-              Discipline & Activities
-            </h1>
-          </div>
-          <p className="text-base max-w-2xl" style={{ color: '#c4c8d4' }}>
-            Manage employee discipline case studies, hearings, investigations, and related activities.
-          </p>
-          <div className="flex flex-wrap gap-3 mt-2">
-            <Button
-              type="primary"
-              size="large"
-              icon={<PlusOutlined />}
-              onClick={() => setCreateModalVisible(true)}
-              style={{
-                background: '#f5c400',
-                borderColor: '#f5c400',
-                color: '#05060a',
-                fontWeight: 600,
-                height: 44,
-                paddingLeft: 24,
-                paddingRight: 24,
-              }}
-            >
-              Add Case Study
-            </Button>
-          </div>
-        </div>
-      </div>
+      <HeroBanner
+        eyebrow="Activities"
+        title="Discipline & Activities"
+        description="Manage employee discipline case studies, hearings, investigations, and related activities."
+        icon={<FileText className="h-9 w-9" style={{ color: 'var(--accent)' }} />}
+        gradient="neutral"
+        tags={[
+          { label: 'Case Studies', variant: 'neutral' },
+          { label: 'Hearings', variant: 'cyan' },
+          { label: 'Investigations', variant: 'lime' },
+        ]}
+        actions={(
+          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setCreateModalVisible(true)}>
+            Add Case Study
+          </Button>
+        )}
+      />
 
       <Card
         style={{

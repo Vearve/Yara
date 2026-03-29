@@ -5,6 +5,7 @@ import { useState, useMemo, useEffect } from 'react';
 import http from '../../lib/http';
 import dayjs from 'dayjs';
 import { exportChargeToPDF } from '../../lib/pdfExport';
+import { HeroBanner } from '../../components/HeroBanner';
 
 const toAbsoluteMediaUrl = (value?: string | null): string | null => {
   if (!value) return null;
@@ -232,11 +233,22 @@ export default function Charges() {
 
   return (
     <div style={{ padding: 24 }}>
-      <div className="mb-6 flex flex-col gap-2">
-        <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Activities</div>
-        <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Charge Sheets</h1>
-        <p style={{ margin: '8px 0 0 0', color: '#c4c8d4', fontSize: '14px' }}>Employee charges and disciplinary allegations</p>
-      </div>
+      <HeroBanner
+        eyebrow="Activities"
+        title="Charge Sheets"
+        description="Track employee charges, supporting statements, and disciplinary outcomes."
+        gradient="neutral"
+        tags={[
+          { label: 'Allegations', variant: 'neutral' },
+          { label: 'Case Linkage', variant: 'cyan' },
+          { label: 'Disposition', variant: 'lime' },
+        ]}
+        actions={(
+          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
+            New Charge
+          </Button>
+        )}
+      />
 
       {/* Filters */}
       <Card
@@ -282,11 +294,6 @@ export default function Charges() {
           </Button>
         </Space>
       </Card>
-
-      {/* Header with Add Button */}
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>New Charge</Button>
-      </div>
 
       {/* Charges Table */}
       <Card

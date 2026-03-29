@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Table, Button, Space, Modal, Form, Input, Select, Tag, message, Drawer } from 'antd';
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import http from '../../lib/http';
+import { HeroBanner } from '../../components/HeroBanner';
 
 interface Department {
   id: number;
@@ -97,8 +98,18 @@ export default function Departments() {
 
   return (
     <div style={{ padding: '24px' }}>
+      <HeroBanner
+        eyebrow="Human Capital"
+        title="Departments"
+        description="Manage department structures, managers, and mapped job titles across the organization."
+        gradient="neutral"
+        tags={[
+          { label: 'Org Structure', variant: 'neutral' },
+          { label: 'Department Leads', variant: 'cyan' },
+          { label: 'Job Mapping', variant: 'lime' },
+        ]}
+      />
       <div className="mb-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <h2 style={{ margin: 0, color: '#f7f8fb' }}>Departments</h2>
         <Space>
           <Input
             placeholder="Filter by code or name"

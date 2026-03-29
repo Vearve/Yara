@@ -295,6 +295,37 @@ a:hover {
   color: #635a74;
 }
 
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item,
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-submenu-title {
+  color: #f1ebfa;
+}
+
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item:hover,
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-submenu-title:hover {
+  color: #ffffff;
+}
+
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item-selected,
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item-active {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item-selected,
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item-selected .ant-menu-title-content,
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item-selected a,
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item-selected .anticon,
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item-active,
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item-active .ant-menu-title-content,
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item-active a,
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item-active .anticon {
+  color: #3a2353 !important;
+}
+
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-submenu-selected>.ant-menu-submenu-title,
+:root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-submenu-open>.ant-menu-submenu-title {
+  color: #ffffff;
+}
+
 /* Independent sidebar scrollbar styling */
 .ant-layout-sider {
   scroll-behavior: smooth;

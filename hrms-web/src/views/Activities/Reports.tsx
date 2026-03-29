@@ -6,6 +6,7 @@ import { listReports, createReport } from '../../api/activities';
 import { exportReportToPDF } from '../../lib/pdfExport';
 import dayjs from 'dayjs';
 import http from '../../lib/http';
+import { HeroBanner } from '../../components/HeroBanner';
 
 export default function Reports() {
   const qc = useQueryClient();
@@ -255,11 +256,22 @@ export default function Reports() {
 
   return (
     <div style={{ padding: 24 }}>
-      <div className="mb-6 flex flex-col gap-2">
-        <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Activities</div>
-        <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Reports</h1>
-        <p style={{ margin: '8px 0 0 0', color: '#c4c8d4', fontSize: '14px' }}>Safety, complaint, and disciplinary reports</p>
-      </div>
+      <HeroBanner
+        eyebrow="Activities"
+        title="Reports"
+        description="Capture safety, complaint, and disciplinary reports with searchable records and attachments."
+        gradient="neutral"
+        tags={[
+          { label: 'Incident Logs', variant: 'neutral' },
+          { label: 'Report Types', variant: 'cyan' },
+          { label: 'Attachments', variant: 'lime' },
+        ]}
+        actions={(
+          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
+            Create Report
+          </Button>
+        )}
+      />
 
       {/* Filters */}
       <Card
@@ -303,11 +315,6 @@ export default function Reports() {
           </Button>
         </Space>
       </Card>
-
-      {/* Header with Add Button */}
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>Create Report</Button>
-      </div>
 
       {/* Reports Table */}
       <Card

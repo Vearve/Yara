@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { addDevelopmentItem, addFactor, addImprovement, addNextObjective, addObjective, createAppraisal, deleteAppraisal, deleteDevelopmentItem, deleteImprovement, deleteNextObjectiveItem, deleteObjective, deleteFactor, listAppraisals, listDevelopmentItems, listFactors, listImprovements, listNextObjectives, listObjectives, ratingOptions, updateAppraisal, updateDevelopmentItem, updateImprovement, updateNextObjectiveItem, updateObjective, updateFactor } from '../../api/appraisals';
 import { UploadOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import http from '../../lib/http';
+import { HeroBanner } from '../../components/HeroBanner';
 
 const { RangePicker } = DatePicker;
 
@@ -391,10 +392,22 @@ export default function Appraisals() {
 
   return (
     <div style={{ padding: 24 }}>
-      <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}>
-        <h1 style={{ margin: 0 }}>Appraisals</h1>
-        <Button type="primary" onClick={() => setCreateOpen(true)}>New Appraisal</Button>
-      </Space>
+      <HeroBanner
+        eyebrow="Activities"
+        title="Appraisals"
+        description="Manage performance appraisals, objectives, factors, and development follow-ups in one workflow."
+        gradient="neutral"
+        tags={[
+          { label: 'Performance Reviews', variant: 'neutral' },
+          { label: 'Objectives', variant: 'cyan' },
+          { label: 'Development Plans', variant: 'lime' },
+        ]}
+        actions={(
+          <Button type="primary" size="large" onClick={() => setCreateOpen(true)}>
+            New Appraisal
+          </Button>
+        )}
+      />
       <Card size="small" style={{ marginBottom: 16 }}>
         <Space wrap>
           <Input

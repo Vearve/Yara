@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { listInvestigations, createInvestigation } from '../../api/activities';
 import http from '../../lib/http';
 import { exportInvestigationToPDF } from '../../lib/pdfExport';
+import { HeroBanner } from '../../components/HeroBanner';
 
 export default function Investigations() {
   const queryClient = useQueryClient();
@@ -231,26 +232,22 @@ export default function Investigations() {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div className="mb-6 flex flex-col gap-2">
-        <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Activities</div>
-        <div className="flex justify-between items-center">
-          <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Investigations</h1>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalOpen(true)}
-            style={{
-              background: '#f5c400',
-              borderColor: '#f5c400',
-              color: '#05060a',
-              fontWeight: 600,
-            }}
-          >
+      <HeroBanner
+        eyebrow="Activities"
+        title="Investigations"
+        description="Initiate, assign, and monitor workplace investigations with evidence and findings."
+        gradient="neutral"
+        tags={[
+          { label: 'Case Intake', variant: 'neutral' },
+          { label: 'Investigator Workflow', variant: 'cyan' },
+          { label: 'Findings', variant: 'lime' },
+        ]}
+        actions={(
+          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
             New Investigation
           </Button>
-        </div>
-        <p style={{ margin: '0', color: '#c4c8d4', fontSize: '14px' }}>Initiate and track workplace investigations</p>
-      </div>
+        )}
+      />
 
       {/* Filter Section */}
       <div style={{

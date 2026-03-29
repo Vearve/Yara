@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import http from '../../lib/http';
 import dayjs from 'dayjs';
+import { HeroBanner } from '../../components/HeroBanner';
 
 export default function ContractSchedule() {
   const [form] = Form.useForm();
@@ -21,7 +22,7 @@ export default function ContractSchedule() {
       if (appliedFilters.employee) params.search = appliedFilters.employee;
       if (appliedFilters.status) params.status = appliedFilters.status;
       if (appliedFilters.dept) params.department_id = appliedFilters.dept;
-      
+
       const res = await http.get('/api/v1/hcm/contracts/', { params: { page_size: 500, ...params } });
       return res.data?.results || res.data || [];
     },
@@ -143,11 +144,17 @@ export default function ContractSchedule() {
 
   return (
     <div style={{ padding: 24 }}>
-      <div className="mb-6 flex flex-col gap-2">
-        <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Human Capital</div>
-        <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Contract Schedule</h1>
-        <p style={{ margin: '8px 0 0 0', color: '#c4c8d4', fontSize: '14px' }}>Employee contract renewal tracking</p>
-      </div>
+      <HeroBanner
+        eyebrow="Human Capital"
+        title="Contract Schedule"
+        description="Track contract lifecycles, renewals, expiries, and department-level obligations in one view."
+        gradient="neutral"
+        tags={[
+          { label: 'Renewals', variant: 'neutral' },
+          { label: 'Expiry Watchlist', variant: 'cyan' },
+          { label: 'Department Scope', variant: 'lime' },
+        ]}
+      />
 
       {/* Filters */}
       <Card

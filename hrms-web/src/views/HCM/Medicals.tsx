@@ -5,6 +5,7 @@ import { useState, useMemo } from 'react';
 import { useEffect } from 'react';
 import http from '../../lib/http';
 import dayjs from 'dayjs';
+import { HeroBanner } from '../../components/HeroBanner';
 
 export default function Medicals() {
   const queryClient = useQueryClient();
@@ -39,7 +40,7 @@ export default function Medicals() {
     }
     return value?.originFileObj || value?.file || null;
   };
-  
+
   // Filter states
   const [pendingFilters, setPendingFilters] = useState<{ employee?: string; type?: string; status?: string }>({});
   const [appliedFilters, setAppliedFilters] = useState<{ employee?: string; type?: string; status?: string }>({});
@@ -224,44 +225,44 @@ export default function Medicals() {
         </Space>
       ),
     },
-    { 
-      title: 'S/No', 
+    {
+      title: 'S/No',
       dataIndex: 'sn',
       width: 70,
     },
-    { 
-      title: 'Employee', 
-      dataIndex: 'employee_name', 
+    {
+      title: 'Employee',
+      dataIndex: 'employee_name',
       key: 'employee_name',
       render: (_: any, record: any) => record.employee_name || '-'
     },
-    { 
-      title: 'Medical Type', 
-      dataIndex: 'medical_type_name', 
+    {
+      title: 'Medical Type',
+      dataIndex: 'medical_type_name',
       key: 'medical_type_name',
       render: (_: any, record: any) => record.medical_type_name || record.medical_type_detail?.name || '-'
     },
-    { 
-      title: 'Scheduled Date', 
-      dataIndex: 'scheduled_date', 
+    {
+      title: 'Scheduled Date',
+      dataIndex: 'scheduled_date',
       key: 'scheduled_date',
       render: (date: string) => date ? dayjs(date).format('YYYY-MM-DD') : '-'
     },
-    { 
-      title: 'Completion Date', 
-      dataIndex: 'completion_date', 
+    {
+      title: 'Completion Date',
+      dataIndex: 'completion_date',
       key: 'completion_date',
       render: (date: string) => date ? dayjs(date).format('YYYY-MM-DD') : '-'
     },
-    { 
-      title: 'Facility', 
-      dataIndex: 'facility', 
+    {
+      title: 'Facility',
+      dataIndex: 'facility',
       key: 'facility',
       render: (f: string) => f || '-'
     },
-    { 
-      title: 'Status', 
-      dataIndex: 'status', 
+    {
+      title: 'Status',
+      dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
         <Tag color={status === 'CLEARED' ? 'green' : status === 'COMPLETED' ? 'blue' : status === 'RESTRICTED' || status === 'NOT_CLEARED' ? 'red' : 'orange'}>
@@ -269,15 +270,15 @@ export default function Medicals() {
         </Tag>
       )
     },
-    { 
-      title: 'Clearance', 
-      dataIndex: 'clearance_status', 
+    {
+      title: 'Clearance',
+      dataIndex: 'clearance_status',
       key: 'clearance_status',
       render: (status: string) => status || '-'
     },
-    { 
-      title: 'Expiry Date', 
-      dataIndex: 'expiry_date', 
+    {
+      title: 'Expiry Date',
+      dataIndex: 'expiry_date',
       key: 'expiry_date',
       render: (date: string) => {
         if (!date) return '-';
@@ -300,14 +301,14 @@ export default function Medicals() {
         return dayjs(date).format('YYYY-MM-DD');
       }
     },
-    { 
-      title: 'Document', 
-      dataIndex: 'report_document', 
+    {
+      title: 'Document',
+      dataIndex: 'report_document',
       key: 'report_document',
       render: (doc: string) => doc ? (
-        <Button 
-          type="link" 
-          size="small" 
+        <Button
+          type="link"
+          size="small"
           icon={<DownloadOutlined />}
           href={doc}
           target="_blank"
@@ -320,11 +321,31 @@ export default function Medicals() {
 
   return (
     <div style={{ padding: 24 }}>
-      <div className="mb-6 flex flex-col gap-2">
-        <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]">Health & Safety</div>
-        <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>Medical Management</h1>
-        <p style={{ margin: '8px 0 0 0', color: '#c4c8d4', fontSize: '14px' }}>Track employee medical examinations and test expiry dates</p>
-      </div>
+      <HeroBanner
+        eyebrow="Health & Safety"
+        title="Medical Management"
+        description="Track employee medical examinations, outcomes, and test expiry dates across the workforce."
+        gradient="neutral"
+        tags={[
+          { label: 'Examinations', variant: 'neutral' },
+          { label: 'Clearance Status', variant: 'cyan' },
+          { label: 'Expiry Tracking', variant: 'lime' },
+        ]}
+        actions={(
+          <Button
+            type="primary"
+            size="large"
+            icon={<PlusOutlined />}
+            onClick={() => {
+              setEditingRecord(null);
+              form.resetFields();
+              setIsModalOpen(true);
+            }}
+          >
+            Add Medical Record
+          </Button>
+        )}
+      />
 
       {/* Filters */}
       <Card
@@ -380,21 +401,6 @@ export default function Medicals() {
           </Button>
         </Space>
       </Card>
-
-      {/* Header with Add Button */}
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />}
-          onClick={() => {
-            setEditingRecord(null);
-            form.resetFields();
-            setIsModalOpen(true);
-          }}
-        >
-          Add Medical Record
-        </Button>
-      </div>
 
       {/* Medical Records Table */}
       <Card
@@ -471,10 +477,10 @@ export default function Medicals() {
             label="Employee"
             rules={[{ required: true, message: 'Please select employee' }]}
           >
-            <Select 
-              placeholder="Select employee" 
-              showSearch 
-              filterOption={(input, option: any) => 
+            <Select
+              placeholder="Select employee"
+              showSearch
+              filterOption={(input, option: any) =>
                 (option?.children?.toLowerCase() || '').includes(input.toLowerCase())
               }
             >
@@ -536,8 +542,8 @@ export default function Medicals() {
             <Input.TextArea rows={3} placeholder="Details of medical findings" />
           </Form.Item>
 
-          <Form.Item 
-            name="report_document" 
+          <Form.Item
+            name="report_document"
             label="Medical Report Document"
             valuePropName="fileList"
             getValueFromEvent={(e) => e?.fileList || []}

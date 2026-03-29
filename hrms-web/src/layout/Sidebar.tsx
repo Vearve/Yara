@@ -186,6 +186,7 @@ export default function Sidebar({ activePath }: { activePath: string }) {
         mode="inline"
         items={items}
         selectedKeys={findSelected(activePath)}
+        className="app-sidebar-menu"
         style={{ background: 'transparent', border: 'none' }}
       />
     </ConfigProvider>
