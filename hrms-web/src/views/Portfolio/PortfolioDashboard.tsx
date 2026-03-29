@@ -6,8 +6,9 @@ import http from '../../lib/http';
 import { TeamOutlined, FileTextOutlined, AlertOutlined } from '@ant-design/icons';
 import { GlassCard, TagPill } from '../../components/NeonPrimitives';
 import { KPICard } from '../../components/KPICard';
+import { HeroBanner } from '../../components/HeroBanner';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export default function PortfolioDashboard() {
   const nav = useNavigate();
@@ -60,45 +61,25 @@ export default function PortfolioDashboard() {
 
   return (
     <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* Hero */}
-      <div
-        className="relative overflow-hidden rounded-2xl border shadow-glow mb-6"
-        style={{
-          background: 'linear-gradient(135deg, rgba(245, 196, 0, 0.1) 0%, rgba(11, 15, 26, 0.9) 60%, rgba(62, 231, 255, 0.08) 100%)',
-          borderColor: 'rgba(245, 196, 0, 0.2)',
-        }}
-      >
-        <div
-          className="absolute inset-0 blur-3xl"
-          style={{ background: 'radial-gradient(at 15% 15%, rgba(245, 196, 0, 0.22), transparent 45%)' }}
-        />
-        <div className="relative flex flex-col gap-3 p-6 md:p-8">
-          <div className="flex flex-wrap items-center gap-3 text-sm uppercase tracking-[0.2em]" style={{ color: '#c4c8d4' }}>
-            <span>Consultant View</span>
-            <TagPill variant="gold">Live</TagPill>
-          </div>
-          <Title level={2} style={{ margin: 0, color: '#f7f8fb' }}>Portfolio Overview</Title>
-          <Text style={{ color: '#c4c8d4', maxWidth: 780 }}>
-            Manage {workspaces.length} client workspace{workspaces.length !== 1 ? 's' : ''} with compliance, roles, and cases at a glance.
-          </Text>
-          <div className="flex flex-wrap gap-3 mt-2">
-            <Button type="primary" style={{ background: '#f5c400', borderColor: '#f5c400', color: '#05060a', fontWeight: 600 }}>
-              Add Client
-            </Button>
-            <Button style={{ color: '#f7f8fb', borderColor: 'rgba(245, 196, 0, 0.25)' }}>
-              View Reports
-            </Button>
-            <Button style={{ color: '#3ee7ff', borderColor: 'rgba(62, 231, 255, 0.25)' }}>
-              Export Snapshot
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-2 mt-3">
-            <TagPill variant="gold">Clients: {totalClients}</TagPill>
-            <TagPill variant="cyan">Projects: {totalProjects}</TagPill>
-            <TagPill variant="lime">Compliance: {avgCompliance}%</TagPill>
-          </div>
-        </div>
-      </div>
+      <HeroBanner
+        eyebrow="Portfolio"
+        title="Portfolio Overview"
+        description={`Manage ${workspaces.length} client workspace${workspaces.length !== 1 ? 's' : ''} with compliance, roles, and cases at a glance.`}
+        gradient="neutral"
+        tags={[
+          { label: 'Consultant View', variant: 'neutral' },
+          { label: `Clients: ${totalClients}`, variant: 'gold' },
+          { label: `Projects: ${totalProjects}`, variant: 'cyan' },
+          { label: `Compliance: ${avgCompliance}%`, variant: 'lime' },
+        ]}
+        actions={(
+          <>
+            <Button type="primary">Add Client</Button>
+            <Button>View Reports</Button>
+            <Button>Export Snapshot</Button>
+          </>
+        )}
+      />
 
       {/* Summary Stats Row */}
       <Row gutter={[24, 24]}>

@@ -27,6 +27,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import http from '../../lib/http';
 import { canPerformAction } from '../../lib/permissions';
+import { HeroBanner } from '../../components/HeroBanner';
 
 const { Title, Text } = Typography;
 
@@ -208,33 +209,27 @@ export default function ClientManagement() {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div className="mb-6 flex flex-col gap-2">
-        <div className="text-sm uppercase tracking-[0.2em] text-[var(--text-dim)]" style={{ color: '#c4c8d4' }}>Portfolio</div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ margin: 0, color: '#f7f8fb', fontSize: '32px', fontWeight: 700 }}>
-            Client Management
-          </h1>
-          {canPerformAction('can_manage_clients') ? (
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              size="large"
-              onClick={() => setCreateModalOpen(true)}
-              style={{
-                background: '#f5c400',
-                borderColor: '#f5c400',
-                color: '#05060a',
-                fontWeight: 600,
-              }}
-            >
-              Add New Client
-            </Button>
-          ) : null}
-        </div>
-      </div>
-      <p style={{ margin: '8px 0 0 0', color: '#c4c8d4', fontSize: '14px', marginBottom: '24px' }}>
-        Manage all your client workspaces, add new clients, and monitor their operations
-      </p>
+      <HeroBanner
+        eyebrow="Portfolio"
+        title="Client Management"
+        description="Manage all client workspaces, add new clients, and monitor operational footprint across your portfolio."
+        gradient="neutral"
+        tags={[
+          { label: `Total Clients: ${clients?.length || 0}`, variant: 'gold' },
+          { label: `Active Clients: ${clients?.filter(c => c.workspace.is_active).length || 0}`, variant: 'lime' },
+          { label: `Total Employees: ${clients?.reduce((sum, c) => sum + c.stats.total_employees, 0) || 0}`, variant: 'cyan' },
+        ]}
+        actions={canPerformAction('can_manage_clients') ? (
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            size="large"
+            onClick={() => setCreateModalOpen(true)}
+          >
+            Add New Client
+          </Button>
+        ) : null}
+      />
 
       {!canPerformAction('can_manage_clients') && (
         <Alert
