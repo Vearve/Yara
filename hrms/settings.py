@@ -220,11 +220,11 @@ SIMPLE_JWT = {
 
 # CORS Configuration
 # Default includes localhost for dev, will be overridden by env var for Render
-CORS_ALLOWED_ORIGINS: list = list(config(
+CORS_ALLOWED_ORIGINS: list = config(  # type: ignore[assignment]
     'CORS_ALLOWED_ORIGINS',
     default='http://localhost:3000,http://localhost:3001,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,https://yara-vearve.ink,https://www.yara-vearve.ink,https://yara-u7g7.onrender.com',
     cast=Csv()
-))
+)
 # Ensure production origins are present even when env var is partial.
 for _origin in [
     'https://yara-vearve.ink',
@@ -321,11 +321,11 @@ os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
 
 # CSRF Configuration
 # Works for both dev and production
-CSRF_TRUSTED_ORIGINS: list = list(config(
+CSRF_TRUSTED_ORIGINS: list = config(  # type: ignore[assignment]
     'CSRF_TRUSTED_ORIGINS',
     default='http://localhost:3000,http://localhost:3001,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,https://*.onrender.com,https://yara-vearve.ink,https://www.yara-vearve.ink,https://yara-u7g7.onrender.com',
     cast=Csv()
-))
+)
 for _origin in [
     'https://yara-vearve.ink',
     'https://www.yara-vearve.ink',
