@@ -77,6 +77,15 @@ export default function Reports() {
     enabled: !!workspaceId,
   });
 
+  const { data: employees = [] } = useQuery({
+    queryKey: ['employees-list', workspaceId],
+    queryFn: async () => {
+      const res = await http.get('/api/v1/hcm/employees/', { params: { page_size: 200 } });
+      return res.data?.results ?? res.data ?? [];
+    },
+    enabled: !!workspaceId,
+  });
+
   const reportTypeOptions = (reportTypes?.length ? reportTypes : [
     { id: 'SAFETY', name: 'SAFETY' },
     { id: 'COMPLAINT', name: 'COMPLAINT' },
@@ -144,6 +153,7 @@ export default function Reports() {
     editForm.setFieldsValue({
       report_number: record.report_number,
       report_type: record.report_type_detail?.id || record.report_type,
+      reported_by: record.reported_by,
       case_study: record.case_study,
       title: record.title,
       description: record.description,
@@ -380,6 +390,18 @@ export default function Reports() {
               placeholder="Select report type"
             />
           </Form.Item>
+          <Form.Item name="reported_by" label="Reported By">
+            <Select
+              showSearch
+              optionFilterProp="label"
+              options={(employees || []).map((employee: any) => ({
+                value: employee.id,
+                label: `${employee.employee_id || employee.employee_code || 'EMP'} - ${employee.full_name || `${employee.first_name} ${employee.last_name}`}`,
+              }))}
+              placeholder="Select the reporting employee"
+              allowClear
+            />
+          </Form.Item>
           <Form.Item name="case_study" label="Case Study (optional)">
             <Select
               showSearch
@@ -452,6 +474,18 @@ export default function Reports() {
               optionFilterProp="label"
               options={reportTypeOptions}
               placeholder="Select report type"
+            />
+          </Form.Item>
+          <Form.Item name="reported_by" label="Reported By">
+            <Select
+              showSearch
+              optionFilterProp="label"
+              options={(employees || []).map((employee: any) => ({
+                value: employee.id,
+                label: `${employee.employee_id || employee.employee_code || 'EMP'} - ${employee.full_name || `${employee.first_name} ${employee.last_name}`}`,
+              }))}
+              placeholder="Select the reporting employee"
+              allowClear
             />
           </Form.Item>
           <Form.Item name="case_study" label="Case Study (optional)">
