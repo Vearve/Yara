@@ -188,9 +188,13 @@ const PayrollManagement: React.FC = () => {
   const { data: payslipsData, isLoading: payslipsLoading } = useQuery({
     queryKey: ['payslips', selectedYear, selectedMonth],
     queryFn: async () => {
-      const response = await http.get(
-        `/api/v1/payroll/payslips/?period__year=${selectedYear}&period__month=${selectedMonth}`
-      );
+      const response = await http.get('/api/v1/payroll/payslips/', {
+        params: {
+          period__year: selectedYear,
+          period__month: selectedMonth,
+          page_size: 1000,
+        },
+      });
       return (response.data?.results || response.data || []) as Payslip[];
     },
     enabled: canViewPayroll || canManagePayroll,
@@ -1039,7 +1043,12 @@ const PayrollManagement: React.FC = () => {
                       columns={columns}
                       dataSource={payslipsList}
                       rowKey="id"
-                      pagination={{ pageSize: 20 }}
+                      pagination={{
+                        pageSize: 20,
+                        showSizeChanger: true,
+                        pageSizeOptions: ['20', '50', '100'],
+                        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} payslips`,
+                      }}
                       scroll={{ x: 'max-content' }}
                     />
                   </Spin>
