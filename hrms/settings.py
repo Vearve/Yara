@@ -220,11 +220,11 @@ SIMPLE_JWT = {
 
 # CORS Configuration
 # Default includes localhost for dev, will be overridden by env var for Render
-CORS_ALLOWED_ORIGINS = config(
+CORS_ALLOWED_ORIGINS: list = list(config(
     'CORS_ALLOWED_ORIGINS',
     default='http://localhost:3000,http://localhost:3001,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,https://yara-vearve.ink,https://www.yara-vearve.ink,https://yara-u7g7.onrender.com',
     cast=Csv()
-)
+))
 # Ensure production origins are present even when env var is partial.
 for _origin in [
     'https://yara-vearve.ink',
@@ -321,11 +321,11 @@ os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
 
 # CSRF Configuration
 # Works for both dev and production
-CSRF_TRUSTED_ORIGINS = config(
+CSRF_TRUSTED_ORIGINS: list = list(config(
     'CSRF_TRUSTED_ORIGINS',
     default='http://localhost:3000,http://localhost:3001,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,https://*.onrender.com,https://yara-vearve.ink,https://www.yara-vearve.ink,https://yara-u7g7.onrender.com',
     cast=Csv()
-)
+))
 for _origin in [
     'https://yara-vearve.ink',
     'https://www.yara-vearve.ink',
@@ -358,8 +358,10 @@ if USE_S3:
     # S3 Bucket Configuration
     AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='')
     AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+    AWS_DEFAULT_ACL = None          # use bucket policy for public access
+    AWS_QUERYSTRING_AUTH = False    # serve files without signed URLs
     
     # AWS Credentials (load from environment)
     AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
@@ -370,9 +372,8 @@ if USE_S3:
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     # Note: STATIC_ROOT not needed when using S3 storage backend
     
-    # S3 Public Media Settings (photos, documents, uploads)
-    PUBLIC_MEDIA_LOCATION = 'media'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
+    # S3 Media Settings (photos, documents, uploads — keys stored without /media/ prefix)
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     
     # Optional: Private media storage (not exposed via CDN)
