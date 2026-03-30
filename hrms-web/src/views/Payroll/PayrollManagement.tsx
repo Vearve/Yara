@@ -321,8 +321,7 @@ const PayrollManagement: React.FC = () => {
   });
 
   const handleBulkCreate = () => {
-    const employeeIds = Array.from(new Set((payrollEntriesData || []).map((entry: PayrollEntry) => entry.employee)));
-    bulkCreateMutation.mutate({ year: selectedYear, month: selectedMonth, employee_ids: employeeIds });
+    bulkCreateMutation.mutate({ year: selectedYear, month: selectedMonth });
   };
 
   const handleOpenDrawer = (payslip?: Payslip) => {
