@@ -387,7 +387,7 @@ class PayslipViewSet(viewsets.ModelViewSet):
         POST: {
             "year": 2026,
             "month": 1,
-            "employee_ids": [1, 2, 3]  // optional, if not provided creates for all active employees
+            "employee_ids": [1, 2, 3]  // optional, if not provided creates for all payroll-enrolled employees
         }
         """
         from apps.hcm.models import Employee
@@ -408,15 +408,18 @@ class PayslipViewSet(viewsets.ModelViewSet):
             month=month
         )
         
-        # Get employees
-        if employee_ids:
-            employees = Employee.objects.filter(id__in=employee_ids)
-        else:
-            employees = Employee.objects.filter(employment_status='ACTIVE')
+        # Only generate payslips for employees that are in payroll (have PayrollEntry rows).
+        payroll_entries_qs = PayrollEntry.objects.all()
 
-        # Apply workspace filtering if available
+        # Apply workspace filtering if available.
         if hasattr(request, 'workspace') and request.workspace:
-            employees = employees.filter(workspace=request.workspace)
+            payroll_entries_qs = payroll_entries_qs.filter(employee__workspace=request.workspace)
+
+        if employee_ids:
+            payroll_entries_qs = payroll_entries_qs.filter(employee_id__in=employee_ids)
+
+        payroll_employee_ids = payroll_entries_qs.values_list('employee_id', flat=True).distinct()
+        employees = Employee.objects.filter(id__in=payroll_employee_ids)
         
         created_payslips = []
         errors = []
