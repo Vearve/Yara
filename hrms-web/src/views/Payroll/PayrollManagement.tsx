@@ -169,7 +169,7 @@ const PayrollManagement: React.FC = () => {
   const { data: payrollEntriesData, isLoading: payrollEntriesLoading, refetch: refetchEntries } = useQuery({
     queryKey: ['payroll-entries'],
     queryFn: async () => {
-      const response = await http.get('/api/v1/payroll/entries/?ordering=-created_at');
+      const response = await http.get('/api/v1/payroll/entries/', { params: { ordering: '-created_at', page_size: 1000 } });
       return response.data.results || response.data || [];
     },
   });
@@ -198,9 +198,9 @@ const PayrollManagement: React.FC = () => {
 
   // Fetch employees for creating payslips
   const { data: employeesRaw } = useQuery({
-    queryKey: ['employees'],
+    queryKey: ['employees', 'payroll-management'],
     queryFn: async () => {
-      const response = await http.get('/api/v1/hcm/employees/');
+      const response = await http.get('/api/v1/hcm/employees/', { params: { page_size: 1000 } });
       // Handle both paginated response { results: [...] } and direct array response
       const data = Array.isArray(response.data) ? response.data : (response.data?.results || []);
       return data as Employee[];
