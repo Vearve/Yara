@@ -68,6 +68,11 @@ const toAbsoluteMediaUrl = (value?: string | null): string | null => {
   if (!value) return null;
   const trimmed = value.trim();
 
+  if (trimmed.startsWith('//')) {
+    const protocol = typeof window !== 'undefined' ? window.location.protocol : 'https:';
+    return `${protocol}${trimmed}`;
+  }
+
   if (/^https?:\/\//i.test(trimmed)) {
     if (window.location.protocol === 'https:' && trimmed.startsWith('http://')) {
       return `https://${trimmed.slice('http://'.length)}`;
@@ -93,6 +98,7 @@ const toAbsoluteMediaUrl = (value?: string | null): string | null => {
 type EmployeeRow = {
   id: number;
   employee_id: string;
+  photo?: string;
   full_name: string;
   first_name: string;
   last_name: string;
@@ -715,6 +721,15 @@ export default function Demography() {
         </Button>
       ),
       width: 130,
+    },
+    {
+      title: 'Photo',
+      dataIndex: 'photo',
+      width: 80,
+      render: (photo: string | null) => {
+        const src = toAbsoluteMediaUrl(photo);
+        return <Avatar src={src || undefined} icon={<UserOutlined />} />;
+      },
     },
     { title: 'Employee ID', dataIndex: 'employee_id' },
     { title: 'First Name', dataIndex: 'first_name' },

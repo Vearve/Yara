@@ -104,9 +104,17 @@ class EmployeeListSerializer(serializers.ModelSerializer):
             'email', 'phone', 'job_title', 'department', 'department_name',
             'employment_type', 'employment_type_name', 'category', 'category_name',
             'classification', 'classification_name',
-            'employment_status', 'hire_date', 'gender', 'date_of_birth', 'nationality', 'created_at'
+            'employment_status', 'hire_date', 'gender', 'date_of_birth', 'nationality', 'photo', 'created_at'
         ]
         read_only_fields = ['id', 'created_at', 'full_name']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        photo_url = data.get('photo')
+        request = self.context.get('request')
+        if photo_url and request and photo_url.startswith('/'):
+            data['photo'] = request.build_absolute_uri(photo_url)
+        return data
 
 
 class EmployeeDetailSerializer(serializers.ModelSerializer):
