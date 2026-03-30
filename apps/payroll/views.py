@@ -423,6 +423,9 @@ class PayslipViewSet(viewsets.ModelViewSet):
         
         created_payslips = []
         errors = []
+        skipped_existing = 0
+        skipped_no_salary = 0
+        skipped_other = 0
         
         # Import leave models for integration
         from apps.leave.models import LeaveRequest, SickNote, Absenteeism, DoubleTicketRequest
@@ -439,6 +442,7 @@ class PayslipViewSet(viewsets.ModelViewSet):
             # Check if payslip already exists
             if Payslip.objects.filter(employee=employee, period=period).exists():
                 errors.append(f"Payslip already exists for {employee.full_name}")
+                skipped_existing += 1
                 continue
             
             # Try to get salary structure from PayrollEntry (Salary Management Dashboard)
@@ -446,6 +450,7 @@ class PayslipViewSet(viewsets.ModelViewSet):
             
             if not payroll_entry:
                 errors.append(f"No salary data found for {employee.full_name}. Please add employee to payroll first.")
+                skipped_no_salary += 1
                 continue
             
             # Use comprehensive salary structure from PayrollEntry
@@ -558,9 +563,16 @@ class PayslipViewSet(viewsets.ModelViewSet):
             created_payslips.append(payslip)
         
         serializer = PayslipSerializer(created_payslips, many=True)
+        skipped_other = max(len(errors) - skipped_existing - skipped_no_salary, 0)
         return Response({
             'created': len(created_payslips),
             'errors': errors,
+            'summary': {
+                'target_employees': employees.count(),
+                'skipped_existing': skipped_existing,
+                'skipped_no_salary': skipped_no_salary,
+                'skipped_other': skipped_other,
+            },
             'payslips': serializer.data
         }, status=status.HTTP_201_CREATED)
     

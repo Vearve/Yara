@@ -211,13 +211,17 @@ const PayrollManagement: React.FC = () => {
 
   // Bulk create payslips mutation
   const bulkCreateMutation = useMutation({
-    mutationFn: (data: { year: number; month: number }) =>
+    mutationFn: (data: { year: number; month: number; employee_ids?: number[] }) =>
       http.post('/api/v1/payroll/payslips/bulk_create/', data),
     onSuccess: (response: any) => {
       queryClient.invalidateQueries({ queryKey: ['payslips'] });
 
       const created = response.data?.created || 0;
       const errors = response.data?.errors || [];
+      const summary = response.data?.summary || {};
+      const skippedExisting = summary.skipped_existing || 0;
+      const skippedNoSalary = summary.skipped_no_salary || 0;
+      const targetEmployees = summary.target_employees || 0;
 
       if (created > 0) {
         message.success(`${created} payslips created successfully`);
@@ -228,7 +232,15 @@ const PayrollManagement: React.FC = () => {
       }
 
       if (created === 0 && errors.length > 0) {
-        message.error('No payslips could be created. Please ensure employees have salary data.');
+        if (targetEmployees === 0) {
+          message.warning('No payroll employees found for this workspace. Add employees to payroll first.');
+        } else if (skippedExisting > 0 && skippedNoSalary === 0) {
+          message.info('No new payslips created: all selected payroll employees already have payslips for this period.');
+        } else if (skippedNoSalary > 0) {
+          message.error('No payslips could be created because some selected employees have no salary data in payroll entries.');
+        } else {
+          message.error('No payslips could be created for the selected employees and period.');
+        }
       }
     },
     onError: (error: any) => {
@@ -309,7 +321,8 @@ const PayrollManagement: React.FC = () => {
   });
 
   const handleBulkCreate = () => {
-    bulkCreateMutation.mutate({ year: selectedYear, month: selectedMonth });
+    const employeeIds = Array.from(new Set((payrollEntriesData || []).map((entry: PayrollEntry) => entry.employee)));
+    bulkCreateMutation.mutate({ year: selectedYear, month: selectedMonth, employee_ids: employeeIds });
   };
 
   const handleOpenDrawer = (payslip?: Payslip) => {
