@@ -4,7 +4,6 @@ Reflects Human Management Payroll sheet: components and per-employee entries.
 """
 
 from django.db import models
-from django.contrib.auth import get_user_model
 from apps.hcm.models import Employee
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -441,28 +440,6 @@ class Payslip(models.Model):
         self.total_deductions = result['deductions']['total']
         self.net_salary = result['net_pay']
         self.is_processed = True
-
-
-class PayslipAuditLog(models.Model):
-    ACTION_CHOICES = [
-        ('CREATED', 'Created'),
-        ('CALCULATED', 'Calculated'),
-        ('UPDATED', 'Updated'),
-        ('DELETED', 'Deleted'),
-    ]
-
-    payslip = models.ForeignKey(Payslip, on_delete=models.CASCADE, related_name='audit_logs')
-    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
-    user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True)
-    version = models.PositiveIntegerField(default=1)
-    changes = models.JSONField(default=dict, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.payslip_id} {self.action} v{self.version}"
 
 
 class PayslipDeduction(models.Model):

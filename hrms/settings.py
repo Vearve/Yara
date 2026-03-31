@@ -176,12 +176,19 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 _project_static_dir = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [_project_static_dir] if os.path.isdir(_project_static_dir) else []
 
-# Use WhiteNoise for serving static files in production
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Keep static assets on the app filesystem/WhiteNoise even when media uploads use S3.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -367,14 +374,11 @@ if USE_S3:
     AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
     AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default='')
     
-    # S3 Static Settings
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    # Note: STATIC_ROOT not needed when using S3 storage backend
-    
     # S3 Media Settings (photos, documents, uploads — keys stored without /media/ prefix)
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STORAGES['default'] = {
+        'BACKEND': 'storages.backends.s3.S3Storage',
+    }
     
     # Optional: Private media storage (not exposed via CDN)
     # PRIVATE_MEDIA_LOCATION = 'private'
