@@ -2,6 +2,7 @@ import { Table, Button, Modal, Form, Input, Select, DatePicker, message, Tag, Ro
 import { PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { AxiosError } from 'axios';
 import { recruitmentApi, type ATR as ApiATR } from '../../api/services/recruitmentApi';
 import { exportAtrToPDF } from '../../lib/pdfExport';
 import http from '../../lib/http';
@@ -21,6 +22,11 @@ interface ATRRequest {
   vacancies: number;
   status: 'pending' | 'approved' | 'rejected';
   approval_status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
+function getApiErrorMessage(error: unknown, fallback: string): string {
+  const axiosError = error as AxiosError<{ detail?: string; message?: string }>;
+  return axiosError.response?.data?.detail || axiosError.response?.data?.message || fallback;
 }
 
 export default function ATR() {
@@ -137,7 +143,7 @@ export default function ATR() {
       message.success('ATR deleted');
       queryClient.invalidateQueries({ queryKey: ['recruitment-atrs'] });
     },
-    onError: () => message.error('Failed to delete ATR'),
+    onError: (error) => message.error(getApiErrorMessage(error, 'Failed to delete ATR')),
   });
 
   const handleApprove = (record: ATRRequest) => {
