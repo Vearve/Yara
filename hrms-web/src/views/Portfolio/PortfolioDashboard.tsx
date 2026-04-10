@@ -14,6 +14,17 @@ export default function PortfolioDashboard() {
   const nav = useNavigate();
   const [complianceFilter, setComplianceFilter] = useState<'all' | 'good' | 'attention'>('all');
   const [workspaceId, setWorkspaceId] = useState<string | null>(() => localStorage.getItem('workspaceId'));
+  const isLight = typeof document !== 'undefined' && document.documentElement.classList.contains('light-mode');
+
+  const textPrimary = isLight ? '#1f192c' : '#f7f8fb';
+  const textSecondary = isLight ? '#3c3550' : '#c4c8d4';
+  const textMuted = isLight ? '#55506a' : '#c4c8d4';
+  const softPanelBg = isLight ? 'rgba(31, 25, 44, 0.06)' : 'rgba(255, 255, 255, 0.02)';
+  const softPanelBorder = isLight ? '1px solid rgba(60, 53, 80, 0.22)' : '1px dashed rgba(245, 196, 0, 0.16)';
+  const goldAccent = isLight ? '#7a4d00' : '#f5c400';
+  const cyanAccent = isLight ? '#005b74' : '#3ee7ff';
+  const limeAccent = isLight ? '#1f6f2d' : '#7cff6b';
+  const amberAccent = isLight ? '#8e4d00' : '#ffb547';
 
   useEffect(() => {
     const handleWorkspaceChange = () => {
@@ -60,7 +71,7 @@ export default function PortfolioDashboard() {
   });
 
   return (
-    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div className="portfolio-dashboard" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
       <HeroBanner
         eyebrow="Portfolio"
         title="Portfolio Overview"
@@ -88,7 +99,7 @@ export default function PortfolioDashboard() {
             title="Total Companies"
             value={totalClients}
             prefix={<TeamOutlined />}
-            color="#f5c400"
+            color={goldAccent}
             gradient="gold"
             delta={14.2}
           />
@@ -98,7 +109,7 @@ export default function PortfolioDashboard() {
             title="Total Employees"
             value={totalEmployees}
             prefix={<TeamOutlined />}
-            color="#3ee7ff"
+            color={cyanAccent}
             gradient="cyan"
             delta={8.7}
           />
@@ -108,7 +119,7 @@ export default function PortfolioDashboard() {
             title="Total Cases"
             value={totalCases}
             prefix={<FileTextOutlined />}
-            color="#7cff6b"
+            color={limeAccent}
             gradient="lime"
             delta={-3.5}
           />
@@ -118,7 +129,7 @@ export default function PortfolioDashboard() {
             title="Active ATR"
             value={totalOpenRoles}
             prefix={<AlertOutlined />}
-            color="#ffb547"
+            color={amberAccent}
             gradient="amber"
             delta={22.3}
           />
@@ -130,7 +141,7 @@ export default function PortfolioDashboard() {
         <Col xs={24} lg={12}>
           <GlassCard title="Overall Compliance Status" gradient="gold">
             <div style={{ marginBottom: 16 }}>
-              <Text type="secondary" style={{ display: 'block', marginBottom: 8, color: '#c4c8d4' }}>Target: 95% | Actual: {avgCompliance}%</Text>
+              <Text type="secondary" style={{ display: 'block', marginBottom: 8, color: textSecondary, fontWeight: isLight ? 600 : 500 }}>Target: 95% | Actual: {avgCompliance}%</Text>
               <Progress
                 type="circle"
                 percent={avgCompliance}
@@ -139,7 +150,7 @@ export default function PortfolioDashboard() {
                 format={(percent) => `${percent}%`}
               />
             </div>
-            <Text style={{ fontSize: 12, color: '#c4c8d4' }}>
+            <Text style={{ fontSize: 12, color: textMuted, fontWeight: isLight ? 600 : 500 }}>
               {workspaces.filter((w: any) => w.stats?.compliance_level === 'Good').length} of {workspaces.length} companies at target compliance
             </Text>
           </GlassCard>
@@ -147,17 +158,17 @@ export default function PortfolioDashboard() {
         <Col xs={24} lg={12}>
           <GlassCard title="Key Metrics" gradient="gold">
             <Space orientation="vertical" size={8} style={{ width: '100%' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#f7f8fb' }}>
-                <Text style={{ color: '#c4c8d4' }}>Active Projects</Text>
-                <Text strong style={{ color: '#f5c400' }}>{totalProjects}</Text>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: textPrimary }}>
+                <Text style={{ color: textSecondary, fontWeight: isLight ? 600 : 500 }}>Active Projects</Text>
+                <Text strong style={{ color: goldAccent, fontWeight: 700 }}>{totalProjects}</Text>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#f7f8fb' }}>
-                <Text style={{ color: '#c4c8d4' }}>Contractors</Text>
-                <Text strong style={{ color: '#f5c400' }}>{totalContractors}</Text>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: textPrimary }}>
+                <Text style={{ color: textSecondary, fontWeight: isLight ? 600 : 500 }}>Contractors</Text>
+                <Text strong style={{ color: goldAccent, fontWeight: 700 }}>{totalContractors}</Text>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#f7f8fb' }}>
-                <Text style={{ color: '#c4c8d4' }}>Compliant Companies</Text>
-                <Text strong style={{ color: '#7cff6b' }}>{goodComplianceCount}</Text>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: textPrimary }}>
+                <Text style={{ color: textSecondary, fontWeight: isLight ? 600 : 500 }}>Compliant Companies</Text>
+                <Text strong style={{ color: limeAccent, fontWeight: 700 }}>{goodComplianceCount}</Text>
               </div>
             </Space>
           </GlassCard>
@@ -167,9 +178,9 @@ export default function PortfolioDashboard() {
       {/* Client Workspace Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div className="flex flex-wrap items-center gap-3">
-          <h3 style={{ margin: 0, color: '#f7f8fb', fontSize: '18px', fontWeight: 700 }}>Client Workspaces</h3>
+          <h3 style={{ margin: 0, color: textPrimary, fontSize: '18px', fontWeight: 700 }}>Client Workspaces</h3>
           <TagPill variant="gold">{filteredWorkspaces.length} Active</TagPill>
-          <Text style={{ margin: 0, color: '#c4c8d4', fontSize: '13px' }}>Tap a card to open the workspace</Text>
+          <Text style={{ margin: 0, color: textSecondary, fontSize: '13px', fontWeight: isLight ? 600 : 500 }}>Tap a card to open the workspace</Text>
         </div>
         <div className="flex flex-wrap gap-2" style={{ gap: 10 }}>
           <TagPill
@@ -217,7 +228,11 @@ export default function PortfolioDashboard() {
             const activeProjects = stats.active_projects ?? 0;
             const contractors = stats.contractors_count ?? 0;
             const complianceLevel = stats.compliance_level || 'Unknown';
-            const complianceTone = complianceLevel.toLowerCase() === 'good' ? '#7cff6b' : complianceLevel.toLowerCase() === 'medium' ? '#ffb547' : '#ff6b9d';
+            const complianceTone = complianceLevel.toLowerCase() === 'good'
+              ? (isLight ? '#2f8f2f' : '#7cff6b')
+              : complianceLevel.toLowerCase() === 'medium'
+                ? (isLight ? '#a56000' : '#ffb547')
+                : (isLight ? '#b33f64' : '#ff6b9d');
 
             return (
               <Col xs={24} sm={12} md={12} lg={6} key={ws.id}>
@@ -240,18 +255,29 @@ export default function PortfolioDashboard() {
                 >
                   <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                     <div>
-                      <h4 style={{ margin: '0 0 4px 0', color: '#f7f8fb', fontSize: '16px', fontWeight: 700 }}>
+                      <h4 style={{ margin: '0 0 4px 0', color: textPrimary, fontSize: '16px', fontWeight: 800 }}>
                         {ws.name}
                       </h4>
-                      <span style={{ fontSize: 12, color: '#c4c8d4' }}>
+                      <span style={{ fontSize: 12, color: textSecondary, fontWeight: isLight ? 700 : 500 }}>
                         {ws.industry || 'General'}
                       </span>
                     </div>
-                    <TagPill variant="cyan" style={{ alignSelf: 'flex-start' }}>{item.role}</TagPill>
+                    <TagPill
+                      variant="cyan"
+                      style={{
+                        alignSelf: 'flex-start',
+                        color: isLight ? '#07566a' : '#3ee7ff',
+                        borderColor: isLight ? 'rgba(7, 86, 106, 0.3)' : undefined,
+                        background: isLight ? 'rgba(7, 86, 106, 0.08)' : undefined,
+                        fontWeight: isLight ? 700 : 600,
+                      }}
+                    >
+                      {item.role}
+                    </TagPill>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: 10, border: '1px dashed rgba(245, 196, 0, 0.16)', marginBottom: 8 }}>
-                    <span style={{ fontSize: 11, color: '#c4c8d4' }}>Compliance</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: softPanelBg, borderRadius: 10, border: softPanelBorder, marginBottom: 8 }}>
+                    <span style={{ fontSize: 11, color: textSecondary, fontWeight: isLight ? 700 : 500 }}>Compliance</span>
                     <TagPill style={{ background: `${complianceTone}20`, color: complianceTone, borderColor: `${complianceTone}40`, margin: 0 }}>
                       {complianceLevel}
                     </TagPill>
@@ -261,34 +287,34 @@ export default function PortfolioDashboard() {
                     <Row gutter={[8, 8]}>
                       <Col span={12}>
                         <div>
-                          <div style={{ fontSize: 11, color: '#c4c8d4', marginBottom: 4 }}>Employees</div>
-                          <div style={{ fontSize: 16, color: '#f5c400', fontWeight: 'bold' }}>{employeeCount}</div>
+                          <div style={{ fontSize: 11, color: textSecondary, marginBottom: 4, fontWeight: isLight ? 700 : 500 }}>Employees</div>
+                          <div style={{ fontSize: 16, color: goldAccent, fontWeight: 800 }}>{employeeCount}</div>
                         </div>
                       </Col>
                       <Col span={12}>
                         <div>
-                          <div style={{ fontSize: 11, color: '#c4c8d4', marginBottom: 4 }}>Projects</div>
-                          <div style={{ fontSize: 16, color: '#3ee7ff', fontWeight: 'bold' }}>{activeProjects}</div>
+                          <div style={{ fontSize: 11, color: textSecondary, marginBottom: 4, fontWeight: isLight ? 700 : 500 }}>Projects</div>
+                          <div style={{ fontSize: 16, color: cyanAccent, fontWeight: 800 }}>{activeProjects}</div>
                         </div>
                       </Col>
                     </Row>
                     <Row gutter={[8, 8]}>
                       <Col span={12}>
                         <div>
-                          <div style={{ fontSize: 11, color: '#c4c8d4', marginBottom: 4 }}>Contractors</div>
-                          <div style={{ fontSize: 16, color: '#7cff6b', fontWeight: 'bold' }}>{contractors}</div>
+                          <div style={{ fontSize: 11, color: textSecondary, marginBottom: 4, fontWeight: isLight ? 700 : 500 }}>Contractors</div>
+                          <div style={{ fontSize: 16, color: limeAccent, fontWeight: 800 }}>{contractors}</div>
                         </div>
                       </Col>
                       <Col span={12}>
                         <div>
-                          <div style={{ fontSize: 11, color: '#c4c8d4', marginBottom: 4 }}>Cases</div>
-                          <div style={{ fontSize: 16, color: '#ffb547', fontWeight: 'bold' }}>{stats.case_count ?? 0}</div>
+                          <div style={{ fontSize: 11, color: textSecondary, marginBottom: 4, fontWeight: isLight ? 700 : 500 }}>Cases</div>
+                          <div style={{ fontSize: 16, color: amberAccent, fontWeight: 800 }}>{stats.case_count ?? 0}</div>
                         </div>
                       </Col>
                     </Row>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: 10, border: '1px dashed rgba(245, 196, 0, 0.16)' }}>
-                      <span style={{ fontSize: 11, color: '#c4c8d4' }}>Active ATR</span>
-                      <strong style={{ color: '#f5c400' }}>{stats.active_atrs ?? 0}</strong>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: softPanelBg, borderRadius: 10, border: softPanelBorder }}>
+                      <span style={{ fontSize: 11, color: textSecondary, fontWeight: isLight ? 700 : 500 }}>Active ATR</span>
+                      <strong style={{ color: goldAccent, fontWeight: 800 }}>{stats.active_atrs ?? 0}</strong>
                     </div>
                   </Space>
 
@@ -305,7 +331,7 @@ export default function PortfolioDashboard() {
 
         {workspaces.length === 0 && (
           <GlassCard style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <Text style={{ color: '#c4c8d4' }}>No workspaces assigned</Text>
+            <Text style={{ color: textSecondary, fontWeight: isLight ? 600 : 500 }}>No workspaces assigned</Text>
           </GlassCard>
         )}
       </div>

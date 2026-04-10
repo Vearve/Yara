@@ -295,6 +295,32 @@ a:hover {
   color: #635a74;
 }
 
+:root.light-mode .portfolio-dashboard .ant-card {
+  border-color: rgba(55, 45, 83, 0.16);
+}
+
+:root.light-mode .portfolio-dashboard .ant-card-head-title {
+  color: #2b2440;
+  font-weight: 700;
+}
+
+:root.light-mode .portfolio-dashboard .ant-typography,
+:root.light-mode .portfolio-dashboard h3,
+:root.light-mode .portfolio-dashboard h4 {
+  color: #231d35;
+}
+
+:root.light-mode .portfolio-dashboard .ant-typography-secondary,
+:root.light-mode .portfolio-dashboard .ant-progress-text {
+  color: #4f4865 !important;
+}
+
+:root.light-mode .portfolio-dashboard .ant-btn-default {
+  color: #332b49;
+  border-color: rgba(55, 45, 83, 0.22);
+  background: rgba(255, 255, 255, 0.82);
+}
+
 :root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-item,
 :root.light-mode .app-sidebar-menu.ant-menu-dark .ant-menu-submenu-title {
   color: #f1ebfa;
