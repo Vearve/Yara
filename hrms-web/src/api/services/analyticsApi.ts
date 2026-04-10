@@ -184,6 +184,7 @@ export const analyticsApi = {
       const filteredSickNotes = filterByEmployee(sickNotes);
       const filteredAbsenteeism = filterByEmployee(absenteeism);
       const filteredTrainings = filterByEmployee(trainings);
+      const filteredPayrollEntries = filterByEmployee(payrollEntries);
       const filteredDepartments = departmentId
         ? departments.filter((d: any) => d.id === departmentId)
         : departments;
@@ -221,28 +222,30 @@ export const analyticsApi = {
         const val = parseFloat(c?.basic_salary ?? c?.basic ?? c?.gross ?? 0);
         return Number.isFinite(val) && val > 0;
       });
-      const usePayrollEntries = activeContractsWithSalary.length === 0 && payrollEntries.length > 0;
-      const salarySource = usePayrollEntries ? payrollEntries : activeContractsWithSalary;
+      // Prefer payroll entries when available because they include consolidated gross/net values
+      // used by payroll screens and monthly payslip generation.
+      const usePayrollEntries = filteredPayrollEntries.length > 0;
+      const salarySource = usePayrollEntries ? filteredPayrollEntries : activeContractsWithSalary;
 
-      const readSalary = (item: any) => {
-        const value = item?.basic_salary ?? item?.basic ?? item?.gross ?? item?.net;
+      const readGross = (item: any) => {
+        const value = item?.gross_salary ?? item?.gross ?? item?.basic_salary ?? item?.basic ?? item?.net_salary ?? item?.net;
         const parsed = parseFloat(value);
         return Number.isFinite(parsed) ? parsed : 0;
       };
 
       const readNet = (item: any) => {
-        const value = item?.net ?? item?.net_salary ?? item?.gross ?? item?.basic ?? item?.basic_salary;
+        const value = item?.net_salary ?? item?.net ?? item?.gross_salary ?? item?.gross ?? item?.basic_salary ?? item?.basic;
         const parsed = parseFloat(value);
         return Number.isFinite(parsed) ? parsed : 0;
       };
 
       const avgGross = salarySource.length > 0
-        ? salarySource.reduce((sum: number, item: any) => sum + readSalary(item), 0) / salarySource.length
+        ? salarySource.reduce((sum: number, item: any) => sum + readGross(item), 0) / salarySource.length
         : 0;
       const avgNet = salarySource.length > 0
         ? salarySource.reduce((sum: number, item: any) => sum + readNet(item), 0) / salarySource.length
         : 0;
-      const totalPayroll = salarySource.reduce((sum: number, item: any) => sum + readSalary(item), 0);
+      const totalPayroll = salarySource.reduce((sum: number, item: any) => sum + readGross(item), 0);
 
       // Department distribution (fallback computed)
       const deptCounts: { [key: string]: number } = {};
