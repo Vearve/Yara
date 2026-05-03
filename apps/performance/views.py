@@ -5,6 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Count, Q, Avg, Max
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_headers
 from datetime import datetime, timedelta
 from .models import KPI
 from .serializers import KPISerializer
@@ -18,6 +21,11 @@ class KPIViewSet(viewsets.ModelViewSet):
     serializer_class = KPISerializer
     permission_classes = [IsAuthenticated]
 
+    # Keep analytics cache short to preserve near-real-time UX while reducing DB load.
+    analytics_cache_ttl = 60
+
+    @method_decorator(cache_page(60))
+    @method_decorator(vary_on_headers('Authorization', 'X-Workspace-ID'))
     @action(detail=False, methods=['get'])
     def summary(self, request):
         """Get analytics summary with all KPIs"""
@@ -189,6 +197,8 @@ class KPIViewSet(viewsets.ModelViewSet):
         )
         return Response(trainings)
 
+    @method_decorator(cache_page(60))
+    @method_decorator(vary_on_headers('Authorization', 'X-Workspace-ID'))
     @action(detail=False, methods=['get'])
     def recruitment_funnel(self, request):
         """Recruitment funnel analytics"""
@@ -212,6 +222,8 @@ class KPIViewSet(viewsets.ModelViewSet):
         
         return Response(funnel)
 
+    @method_decorator(cache_page(60))
+    @method_decorator(vary_on_headers('Authorization', 'X-Workspace-ID'))
     @action(detail=False, methods=['get'])
     def turnover_monthly(self, request):
         """Monthly engagements vs terminations for charting (last 12 months)."""
@@ -257,6 +269,8 @@ class KPIViewSet(viewsets.ModelViewSet):
         data = sorted(month_map.values(), key=lambda x: x['month'])
         return Response(data)
 
+    @method_decorator(cache_page(60))
+    @method_decorator(vary_on_headers('Authorization', 'X-Workspace-ID'))
     @action(detail=False, methods=['get'])
     def department_distribution(self, request):
         """Employee distribution by department"""
@@ -274,6 +288,8 @@ class KPIViewSet(viewsets.ModelViewSet):
         
         return Response(departments)
 
+    @method_decorator(cache_page(60))
+    @method_decorator(vary_on_headers('Authorization', 'X-Workspace-ID'))
     @action(detail=False, methods=['get'])
     def employee_trend(self, request):
         """Monthly employee status trend"""
@@ -360,6 +376,8 @@ class KPIViewSet(viewsets.ModelViewSet):
             })
 
         return Response(data)
+    @method_decorator(cache_page(60))
+    @method_decorator(vary_on_headers('Authorization', 'X-Workspace-ID'))
     @action(detail=False, methods=['get'])
     def monthly_performance_summary(self, request):
         """Complete monthly performance summary for analytics dashboard"""

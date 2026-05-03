@@ -10,6 +10,7 @@ import { HeroBanner } from '../../components/HeroBanner';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function Overview() {
+  const DASHBOARD_REFRESH_MS = 120000;
   const queryClient = useQueryClient();
   const { theme } = useTheme();
   const isLight = theme === 'light';
@@ -63,14 +64,16 @@ export default function Overview() {
       return (await http.get('/api/v1/hcm/employees/summary/', { params })).data;
     },
     enabled: hasToken,
-    refetchInterval: 2000,
+    refetchInterval: DASHBOARD_REFRESH_MS,
+    refetchIntervalInBackground: false,
   });
 
   const { data: projectStats } = useQuery({
     queryKey: ['project-stats', workspaceId],
     queryFn: async () => (await http.get('/api/v1/core/projects/stats/')).data?.results,
     enabled: hasToken,
-    refetchInterval: 2000,
+    refetchInterval: DASHBOARD_REFRESH_MS,
+    refetchIntervalInBackground: false,
   });
 
   const { data: salaryRanges = [] } = useQuery({
@@ -81,7 +84,8 @@ export default function Overview() {
       return Array.isArray(data) ? data : [];
     },
     enabled: hasToken,
-    refetchInterval: 2000,
+    refetchInterval: DASHBOARD_REFRESH_MS,
+    refetchIntervalInBackground: false,
   });
 
   const { data: medicals = [] } = useQuery({
@@ -94,7 +98,8 @@ export default function Overview() {
       return Array.isArray(data) ? data : [];
     },
     enabled: hasToken,
-    refetchInterval: 2000,
+    refetchInterval: DASHBOARD_REFRESH_MS,
+    refetchIntervalInBackground: false,
   });
 
   // Only show charts if there's actual data

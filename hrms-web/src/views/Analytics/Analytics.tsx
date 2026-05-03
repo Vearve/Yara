@@ -73,7 +73,7 @@ export default function Analytics() {
       employeeId: appliedFilters.employeeId,
       dateRange: appliedFilters.dateRange,
     }),
-    refetchInterval: 30000,
+    refetchInterval: 60000,
     refetchIntervalInBackground: false,
   });
 

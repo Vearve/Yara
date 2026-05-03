@@ -293,6 +293,21 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Lusaka'
 
+# Cache Configuration
+# Default to in-memory cache (safe on Render and local). Keep TTL short for analytics freshness.
+CACHE_TTL_SECONDS = config('CACHE_TTL_SECONDS', default=60, cast=int)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'hrms-default-cache',
+        'TIMEOUT': CACHE_TTL_SECONDS,
+        'OPTIONS': {
+            'MAX_ENTRIES': 2000,
+            'CULL_FREQUENCY': 3,
+        },
+    }
+}
+
 # Logging Configuration
 LOGGING = {
     'version': 1,

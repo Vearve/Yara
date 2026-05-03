@@ -95,22 +95,23 @@ export const analyticsApi = {
   async getAnalytics(filters: AnalyticsFilters = {}): Promise<AnalyticsData> {
     try {
       const { departmentId, jobTitle, employeeId, dateRange } = filters;
+      const PAGE_SIZE = 200;
       // Fetch data from multiple endpoints in parallel
       const results = await Promise.allSettled([
-        http.get('/api/v1/hcm/employees/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/hcm/engagements/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/hcm/terminations/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/hcm/departments/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/recruitment/atrs/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/recruitment/candidates/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/hcm/contracts/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/activities/case-studies/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/activities/investigations/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/leave/requests/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/leave/sick-notes/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/leave/absenteeism/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/tracking/trainings/', { params: { page_size: 1000 } }),
-        http.get('/api/v1/payroll/entries/', { params: { page_size: 1000 } }),
+        http.get('/api/v1/hcm/employees/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/hcm/engagements/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/hcm/terminations/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/hcm/departments/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/recruitment/atrs/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/recruitment/candidates/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/hcm/contracts/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/activities/case-studies/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/activities/investigations/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/leave/requests/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/leave/sick-notes/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/leave/absenteeism/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/tracking/trainings/', { params: { page_size: PAGE_SIZE } }),
+        http.get('/api/v1/payroll/entries/', { params: { page_size: PAGE_SIZE } }),
         http.get('/api/v1/performance/kpis/employee_trend/'),
       ]);
 
