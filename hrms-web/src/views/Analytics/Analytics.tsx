@@ -47,12 +47,6 @@ export default function Analytics() {
     };
   }, [queryClient]);
 
-  // Also clear cache whenever workspaceId changes (backup for page navigation)
-  useEffect(() => {
-    queryClient.removeQueries({ exact: false, queryKey: ['departments-list'] });
-    queryClient.removeQueries({ exact: false, queryKey: ['employees-list-min'] });
-  }, [workspaceId, queryClient]);
-
   const { data: departments } = useQuery({
     queryKey: ['departments-list', workspaceId],
     queryFn: async () => {
@@ -71,7 +65,7 @@ export default function Analytics() {
 
   const jobTitles = Array.from(new Set((employees || []).map((e: any) => e.job_title).filter(Boolean))) as string[];
 
-  const { data: analytics, isLoading, error, refetch } = useQuery<AnalyticsData>({
+  const { data: analytics, isLoading, error } = useQuery<AnalyticsData>({
     queryKey: ['analytics', workspaceId, appliedFilters],
     queryFn: () => analyticsApi.getAnalytics({
       departmentId: appliedFilters.departmentId,
@@ -79,7 +73,8 @@ export default function Analytics() {
       employeeId: appliedFilters.employeeId,
       dateRange: appliedFilters.dateRange,
     }),
-    refetchInterval: 2000,
+    refetchInterval: 30000,
+    refetchIntervalInBackground: false,
   });
 
   if (isLoading) {
@@ -172,25 +167,25 @@ export default function Analytics() {
     {
       label: 'Retention Rate',
       value: `${Number(kpiData.retention_rate ?? 0).toFixed(2)}%`,
-      deltaValue: Number(kpiData.retention_change ?? 0).toFixed(2),
+      deltaValue: Number(Number(kpiData.retention_change ?? 0).toFixed(2)),
       color: '#7cff6b',
     },
     {
       label: 'Turnover Rate',
       value: `${Number(kpiData.turnover_rate ?? 0).toFixed(2)}%`,
-      deltaValue: Number(kpiData.turnover_change ?? 0).toFixed(2),
+      deltaValue: Number(Number(kpiData.turnover_change ?? 0).toFixed(2)),
       color: '#ff4fd8',
     },
     {
       label: 'Overtime Rate',
       value: `${Number(kpiData.overtime_rate ?? 0).toFixed(2)}%`,
-      deltaValue: Number(kpiData.overtime_change ?? 0).toFixed(2),
+      deltaValue: Number(Number(kpiData.overtime_change ?? 0).toFixed(2)),
       color: '#ffb547',
     },
     {
       label: 'Offer Acceptance',
       value: `${kpiData.offer_acceptance ?? 0}%`,
-      deltaValue: kpiData.acceptance_change ?? 0,
+      deltaValue: Number(kpiData.acceptance_change ?? 0),
       color: '#3ee7ff',
     },
   ];

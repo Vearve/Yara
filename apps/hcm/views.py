@@ -38,7 +38,9 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     ViewSet for Employee CRUD operations.
     List view uses EmployeeListSerializer, detail uses EmployeeDetailSerializer.
     """
-    queryset = Employee.objects.all()
+    queryset = Employee.objects.select_related(
+        'department', 'employment_type', 'category', 'classification', 'workspace'
+    ).all()
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['department', 'employment_status', 'gender', 'category']

@@ -10,6 +10,28 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  build: {
+    // Raise the warning threshold — antd alone is large by design
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Core React runtime — cached across every page
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // Ant Design — largest dependency, cache separately
+          'vendor-antd': ['antd', '@ant-design/icons'],
+          // Charts — only loaded on analytics/payroll pages
+          'vendor-charts': ['recharts'],
+          // PDF export — only loaded on demand
+          'vendor-pdf': ['jspdf', 'html2canvas'],
+          // Date utilities
+          'vendor-date': ['dayjs'],
+          // HTTP / query
+          'vendor-query': ['@tanstack/react-query', 'axios'],
+        },
+      },
+    },
+  },
   server: {
     port: 5175,
     strictPort: true,
