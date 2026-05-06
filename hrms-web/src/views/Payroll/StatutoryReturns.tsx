@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Card, Row, Col, Select, Button, Space, Typography, message } from 'antd';
-import { FileExcelOutlined, CloudDownloadOutlined } from '@ant-design/icons';
+import { Card, Row, Col, Select, Button, Space, Typography, message, Tooltip } from 'antd';
+import { FileExcelOutlined, CloudDownloadOutlined, FilePdfOutlined } from '@ant-design/icons';
 import http from '../../lib/http';
 
 const { Title, Paragraph } = Typography;
@@ -26,7 +26,7 @@ const years = Array.from({ length: 6 }, (_, i) => currentYear - 3 + i);
 export default function StatutoryReturns() {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(currentYear);
-  const [loading, setLoading] = useState<{ napsa: boolean; nhima: boolean }>({ napsa: false, nhima: false });
+  const [loading, setLoading] = useState<{ napsa: boolean; nhima: boolean; paye: boolean }>({ napsa: false, nhima: false, paye: false });
 
   const downloadReturn = async (type: 'napsa' | 'nhima') => {
     try {
@@ -53,12 +53,61 @@ export default function StatutoryReturns() {
     }
   };
 
+  const handlePayeReturn = async () => {
+    try {
+      setLoading((s) => ({ ...s, paye: true }));
+
+      // Step 1: Find the payroll period for this month/year
+      const periodResponse = await http.get('/api/v1/payroll/periods/', {
+        params: { start_month: month, start_year: year, limit: 1 },
+      });
+
+      const periods = periodResponse.data.results || periodResponse.data;
+      if (!periods || periods.length === 0) {
+        message.error('No payroll period found for the selected month/year. Please ensure the period exists.');
+        setLoading((s) => ({ ...s, paye: false }));
+        return;
+      }
+
+      const periodId = periods[0].id;
+
+      // Step 2: Generate PAYE return for this period
+      const generateResponse = await http.post('/api/v1/payroll/paye-returns/generate/', {
+        period: periodId,
+      });
+
+      const payeReturnId = generateResponse.data.id;
+      message.success('PAYE return generated successfully');
+
+      // Step 3: Export as CSV
+      const csvResponse = await http.get(`/api/v1/payroll/paye-returns/${payeReturnId}/export_csv/`, {
+        responseType: 'blob',
+      });
+
+      const blob = new Blob([csvResponse.data], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `paye-return-${year}-${String(month).padStart(2, '0')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      message.success('PAYE return CSV exported successfully');
+    } catch (error: any) {
+      console.error('PAYE export error:', error);
+      message.error(error.response?.data?.detail || 'PAYE export failed. Please check the selected period.');
+    } finally {
+      setLoading((s) => ({ ...s, paye: false }));
+    }
+  };
+
   return (
     <div style={{ padding: 24 }}>
       <Card style={{ marginBottom: 16 }}>
         <Title level={4}>Statutory Returns</Title>
         <Paragraph type="secondary" style={{ marginBottom: 0 }}>
-          Export monthly NHIMA and NAPSA returns as Excel files for filing. Select the period and download the required return.
+          Export monthly NHIMA, NAPSA, and PAYE tax returns as Excel/CSV files for filing. Select the period and download the required return.
         </Paragraph>
       </Card>
 
@@ -94,6 +143,22 @@ export default function StatutoryReturns() {
                 >
                   Download Excel
                 </Button>
+              </Space>
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card size="small" title="PAYE Return (ZRA)" bordered>
+              <Space>
+                <Tooltip title="Generates and exports PAYE tax return with employee details (TPIN, gross pay, tax credit, tax payable)">
+                  <Button
+                    type="primary"
+                    icon={<FilePdfOutlined />}
+                    onClick={handlePayeReturn}
+                    loading={loading.paye}
+                  >
+                    Generate & Download CSV
+                  </Button>
+                </Tooltip>
               </Space>
             </Card>
           </Col>
