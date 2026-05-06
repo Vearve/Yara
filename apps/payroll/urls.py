@@ -7,6 +7,7 @@ from .views import (
     TitleBreakdownViewSet,
     PayrollPeriodViewSet,
     PayslipViewSet,
+    PAYEReturnViewSet,
 )
 
 app_name = 'payroll'
@@ -18,6 +19,7 @@ router.register(r'salary-ranges', SalaryRangeViewSet, basename='salary-range')
 router.register(r'title-breakdowns', TitleBreakdownViewSet, basename='title-breakdown')
 router.register(r'periods', PayrollPeriodViewSet, basename='period')
 router.register(r'payslips', PayslipViewSet, basename='payslip')
+router.register(r'paye-returns', PAYEReturnViewSet, basename='paye-return')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -567,3 +567,143 @@ class PayslipAuditLog(models.Model):
     
     def __str__(self):
         return f"{self.payslip} - {self.action} by {self.user or 'System'} on {self.timestamp}"
+
+
+class PAYEReturn(models.Model):
+    """
+    PAYE (Pay As You Earn) statutory return for a specific period and workspace.
+    Aggregates employee tax data for submission to tax authority.
+    
+    Columns:
+    - TPIN: Employee's Tax PIN
+    - Full Name: Employee full name
+    - Employee Nature: Contract type (PERMANENT, CONTRACT, CONTRACTOR, etc.)
+    - Gross Pay: Total taxable income
+    - Chargeable Amount: Gross Pay minus tax-exempt deductions (e.g., NAPSA)
+    - Tax Credit: Personal relief allowances
+    - Tax Payable: Calculated PAYE tax liability
+    """
+    workspace = models.ForeignKey('core.Workspace', on_delete=models.CASCADE, related_name='paye_returns')
+    period = models.ForeignKey(PayrollPeriod, on_delete=models.CASCADE, related_name='paye_returns')
+    
+    # Summary
+    total_employees = models.PositiveIntegerField(default=0)
+    total_gross_pay = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    total_chargeable_amount = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    total_tax_credit = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    total_tax_payable = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    
+    # Status
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('DRAFT', 'Draft'),
+            ('SUBMITTED', 'Submitted'),
+            ('ACCEPTED', 'Accepted'),
+            ('REJECTED', 'Rejected'),
+        ],
+        default='DRAFT',
+        help_text="Return submission status"
+    )
+    
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    submission_notes = models.TextField(blank=True, help_text="Notes about submission or rejection")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    
+    class Meta:
+        unique_together = [['workspace', 'period']]
+        ordering = ['-period__year', '-period__month']
+        verbose_name_plural = "PAYE Returns"
+    
+    def __str__(self):
+        return f"PAYE Return - {self.workspace.name} {self.period}"
+    
+    def calculate(self):
+        """
+        Calculate the PAYE return by aggregating payslip data for the period.
+        Updates the summary fields.
+        """
+        from django.db.models import Sum, Q
+        
+        # Get all active payslips for this workspace and period
+        payslips = Payslip.objects.filter(
+            period=self.period,
+            employee__workspace=self.workspace,
+            is_active=True,
+            is_processed=True
+        )
+        
+        self.total_employees = payslips.count()
+        
+        # Aggregate amounts
+        aggregates = payslips.aggregate(
+            gross_sum=Sum('gross_salary'),
+            paye_sum=Sum('paye_tax'),
+            napsa_sum=Sum('napsa_employee'),
+        )
+        
+        self.total_gross_pay = aggregates['gross_sum'] or Decimal('0')
+        self.total_tax_payable = aggregates['paye_sum'] or Decimal('0')
+        
+        # Chargeable amount = Gross - NAPSA employee contribution (tax-exempt)
+        napsa_total = aggregates['napsa_sum'] or Decimal('0')
+        self.total_chargeable_amount = self.total_gross_pay - napsa_total
+        
+        # Tax credit (basic personal relief) - standard K30,600 per month in Zambia
+        # This can be workspace-configured, but we use a fixed amount for now
+        tax_credit_per_employee = Decimal('30600')
+        self.total_tax_credit = tax_credit_per_employee * self.total_employees
+        
+        self.save(update_fields=[
+            'total_employees',
+            'total_gross_pay',
+            'total_chargeable_amount',
+            'total_tax_credit',
+            'total_tax_payable',
+        ])
+    
+    def generate_detailed_rows(self):
+        """
+        Generate detailed PAYE return rows (one per employee).
+        Returns list of dicts with TPIN, Full Name, Employee Nature, Gross Pay, etc.
+        """
+        payslips = Payslip.objects.filter(
+            period=self.period,
+            employee__workspace=self.workspace,
+            is_active=True,
+            is_processed=True
+        ).select_related('employee')
+        
+        rows = []
+        for payslip in payslips:
+            employee = payslip.employee
+            
+            # Chargeable amount = Gross - NAPSA
+            chargeable = payslip.gross_salary - payslip.napsa_employee
+            
+            # Tax credit (basic personal relief)
+            tax_credit = Decimal('30600')
+            
+            # Tax payable is already calculated in the payslip
+            tax_payable = payslip.paye_tax
+            
+            row = {
+                'tpin': employee.tpin or '',
+                'full_name': employee.full_name,
+                'employee_nature': employee.get_contractor_type_display(),  # Human readable
+                'contractor_type': employee.contractor_type,  # Machine readable
+                'gross_pay': payslip.gross_salary,
+                'chargeable_amount': chargeable,
+                'tax_credit': tax_credit,
+                'tax_payable': tax_payable,
+                'employee_id': employee.employee_id,
+            }
+            rows.append(row)
+        
+        # Sort by TPIN or employee name
+        rows.sort(key=lambda x: x['tpin'] or x['full_name'])
+        
+        return rows

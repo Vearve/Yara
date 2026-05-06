@@ -12,7 +12,10 @@ from datetime import datetime, timedelta
 import csv
 from io import StringIO
 from django.db.models import Q
-from .models import PayrollComponent, PayrollEntry, SalaryRange, TitleBreakdown, PayrollPeriod, Payslip, PayslipDeduction, PayslipAuditLog
+from .models import (
+    PayrollComponent, PayrollEntry, SalaryRange, TitleBreakdown, PayrollPeriod,
+    Payslip, PayslipDeduction, PayslipAuditLog, PAYEReturn
+)
 from .utils import get_tax_band_breakdown, calculate_gross_from_net
 from .pdf_generator import generate_payslip_pdf
 from .serializers import (
@@ -24,6 +27,8 @@ from .serializers import (
     PayslipSerializer,
     PayslipCreateSerializer,
     PayslipAuditLogSerializer,
+    PAYEReturnSerializer,
+    PAYEReturnDetailRowSerializer,
 )
 
 
@@ -1102,3 +1107,170 @@ class PayslipViewSet(viewsets.ModelViewSet):
             return response
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PAYEReturnViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for PAYE (Pay As You Earn) statutory returns.
+    Provides endpoints to generate, view, and manage PAYE returns by period.
+    """
+    serializer_class = None  # Will be set in __init__
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['period', 'status']
+    ordering_fields = ['period__year', 'period__month', 'created_at']
+    ordering = ['-period__year', '-period__month']
+    
+    def get_queryset(self):
+        """Filter PAYE returns by workspace."""
+        if hasattr(self.request, 'workspace') and self.request.workspace:
+            return PAYEReturn.objects.filter(
+                workspace=self.request.workspace
+            ).select_related('period', 'workspace', 'created_by')
+        return PAYEReturn.objects.none()
+    
+    def get_serializer_class(self):
+        """Use appropriate serializer based on action."""
+        from .serializers import PAYEReturnSerializer
+        if self.action == 'retrieve_detail':
+            from .serializers import PAYEReturnDetailRowSerializer
+            return PAYEReturnDetailRowSerializer
+        return PAYEReturnSerializer
+    
+    def perform_create(self, serializer):
+        """Automatically set workspace and user."""
+        workspace = getattr(self.request, 'workspace', None)
+        serializer.save(workspace=workspace, created_by=self.request.user)
+    
+    @action(detail=False, methods=['post'])
+    def generate(self, request):
+        """
+        Generate a PAYE return for a given period.
+        POST: { "period": 1 }  (period ID)
+        """
+        from .models import PAYEReturn
+        from .serializers import PAYEReturnSerializer
+        
+        period_id = request.data.get('period')
+        if not period_id:
+            return Response(
+                {'error': 'period ID is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            period = PayrollPeriod.objects.get(id=period_id)
+            workspace = getattr(request, 'workspace', None)
+            
+            if not workspace:
+                return Response(
+                    {'error': 'Workspace context is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Get or create PAYE return for this period and workspace
+            paye_return, created = PAYEReturn.objects.get_or_create(
+                workspace=workspace,
+                period=period,
+                defaults={'created_by': request.user}
+            )
+            
+            # Calculate the return
+            paye_return.calculate()
+            
+            serializer = PAYEReturnSerializer(paye_return)
+            status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+            return Response(serializer.data, status=status_code)
+        
+        except PayrollPeriod.DoesNotExist:
+            return Response(
+                {'error': 'Period not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    @action(detail=True, methods=['get'])
+    def detail_rows(self, request, pk=None):
+        """
+        Get detailed PAYE return rows (one per employee) with all columns.
+        Returns CSV-friendly list of rows.
+        """
+        from .serializers import PAYEReturnDetailRowSerializer
+        
+        try:
+            paye_return = self.get_object()
+            rows = paye_return.generate_detailed_rows()
+            
+            serializer = PAYEReturnDetailRowSerializer(rows, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    @action(detail=True, methods=['get'])
+    def export_csv(self, request, pk=None):
+        """
+        Export PAYE return as CSV file.
+        Columns: TPIN, Full Name, Employee Nature, Gross Pay, Chargeable Amount, Tax Credit, Tax Payable
+        """
+        try:
+            paye_return = self.get_object()
+            rows = paye_return.generate_detailed_rows()
+            
+            # Create CSV response
+            response = HttpResponse(content_type='text/csv')
+            period_label = f"{paye_return.period.get_month_display()}_{paye_return.period.year}"
+            response['Content-Disposition'] = f'attachment; filename="paye-return-{period_label}.csv"'
+            
+            writer = csv.DictWriter(response, fieldnames=[
+                'tpin', 'full_name', 'employee_nature', 'gross_pay',
+                'chargeable_amount', 'tax_credit', 'tax_payable', 'employee_id'
+            ])
+            
+            writer.writeheader()
+            for row in rows:
+                writer.writerow({
+                    'tpin': row['tpin'],
+                    'full_name': row['full_name'],
+                    'employee_nature': row['employee_nature'],
+                    'gross_pay': row['gross_pay'],
+                    'chargeable_amount': row['chargeable_amount'],
+                    'tax_credit': row['tax_credit'],
+                    'tax_payable': row['tax_payable'],
+                    'employee_id': row['employee_id'],
+                })
+            
+            return response
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    @action(detail=True, methods=['post'])
+    def mark_submitted(self, request, pk=None):
+        """
+        Mark PAYE return as submitted to tax authority.
+        POST: optional { "submission_notes": "..." }
+        """
+        from .serializers import PAYEReturnSerializer
+        
+        try:
+            paye_return = self.get_object()
+            paye_return.status = 'SUBMITTED'
+            paye_return.submitted_at = timezone.now()
+            paye_return.submission_notes = request.data.get('submission_notes', '')
+            paye_return.save()
+            
+            serializer = PAYEReturnSerializer(paye_return)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )

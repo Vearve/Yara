@@ -335,3 +335,50 @@ class PayslipAuditLogSerializer(serializers.ModelSerializer):
             'timestamp', 'changes'
         ]
         read_only_fields = ['id', 'timestamp']
+
+
+class PAYEReturnDetailRowSerializer(serializers.Serializer):
+    """
+    Serializer for detailed PAYE return row (one employee per row).
+    """
+    tpin = serializers.CharField(max_length=50, allow_blank=True)
+    full_name = serializers.CharField(max_length=200)
+    employee_nature = serializers.CharField(max_length=50)  # Contract type display
+    contractor_type = serializers.CharField(max_length=20)  # Machine readable
+    gross_pay = serializers.DecimalField(max_digits=15, decimal_places=2)
+    chargeable_amount = serializers.DecimalField(max_digits=15, decimal_places=2)
+    tax_credit = serializers.DecimalField(max_digits=15, decimal_places=2)
+    tax_payable = serializers.DecimalField(max_digits=15, decimal_places=2)
+    employee_id = serializers.CharField(max_length=50)
+
+
+class PAYEReturnSerializer(serializers.ModelSerializer):
+    """
+    Serializer for PAYE Return summary.
+    """
+    workspace_name = serializers.CharField(source='workspace.name', read_only=True)
+    period_display = serializers.SerializerMethodField()
+    created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True, allow_blank=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    
+    class Meta:
+        model = None  # Will use from import below
+        fields = [
+            'id', 'workspace', 'workspace_name', 'period', 'period_display',
+            'total_employees', 'total_gross_pay', 'total_chargeable_amount',
+            'total_tax_credit', 'total_tax_payable',
+            'status', 'status_display', 'submitted_at', 'submission_notes',
+            'created_at', 'updated_at', 'created_by', 'created_by_name'
+        ]
+        read_only_fields = ['total_employees', 'total_gross_pay', 'total_chargeable_amount',
+                           'total_tax_credit', 'total_tax_payable', 'created_at', 'updated_at']
+    
+    def get_period_display(self, obj):
+        """Return period as 'Month Year' format."""
+        return f"{obj.period.get_month_display()} {obj.period.year}"
+
+
+# Update Meta for PAYEReturnSerializer
+from .models import PAYEReturn
+PAYEReturnSerializer.Meta.model = PAYEReturn
+
