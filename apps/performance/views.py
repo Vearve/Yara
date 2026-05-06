@@ -280,10 +280,15 @@ class KPIViewSet(viewsets.ModelViewSet):
         
         if hasattr(request, 'workspace') and request.workspace:
             # Filter departments that have employees in this workspace
-            dept_qs = dept_qs.filter(employee__workspace=request.workspace).distinct()
+            dept_qs = dept_qs.filter(employees__workspace=request.workspace).distinct()
         
         departments = dept_qs.annotate(
-            employee_count=Count('employee', filter=Q(employee__workspace=request.workspace) if hasattr(request, 'workspace') and request.workspace else Q())
+            employee_count=Count(
+                'employees',
+                filter=Q(employees__workspace=request.workspace)
+                if hasattr(request, 'workspace') and request.workspace
+                else Q(),
+            )
         ).values('name', 'employee_count')
         
         return Response(departments)
