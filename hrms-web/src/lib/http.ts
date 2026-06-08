@@ -10,19 +10,32 @@ const normalizedBaseURL = envBaseURL
 
 const baseURL = normalizedBaseURL;
 
-const http = axios.create({ baseURL });
+const http = axios.create({
+  baseURL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 http.interceptors.request.use((config) => {
   const token = localStorage.getItem('access');
   const workspaceId = localStorage.getItem('workspaceId');
-  if (token) {
-    const headers: AxiosRequestHeaders = (config.headers || {}) as AxiosRequestHeaders;
-    headers.Authorization = `Bearer ${token}`;
-    if (workspaceId) {
-      headers['X-Workspace-ID'] = workspaceId as any;
-    }
-    config.headers = headers;
+  
+  // Ensure proper JSON encoding and Content-Type header
+  if (config.data && typeof config.data === 'object') {
+    config.data = JSON.stringify(config.data);
   }
+  
+  const headers: AxiosRequestHeaders = (config.headers || {}) as AxiosRequestHeaders;
+  headers['Content-Type'] = 'application/json';
+  
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  if (workspaceId) {
+    headers['X-Workspace-ID'] = workspaceId as any;
+  }
+  config.headers = headers;
   return config;
 });
 
@@ -35,10 +48,16 @@ http.interceptors.response.use(
       const refresh = localStorage.getItem('refresh');
       if (refresh) {
         try {
-          const res = await http.post('/api/v1/auth/token/refresh/', { refresh });
+          const refreshPayload = JSON.stringify({ refresh });
+          const res = await http.post('/api/v1/auth/token/refresh/', refreshPayload, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
           localStorage.setItem('access', res.data.access);
           const hdrs: AxiosRequestHeaders = (original.headers || {}) as AxiosRequestHeaders;
           hdrs.Authorization = `Bearer ${res.data.access}`;
+          hdrs['Content-Type'] = 'application/json';
           original.headers = hdrs;
           return http(original as any);
         } catch (e) {
