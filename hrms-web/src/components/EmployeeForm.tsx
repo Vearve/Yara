@@ -234,7 +234,7 @@ export default function EmployeeForm({ visible, onClose, onSuccess, employee }: 
                 showSearch
                 placeholder="Select department"
                 optionFilterProp="label"
-                options={(departments || []).map((d: any) => ({ value: d.id, label: d.name }))}
+                options={departmentOptions}
               />
             </Form.Item>
           </Col>
@@ -244,7 +244,7 @@ export default function EmployeeForm({ visible, onClose, onSuccess, employee }: 
                 showSearch
                 placeholder="Select job title"
                 optionFilterProp="label"
-                options={(jobs || []).map((j: any) => ({ value: j.title, label: j.title }))}
+                options={jobOptions}
               />
             </Form.Item>
           </Col>
