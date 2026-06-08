@@ -91,20 +91,17 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 
 class EmployeeListSerializer(serializers.ModelSerializer):
-    """Lightweight serializer for lists."""
+    """Ultra-lightweight serializer for list views - only essential fields."""
     employment_type_name = serializers.CharField(source='employment_type.name', read_only=True)
-    department_name = serializers.CharField(source='department.name', read_only=True)
-    category_name = serializers.CharField(source='category.name', read_only=True)
-    classification_name = serializers.CharField(source='classification.name', read_only=True)
+    department_name = serializers.CharField(source='department.name', read_only=True, allow_null=True)
     
     class Meta:
         model = Employee
         fields = [
             'id', 'employee_id', 'first_name', 'last_name', 'full_name',
-            'email', 'phone', 'job_title', 'department', 'department_name',
-            'employment_type', 'employment_type_name', 'category', 'category_name',
-            'classification', 'classification_name',
-            'employment_status', 'hire_date', 'gender', 'date_of_birth', 'nationality', 'photo', 'created_at'
+            'email', 'job_title', 'department', 'department_name',
+            'employment_type', 'employment_type_name',
+            'employment_status', 'hire_date', 'photo', 'created_at'
         ]
         read_only_fields = ['id', 'created_at', 'full_name']
 
@@ -117,12 +114,21 @@ class EmployeeListSerializer(serializers.ModelSerializer):
         return data
 
 
+class DepartmentMinimalSerializer(serializers.ModelSerializer):
+    """Minimal department info - no jobs expansion (N+1 prevention)."""
+    manager_name = serializers.CharField(source='manager.full_name', read_only=True, allow_null=True)
+    
+    class Meta:
+        model = Department
+        fields = ['id', 'name', 'code', 'manager', 'manager_name']
+
+
 class EmployeeDetailSerializer(serializers.ModelSerializer):
-    """Full employee details."""
-    employment_type_detail = EmploymentTypeSerializer(source='employment_type', read_only=True)
-    department_detail = DepartmentSerializer(source='department', read_only=True)
-    category_detail = EmployeeCategorySerializer(source='category', read_only=True)
-    classification_detail = EmployeeClassificationSerializer(source='classification', read_only=True)
+    """Full employee details - optimized to prevent N+1 queries."""
+    employment_type_name = serializers.CharField(source='employment_type.name', read_only=True)
+    department_detail = DepartmentMinimalSerializer(source='department', read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True, allow_null=True)
+    classification_name = serializers.CharField(source='classification.name', read_only=True, allow_null=True)
     
     class Meta:
         model = Employee
@@ -131,9 +137,9 @@ class EmployeeDetailSerializer(serializers.ModelSerializer):
             'nrc', 'nrc_number', 'passport', 'tpin', 'nhima', 'sss_number', 'napsa_number',
             'date_of_birth', 'gender', 'nationality',
             'email', 'phone', 'house_address', 'residential_area',
-            'employment_type', 'employment_type_detail',
+            'employment_type', 'employment_type_name',
             'employment_status', 'job_title', 'department', 'department_detail',
-            'category', 'category_detail', 'classification', 'classification_detail', 
+            'category', 'category_name', 'classification', 'classification_name', 
             'point_of_hire', 'contractor_type',
             'hire_date', 'next_of_kin_name', 'next_of_kin_relationship', 'next_of_kin_phone',
             'photo', 'created_at', 'updated_at'

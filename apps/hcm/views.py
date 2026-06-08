@@ -11,9 +11,11 @@ from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import ValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Count
 from django.utils import timezone
 from django.http import HttpResponse
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from datetime import datetime, timedelta
 import pandas as pd
 import csv
@@ -109,109 +111,56 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def summary(self, request):
-        """Return live counts for dashboard cards and current situations."""
-        # DEBUG: Log workspace context
-        import sys
-        print(f"[SUMMARY] workspace_id from request: {getattr(request, 'workspace_id', 'NOT SET')}", file=sys.stderr)
-        print(f"[SUMMARY] workspace object: {getattr(request, 'workspace', 'NOT SET')}", file=sys.stderr)
-        
+        """Return live counts for dashboard cards using optimized aggregation."""
         today = timezone.now().date()
         in_30 = today + timedelta(days=30)
-        dept_id = request.query_params.get('department')
-        search = request.query_params.get('search', '').strip()
-        date_from_raw = request.query_params.get('date_from')
-        date_to_raw = request.query_params.get('date_to')
-
-        date_from = None
-        date_to = None
-        try:
-            if date_from_raw:
-                date_from = datetime.strptime(date_from_raw, '%Y-%m-%d').date()
-            if date_to_raw:
-                date_to = datetime.strptime(date_to_raw, '%Y-%m-%d').date()
-        except ValueError:
-            date_from = None
-            date_to = None
-
+        
+        # Get workspace-filtered queryset
         employees_qs = Employee.objects.all()
         if hasattr(request, 'workspace') and request.workspace:
             employees_qs = employees_qs.filter(workspace=request.workspace)
-            print(f"[SUMMARY] Filtered by workspace {request.workspace.id}: {employees_qs.count()} employees", file=sys.stderr)
-        else:
-            print(f"[SUMMARY] NO WORKSPACE FILTER - returning all {employees_qs.count()} employees", file=sys.stderr)
-        if dept_id:
-            employees_qs = employees_qs.filter(department_id=dept_id)
-        if search:
-            employees_qs = employees_qs.filter(
-                Q(first_name__icontains=search)
-                | Q(last_name__icontains=search)
-                | Q(employee_id__icontains=search)
-                | Q(email__icontains=search)
-            )
-        if date_from and date_to:
-            employees_qs = employees_qs.filter(hire_date__gte=date_from, hire_date__lte=date_to)
-
-        # Employee status counts (Total = active headcount)
+        
+        # Single aggregation for all employee status counts
+        employee_counts = employees_qs.aggregate(
+            total_active=Count('id', filter=Q(employment_status='ACTIVE')),
+            on_leave=Count('id', filter=Q(employment_status='ON_LEAVE')),
+            suspended=Count('id', filter=Q(employment_status='SUSPENDED')),
+            terminated=Count('id', filter=Q(employment_status='TERMINATED'))
+        )
+        
+        # Contracts expiring in next 30 days (single query)
         active_qs = employees_qs.filter(employment_status='ACTIVE')
-        total = active_qs.count()
-        active = total
+        expiring_30d = Contract.objects.filter(
+            employee__in=active_qs,
+            status='ACTIVE',
+            end_date__gte=today,
+            end_date__lte=in_30
+        ).count()
         
-        # Calculate absenteeism: employees currently on approved leave (today falls within leave period)
+        # Sick notes and leave data with aggregation
+        sick_data = {'pending': 0, 'total': 0}
+        leave_data = {'approved_days': 0, 'total_requests': 0}
+        hearings_active = 0
+        investigations_active = 0
+        
         try:
-            from apps.leave.models import LeaveRequest
-            current_leave_qs = LeaveRequest.objects.filter(
-                status='APPROVED',
-                start_date__lte=today,
-                end_date__gte=today
-            )
-            if hasattr(request, 'workspace') and request.workspace:
-                current_leave_qs = current_leave_qs.filter(employee__workspace=request.workspace)
-            if dept_id or search or (date_from and date_to):
-                current_leave_qs = current_leave_qs.filter(employee__in=employees_qs)
+            from apps.leave.models import SickNote, LeaveRequest
             
-            # Count unique employees currently on leave
-            on_leave = current_leave_qs.values('employee').distinct().count()
-        except Exception:
-            # Fallback to employment status if leave app not available
-            on_leave = employees_qs.filter(employment_status='ON_LEAVE').count()
-        
-        suspended = employees_qs.filter(employment_status='SUSPENDED').count()
-        terminated = employees_qs.filter(employment_status='TERMINATED').count()
-
-        # Contracts expiring in next 30 days
-        contracts_qs = Contract.objects.filter(status='ACTIVE', end_date__isnull=False)
-        if hasattr(request, 'workspace') and request.workspace:
-            contracts_qs = contracts_qs.filter(employee__workspace=request.workspace)
-        if dept_id or search or (date_from and date_to):
-            contracts_qs = contracts_qs.filter(employee__in=active_qs)
-        else:
-            contracts_qs = contracts_qs.filter(employee__in=active_qs)
-        if date_from and date_to:
-            contracts_qs = contracts_qs.filter(end_date__gte=date_from, end_date__lte=date_to)
-        else:
-            contracts_qs = contracts_qs.filter(end_date__gte=today, end_date__lte=in_30)
-        expiring_30d = contracts_qs.count()
-
-        # Cross-app: sick notes active today
-        try:
-            from apps.leave.models import SickNote
+            # Sick notes aggregation
             sick_qs = SickNote.objects.filter(
                 start_date__lte=today,
                 end_date__gte=today
             )
             if hasattr(request, 'workspace') and request.workspace:
                 sick_qs = sick_qs.filter(employee__workspace=request.workspace)
-            if dept_id or search or (date_from and date_to):
-                sick_qs = sick_qs.filter(employee__in=employees_qs)
-            sick_pending = sick_qs.filter(status='PENDING').count()
-            sick_total = sick_qs.count()
-        except Exception:
-            sick_pending = 0
-            sick_total = 0
-
-        try:
-            from apps.leave.models import LeaveRequest
-            # Count leave requests active today
+            
+            sick_counts = sick_qs.aggregate(
+                pending=Count('id', filter=Q(status='PENDING')),
+                total=Count('id')
+            )
+            sick_data = {'pending': sick_counts['pending'], 'total': sick_counts['total']}
+            
+            # Leave requests aggregation
             leave_qs = LeaveRequest.objects.filter(
                 status='APPROVED',
                 start_date__lte=today,
@@ -219,46 +168,44 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             )
             if hasattr(request, 'workspace') and request.workspace:
                 leave_qs = leave_qs.filter(employee__workspace=request.workspace)
-            if dept_id or search or (date_from and date_to):
-                leave_qs = leave_qs.filter(employee__in=employees_qs)
-            leave_total = leave_qs.count()
-            leave_days = leave_qs.aggregate(total=Sum('days')).get('total') or 0
+            
+            leave_counts = leave_qs.aggregate(
+                total=Count('id'),
+                days=Sum('days')
+            )
+            leave_data = {
+                'total_requests': leave_counts['total'],
+                'approved_days': leave_counts['days'] or 0
+            }
         except Exception:
-            leave_days = 0
-            leave_total = 0
-
+            pass
+        
+        # Hearings and investigations (minimal queries)
         try:
             from apps.activities.models import Hearing, Investigation
-            hearings_qs = Hearing.objects.exclude(status='CONCLUDED')
-            investigations_qs = Investigation.objects.exclude(status__in=['COMPLETED', 'CLOSED'])
+            
+            hearing_qs = Hearing.objects.exclude(status='CONCLUDED')
+            investigation_qs = Investigation.objects.exclude(status__in=['COMPLETED', 'CLOSED'])
+            
             if hasattr(request, 'workspace') and request.workspace:
-                hearings_qs = hearings_qs.filter(related_employee__workspace=request.workspace)
-                investigations_qs = investigations_qs.filter(related_employee__workspace=request.workspace)
-            if dept_id or search or (date_from and date_to):
-                hearings_qs = hearings_qs.filter(related_employee__in=employees_qs)
-                investigations_qs = investigations_qs.filter(related_employee__in=employees_qs)
-            hearings_active = hearings_qs.count()
-            investigations_active = investigations_qs.count()
+                hearing_qs = hearing_qs.filter(related_employee__workspace=request.workspace)
+                investigation_qs = investigation_qs.filter(related_employee__workspace=request.workspace)
+            
+            hearings_active = hearing_qs.count()
+            investigations_active = investigation_qs.count()
         except Exception:
-            hearings_active = 0
-            investigations_active = 0
+            pass
 
         return Response({
             'employees': {
-                'total': total,
-                'active': active,
-                'on_leave': on_leave,
-                'suspended': suspended,
-                'terminated': terminated,
+                'total': employee_counts['total_active'],
+                'active': employee_counts['total_active'],
+                'on_leave': employee_counts['on_leave'],
+                'suspended': employee_counts['suspended'],
+                'terminated': employee_counts['terminated'],
             },
-            'sick_notes': {
-                'pending': sick_pending,
-                'total': sick_total,
-            },
-            'leave': {
-                'approved_days': leave_days,
-                'total_requests': leave_total,
-            },
+            'sick_notes': sick_data,
+            'leave': leave_data,
             'situations': {
                 'contracts_expiring_30d': expiring_30d,
                 'hearings_active': hearings_active,

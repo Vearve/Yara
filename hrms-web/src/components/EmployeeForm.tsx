@@ -1,8 +1,8 @@
 import { Modal, Form, Input, Select, DatePicker, message, Upload, Avatar, Row, Col } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import http from '../lib/http';
 
 interface EmployeeFormProps {
@@ -16,23 +16,52 @@ export default function EmployeeForm({ visible, onClose, onSuccess, employee }: 
   const [form] = Form.useForm();
   const [photo, setPhoto] = useState<string | null>(employee?.photo || null);
   const selectedDepartment = Form.useWatch('department', form);
+  const queryClient = useQueryClient();
+  const workspaceId = localStorage.getItem('workspaceId');
 
+  // Cache departments for 10 minutes with stale-while-revalidate
+  // Include workspace in queryKey to separate data across workspaces
   const { data: departments = [] } = useQuery({
-    queryKey: ['departments-min'],
+    queryKey: ['departments', workspaceId],
     queryFn: async () => {
-      const res = await http.get('/api/v1/hcm/departments/', { params: { page_size: 200 } });
+      const res = await http.get('/api/v1/hcm/departments/', { 
+        params: { page_size: 500 } 
+      });
       return res.data?.results ?? res.data ?? [];
     },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // Cache for 30 minutes in background
   });
 
+  // Cache jobs per department, with stale-while-revalidate
   const { data: jobs = [] } = useQuery({
-    queryKey: ['jobs', selectedDepartment],
+    queryKey: ['jobs', selectedDepartment, workspaceId],
     queryFn: async () => {
-      const params = selectedDepartment ? { department: selectedDepartment, page_size: 200 } : { page_size: 200 };
-      const res = await http.get('/api/v1/hcm/jobs/', { params });
+      if (!selectedDepartment) return [];
+      const res = await http.get('/api/v1/hcm/jobs/', { 
+        params: { department: selectedDepartment, page_size: 500 } 
+      });
       return res.data?.results ?? res.data ?? [];
     },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // Cache for 30 minutes
+    enabled: !!selectedDepartment,
   });
+
+  // Memoize department and job options to avoid re-renders
+  const departmentOptions = useMemo(() => 
+    departments.map((dept: any) => ({
+      label: dept.name,
+      value: dept.id,
+    })), [departments]
+  );
+
+  const jobOptions = useMemo(() => 
+    jobs.map((job: any) => ({
+      label: job.title,
+      value: job.id,
+    })), [jobs]
+  );
 
   const handlePhotoUpload = (info: any) => {
     if (info.file.originFileObj) {
@@ -62,6 +91,7 @@ export default function EmployeeForm({ visible, onClose, onSuccess, employee }: 
         hire_date: values.hire_date?.format('YYYY-MM-DD'),
         photo: photo,
       };
+      
       if (employee) {
         await http.put(`/api/v1/hcm/employees/${employee.id}/`, payload);
         message.success('Employee updated');
@@ -69,11 +99,15 @@ export default function EmployeeForm({ visible, onClose, onSuccess, employee }: 
         await http.post('/api/v1/hcm/employees/', payload);
         message.success('Employee created');
       }
+      
+      // Invalidate employee list query to refetch
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      
       onSuccess();
       onClose();
       form.resetFields();
     } catch (e: any) {
-      message.error('Failed to save employee');
+      message.error(e?.response?.data?.detail || 'Failed to save employee');
     }
   };
 
@@ -88,6 +122,7 @@ export default function EmployeeForm({ visible, onClose, onSuccess, employee }: 
       }}
       onOk={() => form.submit()}
       width={750}
+      destroyOnClose
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit} initialValues={initialValues}>
         {/* Photo Upload Section */}

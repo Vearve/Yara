@@ -13,45 +13,38 @@ export default function Login() {
       localStorage.setItem('access', res.data.access);
       localStorage.setItem('refresh', res.data.refresh);
 
-      // Get user's workspaces to decide landing page
-      try {
-        const wsRes = await http.get('/api/v1/core/workspaces/my_workspaces/');
-        const memberships = wsRes.data;
+      // Use comprehensive workspace data from JWT response - NO SECOND API CALL NEEDED!
+      const workspaces = res.data.workspaces || [];
+      const defaultWsId = res.data.default_workspace_id;
+      const selectedWsId = res.data.selected_workspace_id;
 
-        if (Array.isArray(memberships)) {
-          if (memberships.length === 1) {
-            // Single workspace user → set workspace and go to dashboard
-            localStorage.setItem('workspaceId', String(memberships[0]?.workspace?.id));
-            localStorage.setItem('workspaceRole', memberships[0]?.role || 'VIEWER');
-            localStorage.setItem('isConsultant', '0');
-            message.success('Welcome back');
-            nav('/dashboard');
-          } else if (memberships.length > 1) {
-            // Multi-workspace user → prefer consultant workspace as Home/Portfolio context
-            const consultantWs = memberships.find((m: any) => m?.workspace?.workspace_type === 'CONSULTANT');
-            const defaultWs = memberships.find((m: any) => m.is_default) || memberships[0];
-            const homeWs = consultantWs || defaultWs;
+      if (Array.isArray(workspaces) && workspaces.length > 0) {
+        if (workspaces.length === 1) {
+          // Single workspace user → set workspace and go to dashboard
+          localStorage.setItem('workspaceId', String(workspaces[0]?.id));
+          localStorage.setItem('workspaceRole', workspaces[0]?.role || 'VIEWER');
+          localStorage.setItem('isConsultant', '0');
+          message.success('Welcome back');
+          nav('/dashboard');
+        } else {
+          // Multi-workspace user → find consultant workspace or use default
+          const consultantWs = workspaces.find((w: any) => w?.workspace_type === 'CONSULTANT');
+          const homeWs = consultantWs || workspaces.find((w: any) => w.id === defaultWsId) || workspaces[0];
 
-            localStorage.setItem('workspaceId', String(homeWs?.workspace?.id));
-            localStorage.setItem('workspaceName', String(homeWs?.workspace?.name || ''));
-            localStorage.setItem('workspaceRole', homeWs?.role || 'VIEWER');
-            localStorage.setItem('consultantHomeWorkspaceId', String(homeWs?.workspace?.id));
-            localStorage.setItem('consultantHomeWorkspaceName', String(homeWs?.workspace?.name || ''));
-            localStorage.setItem('consultantHomeWorkspaceRole', homeWs?.role || 'VIEWER');
-            localStorage.setItem('isConsultant', '1');
-            message.success('Welcome back');
-            nav('/portfolio');
-          } else {
-            // No workspaces
-            localStorage.setItem('isConsultant', '0');
-            message.error('No workspaces assigned');
-          }
+          localStorage.setItem('workspaceId', String(homeWs?.id));
+          localStorage.setItem('workspaceName', String(homeWs?.name || ''));
+          localStorage.setItem('workspaceRole', homeWs?.role || 'VIEWER');
+          localStorage.setItem('consultantHomeWorkspaceId', String(homeWs?.id));
+          localStorage.setItem('consultantHomeWorkspaceName', String(homeWs?.name || ''));
+          localStorage.setItem('consultantHomeWorkspaceRole', homeWs?.role || 'VIEWER');
+          localStorage.setItem('isConsultant', '1');
+          message.success('Welcome back');
+          nav('/portfolio');
         }
-      } catch (e) {
-        // Fallback to dashboard if fetch fails
+      } else {
+        // Fallback if no workspaces (shouldn't happen)
         localStorage.setItem('isConsultant', '0');
-        message.success('Welcome back');
-        nav('/dashboard');
+        message.error('No workspaces assigned');
       }
     } catch (e: any) {
       console.error('Login error:', e);
