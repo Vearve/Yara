@@ -20,15 +20,17 @@ const http = axios.create({
 http.interceptors.request.use((config) => {
   const token = localStorage.getItem('access');
   const workspaceId = localStorage.getItem('workspaceId');
-  
-  // Ensure proper JSON encoding and Content-Type header
-  if (config.data && typeof config.data === 'object') {
-    config.data = JSON.stringify(config.data);
-  }
-  
+
   const headers: AxiosRequestHeaders = (config.headers || {}) as AxiosRequestHeaders;
-  headers['Content-Type'] = 'application/json';
-  
+  if (
+    config.data &&
+    typeof config.data === 'object' &&
+    !(config.data instanceof FormData) &&
+    !(config.data instanceof URLSearchParams)
+  ) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }

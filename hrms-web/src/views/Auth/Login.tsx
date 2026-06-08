@@ -9,12 +9,16 @@ export default function Login() {
 
   const onFinish = async (values: any) => {
     try {
-      // Ensure proper JSON encoding with explicit Content-Type header
-      const res = await http.post('/api/v1/auth/token/', values, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      // Send a plain JSON string payload with the correct Content-Type header.
+      const res = await http.post(
+        '/api/v1/auth/token/',
+        JSON.stringify(values),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       localStorage.setItem('access', res.data.access);
       localStorage.setItem('refresh', res.data.refresh);
 
