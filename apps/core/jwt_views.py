@@ -25,8 +25,15 @@ class WorkspaceAwareTokenObtainPairSerializer(TokenObtainPairSerializer):
         default_ws = None
         workspace_ids = []
         
+        request = self.context.get('request')
+
         for m in memberships:
             workspace_ids.append(m.workspace_id)
+
+            logo_url = None
+            if request and (m.workspace.logo or m.workspace.logo_data):
+                logo_url = request.build_absolute_uri(f'/api/v1/core/workspaces/{m.workspace.pk}/logo/')
+
             workspace_data = {
                 'id': m.workspace_id,
                 'name': m.workspace.name,
@@ -34,7 +41,7 @@ class WorkspaceAwareTokenObtainPairSerializer(TokenObtainPairSerializer):
                 'workspace_type': m.workspace.workspace_type,
                 'is_default': m.is_default,
                 'role': m.role,
-                'logo': m.workspace.logo_data if hasattr(m.workspace, 'logo_data') else None,
+                'logo': logo_url,
             }
             workspace_list.append(workspace_data)
             

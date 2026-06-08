@@ -14,10 +14,10 @@ class BytesSafeJSONEncoder(json.JSONEncoder):
     """
 
     def default(self, obj: Any):
-        # Handle raw bytes that can appear in error contexts or unexpected fields
-        if isinstance(obj, (bytes, bytearray)):
+        # Handle raw bytes or memoryviews that can appear in error contexts or unexpected fields
+        if isinstance(obj, (bytes, bytearray, memoryview)):
             try:
-                return obj.decode('utf-8')
+                return bytes(obj).decode('utf-8')
             except UnicodeDecodeError:
                 return base64.b64encode(bytes(obj)).decode('ascii')
         return super().default(obj)
