@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import HeaderBar from './HeaderBar';
 import Sidebar from './Sidebar';
+import BottomNav from '../components/BottomNav';
 import http from '../lib/http';
 
 const toAbsoluteLogoUrl = (value?: string | null): string | null => {
@@ -275,11 +276,15 @@ export default function AppLayout() {
             margin: isMobile ? '12px 10px' : 24,
             background: 'transparent',
             minHeight: 'calc(100vh - 112px)',
+            paddingBottom: isMobile ? 72 : 0,
           }}
         >
           <Outlet />
         </Content>
       </Layout>
+
+      {/* Bottom nav — mobile only */}
+      <BottomNav onMore={() => setDrawerOpen(true)} />
 
       {/* Footer floater — hidden on mobile to save space */}
       {!isMobile && (

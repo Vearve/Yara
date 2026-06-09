@@ -36,6 +36,7 @@ import jsPDF from 'jspdf';
 import { Users } from 'lucide-react';
 import http from '../../lib/http';
 import { HeroBanner } from '../../components/HeroBanner';
+import MobileCardList from '../../components/MobileCardList';
 
 const { Text } = Typography;
 
@@ -986,19 +987,55 @@ export default function Demography() {
         </Row>
 
         <Card>
-          <Table
-            loading={listLoading}
-            columns={columns}
+          <MobileCardList
             dataSource={filteredEmployees}
-            rowKey={(r: any) => r.id}
-            scroll={{ x: 1200 }}
-            pagination={{
-              pageSize: 50,
-              showSizeChanger: true,
-              pageSizeOptions: ['20', '50', '100', '200'],
-              showTotal: (total) => `Total ${total} employees`
+            rowKey="id"
+            loading={listLoading}
+            primaryField="full_name"
+            secondaryField="job_title"
+            avatarField="photo"
+            statusField="employment_status"
+            statusRender={(val) => (
+              <Tag color={val === 'ACTIVE' ? 'green' : val === 'TERMINATED' ? 'red' : 'orange'} style={{ margin: 0 }}>
+                {val}
+              </Tag>
+            )}
+            fields={[
+              { key: 'employee_id', label: 'Employee ID' },
+              { key: 'department_name', label: 'Department' },
+              { key: 'hire_date', label: 'Hire Date' },
+              { key: 'nrc', label: 'NRC' },
+            ]}
+            onView={(record) => {
+              setSelectedId(record.id);
+              setDrawerOpen(true);
             }}
-            rowClassName={(record: any) => record.employment_status === 'TERMINATED' ? 'terminated-employee-row' : ''}
+            onEdit={(record) => {
+              setEditingId(record.id);
+              employeeForm.setFieldsValue({
+                ...record,
+                hire_date: record.hire_date ? dayjs(record.hire_date) : null,
+                date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
+              });
+              setEmployeeModalOpen(true);
+            }}
+            deleteConfirm="Terminate this employee?"
+            desktopTable={
+              <Table
+                loading={listLoading}
+                columns={columns}
+                dataSource={filteredEmployees}
+                rowKey={(r: any) => r.id}
+                scroll={{ x: 1200 }}
+                pagination={{
+                  pageSize: 50,
+                  showSizeChanger: true,
+                  pageSizeOptions: ['20', '50', '100', '200'],
+                  showTotal: (total) => `Total ${total} employees`
+                }}
+                rowClassName={(record: any) => record.employment_status === 'TERMINATED' ? 'terminated-employee-row' : ''}
+              />
+            }
           />
         </Card>
         <style>{`
