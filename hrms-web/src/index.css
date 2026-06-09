@@ -428,3 +428,55 @@ html::-webkit-scrollbar-thumb:hover {
   background: rgba(62, 231, 255, 0.6);
   background-clip: padding-box;
 }
+
+/* ─── Mobile / Portrait ─────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Prevent layout from overflowing horizontally */
+  body, #root {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Tables scroll horizontally inside their container */
+  .ant-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Reduce card padding */
+  .ant-card-body {
+    padding: 12px !important;
+  }
+
+  /* Statistic values smaller */
+  .ant-statistic-content-value {
+    font-size: 18px !important;
+  }
+
+  /* Typography adjustments */
+  h1.ant-typography, .ant-typography h1 { font-size: 20px !important; }
+  h2.ant-typography, .ant-typography h2 { font-size: 17px !important; }
+  h3.ant-typography, .ant-typography h3 { font-size: 15px !important; }
+
+  /* Drawer close button: bigger touch target */
+  .ant-drawer-close {
+    padding: 12px !important;
+  }
+
+  /* Make row/col layouts stack on mobile */
+  .ant-row { gap: 8px 0; }
+
+  /* Tabs: scrollable on mobile */
+  .ant-tabs-nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .ant-tabs-nav::before { display: none; }
+
+  /* Full-width buttons in forms on mobile */
+  .ant-form-item .ant-btn { width: 100%; }
+
+  /* Modals take full width */
+  .ant-modal { max-width: calc(100vw - 24px) !important; margin: 12px auto !important; }
+  .ant-modal-content { border-radius: 12px; }
+}

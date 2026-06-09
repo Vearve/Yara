@@ -1,4 +1,4 @@
-import { Layout, Typography } from 'antd';
+import { Layout, Drawer, Grid } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import HeaderBar from './HeaderBar';
@@ -36,10 +36,14 @@ const isImageResponse = (blob: Blob, contentType?: string): boolean => {
 };
 
 const { Content, Sider, Header } = Layout;
-const { Title } = Typography;
+
+const SIDEBAR_WIDTH = 240;
 
 export default function AppLayout() {
   const location = useLocation();
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.md;
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [logoSrc, setLogoSrc] = useState<string>('/yara-bg.svg');
   const logoBlobUrlRef = useRef<string | null>(null);
 
@@ -173,72 +177,85 @@ export default function AppLayout() {
       }
     };
   }, []);
-  return (
-    <Layout
-      style={{
-        minHeight: '100vh',
-        background: 'var(--shell-bg)',
-        position: 'relative',
-      }}
-    >
-      {/* Radial glow from center-top - neon yellow hint */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'var(--shell-glow)',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }}
-      />
-      {/* Subtle grid pattern */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'var(--shell-grid)',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }}
-      />
+  const sidebarContent = (
+    <>
+      <div style={{
+        padding: '20px 16px',
+        textAlign: 'center',
+        borderBottom: '1px solid var(--sidebar-border)',
+        background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%)',
+        flexShrink: 0,
+      }}>
+        <img
+          src={logoSrc}
+          alt="Company Logo"
+          style={{ height: 44, objectFit: 'contain', width: '100%' }}
+          onError={(event) => {
+            const target = event.currentTarget;
+            if (!target.src.includes('/yara-bg.svg')) target.src = '/yara-bg.svg';
+            else if (!target.src.includes('/yara-hero.png')) target.src = '/yara-hero.png';
+          }}
+        />
+      </div>
+      <Sidebar activePath={location.pathname} onNavClick={isMobile ? () => setDrawerOpen(false) : undefined} />
+    </>
+  );
 
-      <Sider
-        width={240}
+  return (
+    <Layout style={{ minHeight: '100vh', background: 'var(--shell-bg)', position: 'relative' }}>
+      {/* Background glows */}
+      <div style={{ position: 'fixed', inset: 0, background: 'var(--shell-glow)', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'fixed', inset: 0, background: 'var(--shell-grid)', pointerEvents: 'none', zIndex: 0 }} />
+
+      {/* Desktop sidebar */}
+      {!isMobile && (
+        <Sider
+          width={SIDEBAR_WIDTH}
+          style={{
+            background: 'var(--sidebar-bg)',
+            borderRight: '1px solid var(--sidebar-border)',
+            boxShadow: '4px 0 12px rgba(25, 17, 42, 0.18)',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            zIndex: 10,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            scrollBehavior: 'smooth',
+          }}
+        >
+          {sidebarContent}
+        </Sider>
+      )}
+
+      {/* Mobile sidebar — slide-in Drawer */}
+      {isMobile && (
+        <Drawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          placement="left"
+          width={260}
+          styles={{
+            body: { padding: 0, background: 'var(--sidebar-bg)', display: 'flex', flexDirection: 'column' },
+            header: { display: 'none' },
+            wrapper: { boxShadow: '4px 0 20px rgba(0,0,0,0.4)' },
+          }}
+          style={{ zIndex: 1000 }}
+        >
+          {sidebarContent}
+        </Drawer>
+      )}
+
+      <Layout
         style={{
-          background: 'var(--sidebar-bg)',
-          borderRight: '1px solid var(--sidebar-border)',
-          boxShadow: '4px 0 12px rgba(25, 17, 42, 0.18)',
-          position: 'fixed',
+          background: 'transparent',
+          position: 'relative',
           zIndex: 1,
-          overflowY: 'auto',
-          maxHeight: '100vh',
-          overflowX: 'hidden',
-          scrollBehavior: 'smooth',
+          marginLeft: isMobile ? 0 : SIDEBAR_WIDTH,
+          transition: 'margin-left 0.2s ease',
         }}
       >
-        <div style={{
-          padding: '24px 16px',
-          textAlign: 'center',
-          borderBottom: '1px solid var(--sidebar-border)',
-          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%)',
-        }}>
-          <img
-            src={logoSrc}
-            alt="Company Logo"
-            style={{ height: 52, objectFit: 'contain', marginBottom: 8, width: '100%' }}
-            onError={(event) => {
-              const target = event.currentTarget;
-              if (!target.src.includes('/yara-bg.svg')) {
-                target.src = '/yara-bg.svg';
-              } else if (!target.src.includes('/yara-hero.png')) {
-                target.src = '/yara-hero.png';
-              }
-            }}
-          />
-        </div>
-        <Sidebar activePath={location.pathname} />
-      </Sider>
-      <Layout style={{ background: 'transparent', position: 'relative', zIndex: 1, marginLeft: 240 }}>
         <Header
           style={{
             background: 'var(--header-bg)',
@@ -251,11 +268,11 @@ export default function AppLayout() {
             zIndex: 2,
           }}
         >
-          <HeaderBar />
+          <HeaderBar onMobileMenu={isMobile ? () => setDrawerOpen(true) : undefined} />
         </Header>
         <Content
           style={{
-            margin: 24,
+            margin: isMobile ? '12px 10px' : 24,
             background: 'transparent',
             minHeight: 'calc(100vh - 112px)',
           }}
@@ -263,28 +280,31 @@ export default function AppLayout() {
           <Outlet />
         </Content>
       </Layout>
-      {/* Footer Floater */}
-      <div
-        style={{
-          position: 'fixed',
-          right: 12,
-          bottom: 12,
-          background: 'var(--bg-card-soft)',
-          color: 'var(--text-dim)',
-          padding: '10px 14px',
-          border: '1px solid var(--border)',
-          borderRadius: 8,
-          fontSize: 10,
-          letterSpacing: '0.05em',
-          boxShadow: '0 4px 12px rgba(27, 20, 41, 0.12)',
-          zIndex: 3,
-          fontWeight: 500,
-        }}
-      >
-        <span>HRMS</span>
-        <span style={{ margin: '0 8px', opacity: 0.5 }}>•</span>
-        <span>Workspace Suite</span>
-      </div>
+
+      {/* Footer floater — hidden on mobile to save space */}
+      {!isMobile && (
+        <div
+          style={{
+            position: 'fixed',
+            right: 12,
+            bottom: 12,
+            background: 'var(--bg-card-soft)',
+            color: 'var(--text-dim)',
+            padding: '10px 14px',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+            fontSize: 10,
+            letterSpacing: '0.05em',
+            boxShadow: '0 4px 12px rgba(27, 20, 41, 0.12)',
+            zIndex: 3,
+            fontWeight: 500,
+          }}
+        >
+          <span>HRMS</span>
+          <span style={{ margin: '0 8px', opacity: 0.5 }}>•</span>
+          <span>Workspace Suite</span>
+        </div>
+      )}
     </Layout>
   );
 }

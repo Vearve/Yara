@@ -1,5 +1,5 @@
 import { Flex, Input, Avatar, Upload, Button, Space, Drawer, Switch, Dropdown, Tabs, Card, Spin, Empty, Divider, Typography, Modal, List, Select, Popconfirm, message, Tag, Badge } from 'antd';
-import { MessageOutlined, SettingOutlined, UploadOutlined, LogoutOutlined, UserOutlined, HomeOutlined, SearchOutlined, UserAddOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
+import { MessageOutlined, SettingOutlined, UploadOutlined, LogoutOutlined, UserOutlined, HomeOutlined, SearchOutlined, UserAddOutlined, MoonOutlined, SunOutlined, MenuOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -43,7 +43,7 @@ const isImageResponse = (blob: Blob, contentType?: string): boolean => {
   return detected.startsWith('image/');
 };
 
-export default function HeaderBar() {
+export default function HeaderBar({ onMobileMenu }: { onMobileMenu?: () => void } = {}) {
   const nav = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [logo, setLogo] = useState<string>('/yara-bg.svg');
@@ -435,8 +435,22 @@ export default function HeaderBar() {
 
 
   return (
-    <Flex align="center" justify="space-between" style={{ padding: '10px 24px', height: '100%', width: '100%' }}>
-      <Flex align="center" gap={12} style={{ flex: '0 0 auto', maxWidth: 220 }}>
+    <Flex align="center" justify="space-between" style={{ padding: '10px 16px', height: '100%', width: '100%' }}>
+      <Flex align="center" gap={10} style={{ flex: '0 0 auto', maxWidth: 260 }}>
+        {/* Hamburger — mobile only */}
+        {onMobileMenu && (
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={onMobileMenu}
+            style={{
+              fontSize: 18,
+              color: theme === 'dark' ? '#f5c400' : '#4a3fcf',
+              padding: '4px 8px',
+              flexShrink: 0,
+            }}
+          />
+        )}
         {localStorage.getItem('isConsultant') === '1' && (
           <Button
             size="small"

@@ -18,10 +18,9 @@ import {
 } from '@ant-design/icons';
 import { useTheme } from '../contexts/ThemeContext';
 
-export default function Sidebar({ activePath }: { activePath: string }) {
+export default function Sidebar({ activePath, onNavClick }: { activePath: string; onNavClick?: () => void }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  // Determine if we're in portfolio or workspace view
   const isPortfolioView = activePath.startsWith('/portfolio');
 
   // Portfolio-only items
@@ -197,6 +196,7 @@ export default function Sidebar({ activePath }: { activePath: string }) {
         selectedKeys={findSelected(activePath)}
         className="app-sidebar-menu"
         style={{ background: 'transparent', border: 'none' }}
+        onClick={onNavClick ? () => onNavClick() : undefined}
       />
     </ConfigProvider>
   );
