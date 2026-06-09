@@ -14,7 +14,8 @@ from io import StringIO
 from django.db.models import Q
 from .models import (
     PayrollComponent, PayrollEntry, SalaryRange, TitleBreakdown, PayrollPeriod,
-    Payslip, PayslipDeduction, PayslipAuditLog, PAYEReturn
+    Payslip, PayslipDeduction, PayslipAuditLog, PAYEReturn,
+    WorkspaceStatutorySettings, PayeTaxBand, ComplianceDocument,
 )
 from .utils import get_tax_band_breakdown, calculate_gross_from_net
 from .pdf_generator import generate_payslip_pdf
@@ -29,6 +30,9 @@ from .serializers import (
     PayslipAuditLogSerializer,
     PAYEReturnSerializer,
     PAYEReturnDetailRowSerializer,
+    WorkspaceStatutorySettingsSerializer,
+    PayeTaxBandSerializer,
+    ComplianceDocumentSerializer,
 )
 
 
@@ -1266,7 +1270,7 @@ class PAYEReturnViewSet(viewsets.ModelViewSet):
             paye_return.submitted_at = timezone.now()
             paye_return.submission_notes = request.data.get('submission_notes', '')
             paye_return.save()
-            
+
             serializer = PAYEReturnSerializer(paye_return)
             return Response(serializer.data)
         except Exception as e:
@@ -1274,3 +1278,88 @@ class PAYEReturnViewSet(viewsets.ModelViewSet):
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class WorkspaceStatutorySettingsViewSet(viewsets.ModelViewSet):
+    serializer_class = WorkspaceStatutorySettingsSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['workspace']
+
+    def get_queryset(self):
+        qs = WorkspaceStatutorySettings.objects.select_related('workspace')
+        workspace_id = self.request.query_params.get('workspace')
+        if workspace_id:
+            qs = qs.filter(workspace_id=workspace_id)
+        elif hasattr(self.request, 'workspace') and self.request.workspace:
+            qs = qs.filter(workspace=self.request.workspace)
+        return qs
+
+
+class PayeTaxBandViewSet(viewsets.ModelViewSet):
+    serializer_class = PayeTaxBandSerializer
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['workspace']
+    ordering = ['order', 'min_amount']
+
+    def get_queryset(self):
+        qs = PayeTaxBand.objects.select_related('workspace')
+        workspace_id = self.request.query_params.get('workspace')
+        if workspace_id:
+            qs = qs.filter(workspace_id=workspace_id)
+        elif hasattr(self.request, 'workspace') and self.request.workspace:
+            qs = qs.filter(workspace=self.request.workspace)
+        return qs
+
+
+class ComplianceDocumentViewSet(viewsets.ModelViewSet):
+    serializer_class = ComplianceDocumentSerializer
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['workspace', 'document_type']
+    ordering = ['document_type']
+
+    def get_queryset(self):
+        qs = ComplianceDocument.objects.select_related('workspace')
+        workspace_id = self.request.query_params.get('workspace')
+        if workspace_id:
+            qs = qs.filter(workspace_id=workspace_id)
+        elif hasattr(self.request, 'workspace') and self.request.workspace:
+            qs = qs.filter(workspace=self.request.workspace)
+        return qs
+
+    def perform_create(self, serializer):
+        workspace = getattr(self.request, 'workspace', None)
+        if workspace and 'workspace' not in serializer.validated_data:
+            serializer.save(workspace=workspace)
+        else:
+            serializer.save()
+
+    @action(detail=False, methods=['get'])
+    def summary(self, request):
+        workspace_id = request.query_params.get('workspace')
+        if workspace_id:
+            qs = ComplianceDocument.objects.filter(workspace_id=workspace_id)
+        elif hasattr(request, 'workspace') and request.workspace:
+            qs = ComplianceDocument.objects.filter(workspace=request.workspace)
+        else:
+            return Response({'error': 'Workspace context required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        docs = list(qs)
+        total = len(docs)
+        active = sum(1 for d in docs if d.computed_status == 'Active')
+        permanent = sum(1 for d in docs if d.computed_status == 'Permanent')
+        expiring_soon = sum(1 for d in docs if d.computed_status == 'Expiring Soon')
+        expired = sum(1 for d in docs if d.computed_status == 'Expired')
+
+        valid = active + permanent
+        compliance_pct = round((valid / total) * 100) if total > 0 else 0
+
+        serializer = ComplianceDocumentSerializer(docs, many=True)
+        return Response({
+            'total': total,
+            'active': active,
+            'permanent': permanent,
+            'expiring_soon': expiring_soon,
+            'expired': expired,
+            'compliance_pct': compliance_pct,
+            'documents': serializer.data,
+        })

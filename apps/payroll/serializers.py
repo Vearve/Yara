@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import (
-    PayrollComponent, PayrollEntry, SalaryRange, TitleBreakdown, PayrollPeriod, 
-    Payslip, PayslipDeduction, WorkspaceStatutorySettings, PayeTaxBand, PayslipAuditLog
+    PayrollComponent, PayrollEntry, SalaryRange, TitleBreakdown, PayrollPeriod,
+    Payslip, PayslipDeduction, WorkspaceStatutorySettings, PayeTaxBand, PayslipAuditLog,
+    ComplianceDocument,
 )
 from .utils import calculate_zambian_payroll
 
@@ -313,15 +314,33 @@ class PayeTaxBandSerializer(serializers.ModelSerializer):
 class WorkspaceStatutorySettingsSerializer(serializers.ModelSerializer):
     workspace_name = serializers.CharField(source='workspace.name', read_only=True)
     paye_bands = PayeTaxBandSerializer(source='workspace.paye_tax_bands', many=True, read_only=True)
-    
+
     class Meta:
         model = WorkspaceStatutorySettings
         fields = [
             'id', 'workspace', 'workspace_name',
             'napsa_rate', 'napsa_ceiling_monthly', 'nhima_rate',
-            'effective_date', 'created_at', 'updated_at', 'paye_bands'
+            'basic_ratio', 'housing_ratio', 'transport_ratio', 'lunch_ratio',
+            'effective_date', 'created_at', 'updated_at', 'paye_bands',
         ]
         read_only_fields = ['effective_date', 'created_at', 'updated_at']
+
+
+class ComplianceDocumentSerializer(serializers.ModelSerializer):
+    computed_status = serializers.CharField(read_only=True)
+    days_until_expiry = serializers.IntegerField(read_only=True)
+    document_type_display = serializers.CharField(source='get_document_type_display', read_only=True)
+
+    class Meta:
+        model = ComplianceDocument
+        fields = [
+            'id', 'workspace', 'document_type', 'document_type_display', 'document_name',
+            'reference_number', 'issued_by', 'issue_date', 'expiry_date', 'is_permanent',
+            'document_file', 'notes', 'reminder_days',
+            'computed_status', 'days_until_expiry',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
 
 
 class PayslipAuditLogSerializer(serializers.ModelSerializer):

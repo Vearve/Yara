@@ -406,7 +406,7 @@ class Payslip(models.Model):
         # Calculate absenteeism deduction if not manually set
         if absenteeism_days > 0 and absenteeism_deduction == 0:
             self.absenteeism_deduction = Decimal(str(
-                calculate_unpaid_leave_deduction(float(basic_salary), float(absenteeism_days))
+                calculate_unpaid_leave_deduction(float(self.gross_salary), float(absenteeism_days))
             )).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         
         # Collect all custom deductions
@@ -485,7 +485,25 @@ class WorkspaceStatutorySettings(models.Model):
         default=0.01,
         help_text="NHIMA employee contribution rate (default 1%)"
     )
-    
+
+    # Salary split ratios — used by calculate_gross_from_net()
+    basic_ratio = models.DecimalField(
+        max_digits=5, decimal_places=4, default=0.45,
+        help_text="Fraction of gross allocated to basic salary (default 45%)"
+    )
+    housing_ratio = models.DecimalField(
+        max_digits=5, decimal_places=4, default=0.25,
+        help_text="Fraction of gross allocated to housing allowance (default 25%)"
+    )
+    transport_ratio = models.DecimalField(
+        max_digits=5, decimal_places=4, default=0.15,
+        help_text="Fraction of gross allocated to transportation allowance (default 15%)"
+    )
+    lunch_ratio = models.DecimalField(
+        max_digits=5, decimal_places=4, default=0.15,
+        help_text="Fraction of gross allocated to lunch allowance (default 15%)"
+    )
+
     # Metadata
     effective_date = models.DateField(auto_now=True, help_text="Date these settings became effective")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -535,6 +553,84 @@ class PayeTaxBand(models.Model):
     
     def __str__(self):
         return f"{self.workspace.name} - K{self.min_amount} to K{self.max_amount} @ {self.rate*100}%"
+
+
+class ComplianceDocument(models.Model):
+    """
+    Tracks statutory compliance documents required by Zambian law.
+    Covers NAPSA, NHIMA, ZRA, WCFCB, PACRA, Ministry of Labour and OHS certificates.
+    """
+
+    class DocumentType(models.TextChoices):
+        NAPSA = 'NAPSA', 'NAPSA Compliance Certificate'
+        NHIMA = 'NHIMA', 'NHIMA Registration Certificate'
+        ZRA_TPIN = 'ZRA_TPIN', 'ZRA TPIN Certificate'
+        ZRA_TCC = 'ZRA_TCC', 'Tax Clearance Certificate (TCC)'
+        WCFCB = 'WCFCB', 'Workers Compensation Certificate (WCFCB)'
+        PACRA = 'PACRA', 'PACRA Certificate / Annual Returns'
+        MOL = 'MOL', 'Ministry of Labour Registration'
+        OHS = 'OHS', 'OHS Compliance Record'
+        SDL = 'SDL', 'Skills Development Levy (SDL)'
+        OTHER = 'OTHER', 'Other'
+
+    class Status(models.TextChoices):
+        ACTIVE = 'ACTIVE', 'Active'
+        EXPIRING_SOON = 'EXPIRING_SOON', 'Expiring Soon'
+        EXPIRED = 'EXPIRED', 'Expired'
+        PERMANENT = 'PERMANENT', 'Permanent (No Expiry)'
+
+    workspace = models.ForeignKey(
+        'core.Workspace', on_delete=models.CASCADE, related_name='compliance_documents'
+    )
+    document_type = models.CharField(max_length=20, choices=DocumentType.choices)
+    document_name = models.CharField(
+        max_length=200, blank=True,
+        help_text="Custom display name (leave blank to use document type label)"
+    )
+    reference_number = models.CharField(max_length=100, blank=True, help_text="Certificate/reference number")
+    issued_by = models.CharField(max_length=200, blank=True, help_text="Issuing authority name")
+    issue_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True, help_text="Leave blank for permanent documents")
+    is_permanent = models.BooleanField(
+        default=False, help_text="Tick for once-off documents with no expiry (TPIN, MOL registration)"
+    )
+    document_file = models.FileField(
+        upload_to='compliance_docs/%Y/', null=True, blank=True, help_text="Attach scanned certificate"
+    )
+    notes = models.TextField(blank=True)
+    reminder_days = models.PositiveIntegerField(
+        default=30, help_text="Alert X days before expiry"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['document_type', '-issue_date']
+        verbose_name = "Compliance Document"
+        verbose_name_plural = "Compliance Documents"
+
+    def __str__(self):
+        return f"{self.workspace.name} — {self.get_document_type_display()}"
+
+    @property
+    def computed_status(self) -> str:
+        from datetime import date
+        if self.is_permanent or not self.expiry_date:
+            return 'Permanent'
+        today = date.today()
+        delta = (self.expiry_date - today).days
+        if delta < 0:
+            return 'Expired'
+        if delta <= self.reminder_days:
+            return 'Expiring Soon'
+        return 'Active'
+
+    @property
+    def days_until_expiry(self):
+        from datetime import date
+        if not self.expiry_date or self.is_permanent:
+            return None
+        return (self.expiry_date - date.today()).days
 
 
 class PayslipAuditLog(models.Model):

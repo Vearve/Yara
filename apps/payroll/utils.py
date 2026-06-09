@@ -6,13 +6,8 @@ Supports workspace-specific statutory settings
 
 def get_statutory_settings(workspace=None):
     """
-    Fetch statutory settings for a workspace, with fallback to defaults
-    
-    Args:
-        workspace: Workspace object (optional). If not provided, uses hardcoded defaults
-    
-    Returns:
-        Dict with napsa_rate, napsa_ceiling, nhima_rate
+    Fetch statutory settings for a workspace, with fallback to defaults.
+    Returns napsa_rate, napsa_ceiling, nhima_rate, and salary split ratios.
     """
     if workspace:
         try:
@@ -22,15 +17,23 @@ def get_statutory_settings(workspace=None):
                 'napsa_rate': float(settings.napsa_rate),
                 'napsa_ceiling': float(settings.napsa_ceiling_monthly),
                 'nhima_rate': float(settings.nhima_rate),
+                'basic_ratio': float(settings.basic_ratio),
+                'housing_ratio': float(settings.housing_ratio),
+                'transport_ratio': float(settings.transport_ratio),
+                'lunch_ratio': float(settings.lunch_ratio),
             }
         except Exception:
             pass
 
-    # Fallback to defaults
+    # Fallback to ZRA defaults
     return {
         'napsa_rate': 0.05,
         'napsa_ceiling': 34164.00,
         'nhima_rate': 0.01,
+        'basic_ratio': 0.45,
+        'housing_ratio': 0.25,
+        'transport_ratio': 0.15,
+        'lunch_ratio': 0.15,
     }
 
 
@@ -232,7 +235,11 @@ def calculate_gross_from_net(net_salary, workspace=None):
     NAPSA_RATE = statutory_settings['napsa_rate']
     NAPSA_CEILING_MONTHLY = statutory_settings['napsa_ceiling']
     NHIMA_RATE = statutory_settings['nhima_rate']
-    
+    basic_ratio = statutory_settings['basic_ratio']
+    housing_ratio = statutory_settings['housing_ratio']
+    transport_ratio = statutory_settings['transport_ratio']
+    lunch_ratio = statutory_settings['lunch_ratio']
+
     # Use binary search to find gross that yields target net
     # Assume gross is between net and net * 1.5 (upper bound)
     low = net_salary
@@ -248,18 +255,12 @@ def calculate_gross_from_net(net_salary, workspace=None):
         calculated_net = result['net_pay']
         
         if abs(calculated_net - net_salary) < tolerance:
-            # Calculate salary component breakdown using standard ratios
-            # Standard ratios: Basic 50%, Housing 30%, Transportation 15%, Lunch 5%
             gross_salary = round(mid, 2)
-            basic_salary = round(gross_salary * 0.50, 2)
-            housing_allowance = round(gross_salary * 0.30, 2)
-            transportation_allowance = round(gross_salary * 0.15, 2)
-            lunch_allowance = round(gross_salary * 0.05, 2)
-            
-            # Adjust basic to ensure total equals gross (handle rounding)
+            housing_allowance = round(gross_salary * housing_ratio, 2)
+            transportation_allowance = round(gross_salary * transport_ratio, 2)
+            lunch_allowance = round(gross_salary * lunch_ratio, 2)
             total_allowances = housing_allowance + transportation_allowance + lunch_allowance
             basic_salary = round(gross_salary - total_allowances, 2)
-            
             return {
                 'success': True,
                 'gross_salary': gross_salary,
@@ -269,26 +270,20 @@ def calculate_gross_from_net(net_salary, workspace=None):
                 'transportation_allowance': transportation_allowance,
                 'lunch_allowance': lunch_allowance,
             }
-        
+
         if calculated_net < net_salary:
             low = mid
         else:
             high = mid
-    
+
     # Return best approximation found
     result = calculate_zambian_payroll((low + high) / 2, 0, {}, workspace)
     gross_salary = round((low + high) / 2, 2)
-    
-    # Calculate component breakdown
-    basic_salary = round(gross_salary * 0.50, 2)
-    housing_allowance = round(gross_salary * 0.30, 2)
-    transportation_allowance = round(gross_salary * 0.15, 2)
-    lunch_allowance = round(gross_salary * 0.05, 2)
-    
-    # Adjust basic to ensure total equals gross
+    housing_allowance = round(gross_salary * housing_ratio, 2)
+    transportation_allowance = round(gross_salary * transport_ratio, 2)
+    lunch_allowance = round(gross_salary * lunch_ratio, 2)
     total_allowances = housing_allowance + transportation_allowance + lunch_allowance
     basic_salary = round(gross_salary - total_allowances, 2)
-    
     return {
         'success': True,
         'gross_salary': gross_salary,

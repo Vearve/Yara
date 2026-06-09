@@ -1,4 +1,4 @@
-import { Select, DatePicker, Tag, Spin, Row, Col, Button, Input } from 'antd';
+import { Select, DatePicker, Tag, Spin, Row, Col, Button, Input, Progress, Badge } from 'antd';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import http from '../../lib/http';
@@ -8,6 +8,7 @@ import { GlassCard } from '../../components/NeonPrimitives';
 import { KPICard } from '../../components/KPICard';
 import { HeroBanner } from '../../components/HeroBanner';
 import { useTheme } from '../../contexts/ThemeContext';
+import { FileProtectOutlined } from '@ant-design/icons';
 
 export default function Overview() {
   const DASHBOARD_REFRESH_MS = 120000;
@@ -107,6 +108,17 @@ export default function Overview() {
     enabled: hasToken,
     refetchInterval: DASHBOARD_REFRESH_MS,
     refetchIntervalInBackground: false,
+  });
+
+  const { data: complianceSummary } = useQuery({
+    queryKey: ['compliance-summary', workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return null;
+      const res = await http.get(`/api/v1/payroll/compliance-documents/summary/?workspace=${workspaceId}`);
+      return res.data;
+    },
+    enabled: hasToken && !!workspaceId,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Only show charts if there's actual data
@@ -306,6 +318,81 @@ export default function Overview() {
                   </div>
                 ))}
               </div>
+            )}
+          </GlassCard>
+        </Col>
+      </Row>
+
+      {/* Compliance Widget */}
+      <Row gutter={[18, 18]}>
+        <Col xs={24}>
+          <GlassCard gradient="gold" style={{ padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <FileProtectOutlined style={{ color: isLight ? '#7a4d00' : '#f5c400', fontSize: 16 }} />
+              <span className="text-sm" style={{ color: sectionTitleColor, fontWeight: 700 }}>Government Compliance Documents</span>
+              {complianceSummary && (
+                <Tag color={complianceSummary.compliance_pct >= 75 ? 'green' : complianceSummary.compliance_pct >= 50 ? 'orange' : 'red'} style={{ marginLeft: 'auto' }}>
+                  {complianceSummary.compliance_pct}% Compliant
+                </Tag>
+              )}
+            </div>
+            {!complianceSummary || complianceSummary.total === 0 ? (
+              <div className="text-center" style={{ color: helperTextColor, padding: '16px 0' }}>
+                No compliance documents tracked yet.{' '}
+                <a href="/#/settings/statutory" style={{ color: isLight ? '#7a4d00' : '#f5c400' }}>Add documents in Statutory Settings</a>
+              </div>
+            ) : (
+              <Row gutter={[16, 12]} align="middle">
+                <Col xs={24} sm={6} style={{ textAlign: 'center' }}>
+                  <Progress
+                    type="circle"
+                    percent={complianceSummary.compliance_pct}
+                    size={90}
+                    strokeColor={{ '0%': '#f5c400', '100%': '#7cff6b' }}
+                    format={(p) => `${p}%`}
+                  />
+                  <div style={{ fontSize: 11, color: helperTextColor, marginTop: 6 }}>Overall</div>
+                </Col>
+                <Col xs={24} sm={18}>
+                  <Row gutter={[12, 8]}>
+                    {[
+                      { label: 'Active', count: complianceSummary.active, color: 'green' },
+                      { label: 'Permanent', count: complianceSummary.permanent, color: 'blue' },
+                      { label: 'Expiring Soon', count: complianceSummary.expiring_soon, color: 'orange' },
+                      { label: 'Expired', count: complianceSummary.expired, color: 'red' },
+                    ].map((item) => (
+                      <Col xs={12} sm={6} key={item.label}>
+                        <div style={{ padding: '10px', background: isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.04)', borderRadius: 8, textAlign: 'center' }}>
+                          <div style={{ fontSize: 22, fontWeight: 800, color: item.color === 'green' ? '#52c41a' : item.color === 'blue' ? '#1677ff' : item.color === 'orange' ? '#fa8c16' : '#ff4d4f' }}>
+                            {item.count}
+                          </div>
+                          <div style={{ fontSize: 11, color: helperTextColor }}>{item.label}</div>
+                        </div>
+                      </Col>
+                    ))}
+                  </Row>
+                  {complianceSummary.documents?.filter((d: any) => d.computed_status === 'Expired' || d.computed_status === 'Expiring Soon').length > 0 && (
+                    <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {complianceSummary.documents
+                        .filter((d: any) => d.computed_status === 'Expired' || d.computed_status === 'Expiring Soon')
+                        .map((d: any) => (
+                          <Badge
+                            key={d.id}
+                            color={d.computed_status === 'Expired' ? 'red' : 'orange'}
+                            text={
+                              <span style={{ fontSize: 11, color: helperTextColor }}>
+                                {d.document_type_display || d.document_type}
+                                {d.days_until_expiry !== null && d.days_until_expiry > 0
+                                  ? ` — ${d.days_until_expiry}d`
+                                  : ' — Expired'}
+                              </span>
+                            }
+                          />
+                        ))}
+                    </div>
+                  )}
+                </Col>
+              </Row>
             )}
           </GlassCard>
         </Col>

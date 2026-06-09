@@ -8,6 +8,9 @@ from .views import (
     PayrollPeriodViewSet,
     PayslipViewSet,
     PAYEReturnViewSet,
+    WorkspaceStatutorySettingsViewSet,
+    PayeTaxBandViewSet,
+    ComplianceDocumentViewSet,
 )
 
 app_name = 'payroll'
@@ -20,6 +23,9 @@ router.register(r'title-breakdowns', TitleBreakdownViewSet, basename='title-brea
 router.register(r'periods', PayrollPeriodViewSet, basename='period')
 router.register(r'payslips', PayslipViewSet, basename='payslip')
 router.register(r'paye-returns', PAYEReturnViewSet, basename='paye-return')
+router.register(r'statutory-settings', WorkspaceStatutorySettingsViewSet, basename='statutory-settings')
+router.register(r'paye-tax-bands', PayeTaxBandViewSet, basename='paye-tax-band')
+router.register(r'compliance-documents', ComplianceDocumentViewSet, basename='compliance-document')
 
 urlpatterns = [
     path('', include(router.urls)),

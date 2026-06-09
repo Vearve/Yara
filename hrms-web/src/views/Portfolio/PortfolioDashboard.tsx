@@ -46,6 +46,17 @@ export default function PortfolioDashboard() {
     staleTime: 0,
   });
 
+  const { data: complianceSummary } = useQuery({
+    queryKey: ['compliance-summary', workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return null;
+      const res = await http.get(`/api/v1/payroll/compliance-documents/summary/?workspace=${workspaceId}`);
+      return res.data;
+    },
+    enabled: !!workspaceId,
+    staleTime: 60 * 1000,
+  });
+
   const workspaces = portfolioData?.clients || [];
   const totalEmployees = portfolioData?.total_employees_across_all || 0;
   const totalProjects = portfolioData?.total_active_projects || 0;
@@ -141,16 +152,41 @@ export default function PortfolioDashboard() {
         <Col xs={24} lg={12}>
           <GlassCard title="Overall Compliance Status" gradient="gold">
             <div style={{ marginBottom: 16 }}>
-              <Text type="secondary" style={{ display: 'block', marginBottom: 8, color: textSecondary, fontWeight: isLight ? 600 : 500 }}>Target: 95% | Actual: {avgCompliance}%</Text>
-              <Progress
-                type="circle"
-                percent={avgCompliance}
-                size={120}
-                strokeColor={{ '0%': '#f5c400', '100%': '#7cff6b' }}
-                format={(percent) => `${percent}%`}
-              />
+              <Text type="secondary" style={{ display: 'block', marginBottom: 8, color: textSecondary, fontWeight: isLight ? 600 : 500 }}>
+                Document Compliance: {complianceSummary?.compliance_pct ?? 0}% &nbsp;|&nbsp; Workspace Compliance: {avgCompliance}%
+              </Text>
+              <Space size={24} align="start">
+                <div style={{ textAlign: 'center' }}>
+                  <Progress
+                    type="circle"
+                    percent={complianceSummary?.compliance_pct ?? 0}
+                    size={110}
+                    strokeColor={{ '0%': '#f5c400', '100%': '#7cff6b' }}
+                    format={(percent) => `${percent}%`}
+                  />
+                  <div style={{ fontSize: 11, color: textMuted, marginTop: 6 }}>Doc Compliance</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <Progress
+                    type="circle"
+                    percent={avgCompliance}
+                    size={110}
+                    strokeColor={{ '0%': '#3ee7ff', '100%': '#7cff6b' }}
+                    format={(percent) => `${percent}%`}
+                  />
+                  <div style={{ fontSize: 11, color: textMuted, marginTop: 6 }}>Workspace</div>
+                </div>
+              </Space>
             </div>
-            <Text style={{ fontSize: 12, color: textMuted, fontWeight: isLight ? 600 : 500 }}>
+            {complianceSummary && (
+              <Space size={8} wrap style={{ marginTop: 8 }}>
+                <span style={{ fontSize: 12, color: '#52c41a' }}>✓ {complianceSummary.active} Active</span>
+                <span style={{ fontSize: 12, color: '#3ee7ff' }}>♾ {complianceSummary.permanent} Permanent</span>
+                <span style={{ fontSize: 12, color: '#fa8c16' }}>⚠ {complianceSummary.expiring_soon} Expiring</span>
+                <span style={{ fontSize: 12, color: '#ff4d4f' }}>✕ {complianceSummary.expired} Expired</span>
+              </Space>
+            )}
+            <Text style={{ fontSize: 12, color: textMuted, fontWeight: isLight ? 600 : 500, display: 'block', marginTop: 8 }}>
               {workspaces.filter((w: any) => w.stats?.compliance_level === 'Good').length} of {workspaces.length} companies at target compliance
             </Text>
           </GlassCard>
