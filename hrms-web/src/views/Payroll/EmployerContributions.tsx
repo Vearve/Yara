@@ -11,6 +11,10 @@ import {
 } from 'antd';
 import {
   DollarOutlined,
+  TeamOutlined,
+  BankOutlined,
+  SafetyOutlined,
+  CalculatorOutlined,
 } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import http from '../../lib/http';
@@ -18,20 +22,24 @@ import { canPerformAction } from '../../lib/permissions';
 
 const { Title, Text } = Typography;
 
+interface EmployeeBreakdown {
+  employee_name: string;
+  employee_id: string;
+  gross_salary: number;
+  napsa_employer: number;
+  nhima_employer: number;
+  paye_tax: number;
+  total_employer: number;
+}
+
 interface EmployerSummary {
   total_napsa_employer: number;
   total_nhima_employer: number;
+  total_paye: number;
   total_employer_cost: number;
   total_gross: number;
   employee_count: number;
-  breakdown: Array<{
-    employee_name: string;
-    employee_id: string;
-    gross_salary: number;
-    napsa_employer: number;
-    nhima_employer: number;
-    total_employer: number;
-  }>;
+  breakdown: EmployeeBreakdown[];
 }
 
 const EmployerContributions: React.FC = () => {
@@ -46,24 +54,30 @@ const EmployerContributions: React.FC = () => {
         `/api/v1/payroll/payslips/remittance_report/?year=${selectedYear}&month=${selectedMonth}`
       );
       const data = response.data || {};
-      const breakdown = (data.employee_breakdown || []).map((p: any) => ({
+      const breakdown: EmployeeBreakdown[] = (data.employee_breakdown || []).map((p: any) => ({
         employee_name: p.employee_name,
         employee_id: p.employee_id,
         gross_salary: Number(p.gross_salary || 0),
         napsa_employer: Number(p.napsa_employer || 0),
         nhima_employer: Number(p.nhima_employer || 0),
+        paye_tax: Number(p.paye_tax || 0),
         total_employer: Number(p.napsa_employer || 0) + Number(p.nhima_employer || 0),
       }));
-      
+
       const total_napsa_employer = Number(data.napsa?.employer_total || 0);
       const total_nhima_employer = Number(data.nhima?.employer_total || 0);
-      const total_employer_cost = Number(data.summary?.total_employer_contributions || 0) || (total_napsa_employer + total_nhima_employer);
+      const total_paye = Number(data.paye?.total || 0) ||
+        breakdown.reduce((s, r) => s + r.paye_tax, 0);
+      const total_employer_cost =
+        Number(data.summary?.total_employer_contributions || 0) ||
+        (total_napsa_employer + total_nhima_employer);
       const total_gross = Number(data.summary?.total_gross_payroll || 0);
       const employee_count = Number(data.summary?.total_employees || breakdown.length);
 
       return {
         total_napsa_employer,
         total_nhima_employer,
+        total_paye,
         total_employer_cost,
         total_gross,
         employee_count,
@@ -78,7 +92,8 @@ const EmployerContributions: React.FC = () => {
       title: 'Employee ID',
       dataIndex: 'employee_id',
       key: 'employee_id',
-      width: 120,
+      width: 130,
+      fixed: 'left' as const,
     },
     {
       title: 'Employee Name',
@@ -94,24 +109,33 @@ const EmployerContributions: React.FC = () => {
       render: (val: number) => `K${val.toFixed(2)}`,
     },
     {
-      title: 'NAPSA (Employer)',
+      title: 'NAPSA (Employer 5%)',
       dataIndex: 'napsa_employer',
       key: 'napsa_employer',
-      width: 140,
+      width: 150,
       render: (val: number) => `K${val.toFixed(2)}`,
     },
     {
-      title: 'NHIMA (Employer)',
+      title: 'NHIMA (Employer 1%)',
       dataIndex: 'nhima_employer',
       key: 'nhima_employer',
-      width: 140,
+      width: 155,
       render: (val: number) => `K${val.toFixed(2)}`,
     },
     {
-      title: 'Total Employer Cost',
+      title: 'PAYE (Employee)',
+      dataIndex: 'paye_tax',
+      key: 'paye_tax',
+      width: 140,
+      render: (val: number) => (
+        <Text style={{ color: '#faad14' }}>K{val.toFixed(2)}</Text>
+      ),
+    },
+    {
+      title: 'Employer Cost',
       dataIndex: 'total_employer',
       key: 'total_employer',
-      width: 150,
+      width: 130,
       render: (val: number) => (
         <Text strong style={{ color: '#fa8c16' }}>
           K{val.toFixed(2)}
@@ -123,7 +147,7 @@ const EmployerContributions: React.FC = () => {
   if (!canViewPayroll) {
     return (
       <Card>
-        <Text>You don't have permission to view employer contributions</Text>
+        <Text>You don&apos;t have permission to view employer contributions</Text>
       </Card>
     );
   }
@@ -133,7 +157,10 @@ const EmployerContributions: React.FC = () => {
       <Card>
         <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
           <Col>
-            <Title level={3}>Employer Contributions Report</Title>
+            <Title level={3} style={{ margin: 0 }}>Employer Contributions Report</Title>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              NAPSA &amp; NHIMA employer obligations + PAYE employee deductions
+            </Text>
           </Col>
           <Col>
             <Select
@@ -170,67 +197,109 @@ const EmployerContributions: React.FC = () => {
         <Spin spinning={isLoading}>
           {summary && (
             <>
-              <Row gutter={16} style={{ marginBottom: 24 }}>
-                <Col span={6}>
+              {/* KPI row */}
+              <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+                <Col xs={12} sm={8} md={4}>
                   <Card size="small">
                     <Statistic
-                      title="Total Employees"
+                      title="Employees"
                       value={summary.employee_count}
                       valueStyle={{ color: '#1890ff' }}
-                      prefix={<DollarOutlined />}
+                      prefix={<TeamOutlined />}
                     />
                   </Card>
                 </Col>
-                <Col span={6}>
+                <Col xs={12} sm={8} md={4}>
                   <Card size="small">
                     <Statistic
-                      title="NAPSA (Employer)"
+                      title="NAPSA Employer"
                       value={summary.total_napsa_employer}
                       prefix="K"
                       precision={2}
                       valueStyle={{ color: '#722ed1' }}
+                      suffix={<SafetyOutlined style={{ fontSize: 12 }} />}
                     />
                   </Card>
                 </Col>
-                <Col span={6}>
+                <Col xs={12} sm={8} md={4}>
                   <Card size="small">
                     <Statistic
-                      title="NHIMA (Employer)"
+                      title="NHIMA Employer"
                       value={summary.total_nhima_employer}
                       prefix="K"
                       precision={2}
                       valueStyle={{ color: '#13c2c2' }}
+                      suffix={<SafetyOutlined style={{ fontSize: 12 }} />}
                     />
                   </Card>
                 </Col>
-                <Col span={6}>
+                <Col xs={12} sm={8} md={4}>
                   <Card size="small">
                     <Statistic
-                      title="Total Employer Cost"
+                      title="PAYE (Employees)"
+                      value={summary.total_paye}
+                      prefix="K"
+                      precision={2}
+                      valueStyle={{ color: '#faad14' }}
+                      suffix={<CalculatorOutlined style={{ fontSize: 12 }} />}
+                    />
+                  </Card>
+                </Col>
+                <Col xs={12} sm={8} md={4}>
+                  <Card size="small">
+                    <Statistic
+                      title="Employer Cost"
                       value={summary.total_employer_cost}
                       prefix="K"
                       precision={2}
                       valueStyle={{ color: '#fa8c16' }}
+                      suffix={<BankOutlined style={{ fontSize: 12 }} />}
+                    />
+                  </Card>
+                </Col>
+                <Col xs={12} sm={8} md={4}>
+                  <Card size="small">
+                    <Statistic
+                      title="Total Gross"
+                      value={summary.total_gross}
+                      prefix="K"
+                      precision={2}
+                      valueStyle={{ color: '#52c41a' }}
+                      suffix={<DollarOutlined style={{ fontSize: 12 }} />}
                     />
                   </Card>
                 </Col>
               </Row>
 
+              {/* Burden rate bar */}
               <Card size="small" style={{ marginBottom: 16 }}>
                 <Row gutter={16}>
-                  <Col span={12}>
-                    <Statistic
-                      title="Total Gross Payroll"
-                      value={summary.total_gross}
-                      prefix="K"
-                      precision={2}
-                    />
-                  </Col>
-                  <Col span={12}>
+                  <Col span={8}>
                     <Statistic
                       title="Employer Burden Rate"
-                      value={((summary.total_employer_cost / summary.total_gross) * 100).toFixed(2)}
+                      value={summary.total_gross > 0
+                        ? ((summary.total_employer_cost / summary.total_gross) * 100).toFixed(2)
+                        : '0.00'}
                       suffix="%"
+                    />
+                  </Col>
+                  <Col span={8}>
+                    <Statistic
+                      title="PAYE as % of Gross"
+                      value={summary.total_gross > 0
+                        ? ((summary.total_paye / summary.total_gross) * 100).toFixed(2)
+                        : '0.00'}
+                      suffix="%"
+                      valueStyle={{ color: '#faad14' }}
+                    />
+                  </Col>
+                  <Col span={8}>
+                    <Statistic
+                      title="Total Payroll Obligations"
+                      value={summary.total_employer_cost + summary.total_paye}
+                      prefix="K"
+                      precision={2}
+                      valueStyle={{ color: '#ff4d4f' }}
                     />
                   </Col>
                 </Row>
@@ -241,7 +310,8 @@ const EmployerContributions: React.FC = () => {
                 dataSource={summary.breakdown}
                 rowKey="employee_id"
                 pagination={{ pageSize: 20 }}
-                scroll={{ x: 1000 }}
+                scroll={{ x: 1100 }}
+                size="small"
               />
             </>
           )}

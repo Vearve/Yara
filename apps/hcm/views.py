@@ -21,7 +21,7 @@ from django.utils import timezone
 if TYPE_CHECKING:
     from apps.core.types import WorkspaceRequest
 from django.http import HttpResponse
-from datetime import timedelta
+from datetime import timedelta, date
 import pandas as pd
 import csv
 from io import BytesIO, StringIO
@@ -280,8 +280,8 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         """
         output = StringIO()
         writer = csv.writer(output)
-        
-        # Define CSV headers
+
+        # Headers must exactly match the import column_mapping keys (after lowercase)
         headers = [
             'Employee ID',
             'First Name',
@@ -290,18 +290,29 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             'NRC',
             'Phone',
             'Job Title',
-            'Hire Date (YYYY-MM-DD)',
-            'Date of Birth (YYYY-MM-DD)',
-            'Gender (M/F/OTHER)',
+            'Hire Date',
+            'Date of Birth',
+            'Gender',
             'House Address',
             'TPIN',
             'NHIMA',
-            'SSS Number',
+            'NAPSA Number',
+            'S/S Number',
+            'Nationality',
+            'Point of Hire',
         ]
-        
-        writer.writerow(headers)
-        
-        # Add example row
+
+        # Instructions row (not imported — starts with #)
+        instructions = [
+            '# Required: Employee ID, First Name, Last Name, NRC, Phone, Email, House Address, Job Title, Hire Date, Date of Birth, Gender',
+            '', '', '', '', '', '',
+            'Format: YYYY-MM-DD',
+            'Format: YYYY-MM-DD',
+            'M or F or OTHER',
+            '', '', '', '', '', 'Default: Zambian', '',
+        ]
+
+        # Example data row
         example_row = [
             'EMP-001',
             'John',
@@ -316,15 +327,18 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             '123 Main Street, Kitwe',
             'TPN123456',
             'NHM456789',
+            'NAPSA001234',
             'SSS987654',
+            'Zambian',
+            'Kitwe',
         ]
-        
+
+        writer.writerow(headers)
+        writer.writerow(instructions)
         writer.writerow(example_row)
-        
-        # Create HTTP response with CSV
+
         response = HttpResponse(output.getvalue(), content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="employee_template.csv"'
-        
+        response['Content-Disposition'] = 'attachment; filename="employee_import_template.csv"'
         return response
 
     @action(detail=False, methods=['post'], parser_classes=[MultiPartParser, FormParser])
@@ -346,34 +360,62 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             else:
                 return Response({'error': 'Unsupported file format. Use CSV or XLSX.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Map common column names to model fields (case-insensitive)
+            # Map common column names to model fields (case-insensitive, after strip+lower)
             column_mapping = {
                 'employee id': 'employee_id',
                 'employee number': 'employee_id',
-                's/no': 'skip_column',  # Skip S/No column
-                'full name': 'full_name',  # Handle Full Name
+                'employee no': 'employee_id',
+                's/no': 'skip_column',
+                'full name': 'full_name',
                 'first name': 'first_name',
                 'surname': 'last_name',
                 'last name': 'last_name',
                 'job title': 'job_title',
+                'position': 'job_title',
+                # Hire date — plain and with format hint variants
                 'hire date': 'hire_date',
+                'hire date (yyyy-mm-dd)': 'hire_date',
+                'date of engagement': 'hire_date',
+                'start date': 'hire_date',
+                # Date of birth variants
                 'date of birth': 'date_of_birth',
+                'date of birth (yyyy-mm-dd)': 'date_of_birth',
                 'dob': 'date_of_birth',
+                'birth date': 'date_of_birth',
+                # Gender variants
                 'gender': 'gender',
+                'gender (m/f/other)': 'gender',
+                'sex': 'gender',
+                # Identity numbers
                 'nrc': 'nrc',
                 'national id (nrc)': 'nrc',
+                'national id': 'nrc',
+                'nrc number': 'nrc',
                 'tpin': 'tpin',
                 'tpin number': 'tpin',
                 'nhima': 'nhima',
                 'nhima number': 'nhima',
+                'napsa number': 'napsa_number',
+                'napsa_number': 'napsa_number',
+                'napsa': 'napsa_number',
                 's/s number': 'sss_number',
+                'sss number': 'sss_number',
                 'sss_number': 'sss_number',
+                'ss number': 'sss_number',
+                # Contact
                 'phone': 'phone',
+                'phone number': 'phone',
                 'contact details': 'phone',
+                'mobile': 'phone',
                 'email': 'email',
+                'email address': 'email',
                 'house address': 'house_address',
                 'address': 'house_address',
+                'residential address': 'house_address',
+                # Other
+                'nationality': 'nationality',
                 'point of hire': 'point_of_hire',
+                'employment type': 'employment_type',
             }
 
             # Normalize column names
@@ -400,6 +442,10 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                         
                         # Skip header-like rows
                         if emp_id_str.lower() in ['employee number', 'employee id', 's/no', '']:
+                            continue
+
+                        # Skip instruction/comment rows (rows where employee_id starts with #)
+                        if emp_id_str.startswith('#'):
                             continue
 
                         # Get first and last names
@@ -430,6 +476,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                             'house_address': str(row.get('house_address', '')).strip() or 'N/A',
                             'gender': 'OTHER',  # Default gender
                             'date_of_birth': pd.to_datetime('1990-01-01').date(),  # Default DOB
+                            'hire_date': date.today(),  # Default hire date; overridden below if provided
                         }
 
                         # Optional fields - override defaults if provided
@@ -459,6 +506,12 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                         
                         if pd.notna(row.get('point_of_hire')):
                             employee_data['point_of_hire'] = str(row['point_of_hire']).strip()
+
+                        if pd.notna(row.get('napsa_number')):
+                            employee_data['napsa_number'] = str(row['napsa_number']).strip()
+
+                        if pd.notna(row.get('nationality')):
+                            employee_data['nationality'] = str(row['nationality']).strip()
 
                         # Handle employment type - normalize and use valid choices
                         # Valid EmploymentType choices: DIRECT, CONTRACTOR, CONSULTANT, TEMPORARY

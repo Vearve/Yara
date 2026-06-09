@@ -1,20 +1,24 @@
 import { useState, useEffect } from 'react';
-import { 
-  Card, 
-  Form, 
-  Input, 
-  Button, 
-  Upload, 
-  message, 
-  Avatar, 
+import {
+  Card,
+  Form,
+  Input,
+  Button,
+  Upload,
+  message,
+  Avatar,
   Space,
   Typography,
-  Divider 
+  Divider,
+  Row,
+  Col,
+  Tag,
 } from 'antd';
-import { UserOutlined, UploadOutlined, SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { UserOutlined, UploadOutlined, SaveOutlined, ArrowLeftOutlined, MailOutlined, IdcardOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import http from '../../lib/http';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -35,6 +39,8 @@ export default function UserProfile() {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const nav = useNavigate();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
 
@@ -64,11 +70,7 @@ export default function UserProfile() {
       formData.append('job_title', values.job_title || '');
       formData.append('bio', values.bio || '');
       formData.append('personality_type', values.personality_type || '');
-      
-      if (photoFile) {
-        formData.append('profile_picture', photoFile);
-      }
-      
+      if (photoFile) formData.append('profile_picture', photoFile);
       return http.patch('/api/v1/auth/profile/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -76,6 +78,7 @@ export default function UserProfile() {
     onSuccess: () => {
       message.success('Profile updated successfully');
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['user-profile-header'] });
     },
     onError: () => {
       message.error('Failed to update profile');
@@ -86,151 +89,179 @@ export default function UserProfile() {
     if (info.file.originFileObj) {
       const file = info.file.originFileObj;
       setPhotoFile(file);
-      
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setPhotoPreview(e.target?.result as string);
-      };
+      reader.onload = (e) => setPhotoPreview(e.target?.result as string);
       reader.readAsDataURL(file);
     }
   };
 
+  const accentColor = isDark ? '#f5c400' : '#4a3fcf';
+  const cardBg = isDark ? 'rgba(15, 22, 40, 0.82)' : 'var(--bg-card)';
+  const cardBorder = isDark ? '1px solid rgba(245,196,0,0.18)' : '1px solid var(--border)';
+  const labelColor = isDark ? '#f5c400' : '#4a3fcf';
+
+  const displayName = profile
+    ? [profile.first_name, profile.last_name].filter(Boolean).join(' ') || profile.username
+    : '';
+
   return (
-    <div style={{ padding: 24, maxWidth: 800, margin: '0 auto' }}>
-      <Card
-        style={{
-          background: 'rgba(10, 10, 10, 0.6)',
-          border: '1px solid rgba(212, 175, 55, 0.3)',
-        }}
+    <div style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
+      <Button
+        type="text"
+        icon={<ArrowLeftOutlined />}
+        onClick={() => nav(-1)}
+        style={{ color: accentColor, paddingLeft: 0, marginBottom: 16 }}
       >
-        <Space direction="vertical" size={24} style={{ width: '100%' }}>
-          <Button
-            type="text"
-            icon={<ArrowLeftOutlined />}
-            onClick={() => nav(-1)}
-            style={{ color: '#D4AF37', alignSelf: 'flex-start', paddingLeft: 0 }}
-          >
-            Back
-          </Button>
+        Back
+      </Button>
 
-          <div style={{ textAlign: 'center' }}>
-            <Title level={2} style={{ color: '#D4AF37', marginBottom: 8 }}>
-              My Profile
-            </Title>
-            <Text type="secondary">
-              Manage your personal information and preferences
-            </Text>
-          </div>
-
-          <Divider style={{ borderColor: 'rgba(212, 175, 55, 0.2)' }} />
-
-          <div style={{ textAlign: 'center' }}>
+      <Row gutter={24}>
+        {/* Left panel — avatar + identity */}
+        <Col xs={24} md={8}>
+          <Card style={{ background: cardBg, border: cardBorder, textAlign: 'center' }}>
             <Avatar
-              size={120}
+              size={100}
               icon={<UserOutlined />}
               src={photoPreview}
               style={{
-                backgroundColor: photoPreview ? 'transparent' : '#D4AF37',
-                border: '3px solid #D4AF37',
+                backgroundColor: photoPreview ? 'transparent' : accentColor,
+                border: `3px solid ${accentColor}`,
+                marginBottom: 12,
               }}
             />
-            <div style={{ marginTop: 16 }}>
-              <Upload
-                beforeUpload={() => false}
-                onChange={handlePhotoChange}
-                showUploadList={false}
-                accept="image/*"
-              >
-                <Button icon={<UploadOutlined />} style={{ color: '#D4AF37', borderColor: '#D4AF37' }}>
-                  Change Photo
-                </Button>
-              </Upload>
+            <Title level={4} style={{ color: 'var(--text)', marginBottom: 2 }}>
+              {displayName || '—'}
+            </Title>
+            {profile?.job_title && (
+              <Tag color={isDark ? 'gold' : 'geekblue'} style={{ marginBottom: 8 }}>
+                {profile.job_title}
+              </Tag>
+            )}
+            <div style={{ marginBottom: 8 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                <MailOutlined style={{ marginRight: 4 }} />
+                {profile?.email || '—'}
+              </Text>
             </div>
-          </div>
-
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={(values) => updateMutation.mutate(values)}
-            disabled={isLoading}
-          >
-            <Form.Item
-              name="first_name"
-              label={<span style={{ color: '#D4AF37' }}>First Name</span>}
-              rules={[{ required: true, message: 'First name is required' }]}
+            <div style={{ marginBottom: 16 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                <IdcardOutlined style={{ marginRight: 4 }} />
+                @{profile?.username || '—'}
+              </Text>
+            </div>
+            <Upload
+              beforeUpload={() => false}
+              onChange={handlePhotoChange}
+              showUploadList={false}
+              accept="image/*"
             >
-              <Input placeholder="Enter your first name" />
-            </Form.Item>
-
-            <Form.Item
-              name="last_name"
-              label={<span style={{ color: '#D4AF37' }}>Last Name</span>}
-              rules={[{ required: true, message: 'Last name is required' }]}
-            >
-              <Input placeholder="Enter your last name" />
-            </Form.Item>
-
-            <Form.Item
-              name="email"
-              label={<span style={{ color: '#D4AF37' }}>Email</span>}
-              rules={[
-                { required: true, message: 'Email is required' },
-                { type: 'email', message: 'Please enter a valid email' },
-              ]}
-            >
-              <Input placeholder="your.email@example.com" />
-            </Form.Item>
-
-            <Form.Item
-              name="job_title"
-              label={<span style={{ color: '#D4AF37' }}>Job Title</span>}
-            >
-              <Input placeholder="e.g., HR Manager, Senior Consultant" />
-            </Form.Item>
-
-            <Form.Item
-              name="bio"
-              label={<span style={{ color: '#D4AF37' }}>Bio / Description</span>}
-            >
-              <TextArea
-                rows={4}
-                placeholder="Tell us about yourself, your experience, and what you do..."
-                maxLength={500}
-                showCount
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="personality_type"
-              label={<span style={{ color: '#D4AF37' }}>Type of Person You Are</span>}
-            >
-              <TextArea
-                rows={3}
-                placeholder="Describe your personality, work style, hobbies, or anything fun! (e.g., 'Problem solver who loves coffee and spreadsheets')"
-                maxLength={300}
-                showCount
-              />
-            </Form.Item>
-
-            <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                icon={<SaveOutlined />}
-                loading={updateMutation.isPending}
-                style={{
-                  width: '100%',
-                  background: 'linear-gradient(135deg, #D4AF37 0%, #B8941E 100%)',
-                  border: 'none',
-                  height: 40,
-                }}
-              >
-                Save Changes
+              <Button icon={<UploadOutlined />} style={{ color: accentColor, borderColor: accentColor }}>
+                Change Photo
               </Button>
-            </Form.Item>
-          </Form>
-        </Space>
-      </Card>
+            </Upload>
+          </Card>
+        </Col>
+
+        {/* Right panel — editable form */}
+        <Col xs={24} md={16}>
+          <Card style={{ background: cardBg, border: cardBorder }}>
+            <Title level={4} style={{ color: accentColor, marginBottom: 20 }}>
+              Edit Profile
+            </Title>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={(values) => updateMutation.mutate(values)}
+              disabled={isLoading}
+            >
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    name="first_name"
+                    label={<span style={{ color: labelColor }}>First Name</span>}
+                    rules={[{ required: true, message: 'Required' }]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    name="last_name"
+                    label={<span style={{ color: labelColor }}>Last Name</span>}
+                    rules={[{ required: true, message: 'Required' }]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Form.Item
+                name="email"
+                label={<span style={{ color: labelColor }}>Email</span>}
+                rules={[
+                  { required: true, message: 'Required' },
+                  { type: 'email', message: 'Invalid email' },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+
+              <Form.Item
+                name="job_title"
+                label={<span style={{ color: labelColor }}>Job Title</span>}
+              >
+                <Input placeholder="e.g. HR Manager, Senior Consultant" />
+              </Form.Item>
+
+              <Divider style={{ borderColor: isDark ? 'rgba(245,196,0,0.15)' : 'var(--border)' }} />
+
+              <Form.Item
+                name="bio"
+                label={<span style={{ color: labelColor }}>Bio</span>}
+              >
+                <TextArea
+                  rows={3}
+                  placeholder="Your experience, background, what you do..."
+                  maxLength={500}
+                  showCount
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="personality_type"
+                label={<span style={{ color: labelColor }}>About You</span>}
+              >
+                <TextArea
+                  rows={2}
+                  placeholder="Work style, hobbies, anything fun..."
+                  maxLength={300}
+                  showCount
+                />
+              </Form.Item>
+
+              <Form.Item style={{ marginBottom: 0 }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  icon={<SaveOutlined />}
+                  loading={updateMutation.isPending}
+                  style={{
+                    width: '100%',
+                    background: isDark
+                      ? 'linear-gradient(135deg, #f5c400 0%, #d4a800 100%)'
+                      : 'linear-gradient(135deg, #4a3fcf 0%, #6055e1 100%)',
+                    border: 'none',
+                    height: 40,
+                    color: isDark ? '#05060a' : '#fff',
+                  }}
+                >
+                  Save Changes
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 }

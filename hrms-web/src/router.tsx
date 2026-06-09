@@ -49,7 +49,6 @@ export const router = createHashRouter([
   { path: '/login', element: <Login />, errorElement: <RouteErrorBoundary /> },
   { path: '/invite', element: <InviteByCode />, errorElement: <RouteErrorBoundary /> },
   { path: '/messaging', element: <ProtectedRoute><MessagingInbox /></ProtectedRoute>, errorElement: <RouteErrorBoundary /> },
-  { path: '/profile', element: <ProtectedRoute><UserProfile /></ProtectedRoute>, errorElement: <RouteErrorBoundary /> },
   {
     path: '/',
     element: <ProtectedRoute><AppLayout /></ProtectedRoute>,
@@ -94,6 +93,7 @@ export const router = createHashRouter([
       { path: 'workspace-directory', element: <WorkspaceDirectory /> },
       { path: 'settings/access-requests', element: <AccessRequestsManagement /> },
       { path: 'debug/workspaces', element: <WorkspaceDebug /> },
+      { path: 'profile', element: <UserProfile /> },
       { path: '*', element: <Navigate to="/dashboard" replace /> },
     ],
   },

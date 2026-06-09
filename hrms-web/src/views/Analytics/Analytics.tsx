@@ -543,6 +543,48 @@ export default function Analytics() {
           pagination={{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'] }}
           scroll={{ x: 1400 }}
           columns={[
+            {
+              title: 'Action',
+              key: 'action',
+              width: 160,
+              fixed: 'left' as const,
+              render: (_: any, record: any) => (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      setSelectedSummary(record);
+                      setSummaryModalOpen(true);
+                    }}
+                  >
+                    View
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      exportTableToPDF(
+                        `Monthly Performance Summary - ${record.month}`,
+                        ['Month', 'Active', 'Engagements', 'Terminations', 'Leaves', 'Sick Notes', 'Absenteeism', 'Training %', 'Offers'],
+                        [[
+                          record.month,
+                          record.active,
+                          record.engagements,
+                          record.terminations,
+                          record.leaves,
+                          record.sickNotes,
+                          record.absenteeism,
+                          record.completed,
+                          record.offers,
+                        ]],
+                        `Monthly_Performance_${record.month}.pdf`
+                      );
+                    }}
+                  >
+                    PDF
+                  </Button>
+                </div>
+              ),
+            },
             { title: 'Month', dataIndex: 'month', key: 'month', fixed: 'left', width: 120 },
             {
               title: 'Active Employees',
@@ -599,47 +641,6 @@ export default function Analytics() {
               key: 'offers',
               width: 130,
               render: (text) => <Tag color="geekblue">{text}</Tag>,
-            },
-            {
-              title: 'Action',
-              key: 'action',
-              width: 160,
-              render: (_: any, record: any) => (
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <Button
-                    size="small"
-                    onClick={() => {
-                      setSelectedSummary(record);
-                      setSummaryModalOpen(true);
-                    }}
-                  >
-                    View
-                  </Button>
-                  <Button
-                    size="small"
-                    onClick={() => {
-                      exportTableToPDF(
-                        `Monthly Performance Summary - ${record.month}`,
-                        ['Month', 'Active', 'Engagements', 'Terminations', 'Leaves', 'Sick Notes', 'Absenteeism', 'Training %', 'Offers'],
-                        [[
-                          record.month,
-                          record.active,
-                          record.engagements,
-                          record.terminations,
-                          record.leaves,
-                          record.sickNotes,
-                          record.absenteeism,
-                          record.completed,
-                          record.offers,
-                        ]],
-                        `Monthly_Performance_${record.month}.pdf`
-                      );
-                    }}
-                  >
-                    PDF
-                  </Button>
-                </div>
-              ),
             },
           ]}
           dataSource={monthlySummaryRows}

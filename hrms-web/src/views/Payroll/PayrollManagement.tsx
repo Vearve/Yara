@@ -803,10 +803,45 @@ const PayrollManagement: React.FC = () => {
                     <Table
                       columns={[
                         {
+                          title: 'Actions',
+                          key: 'actions',
+                          width: 90,
+                          fixed: 'left' as const,
+                          render: (_: any, record: PayrollEntry) => (
+                            <Space>
+                              {canManagePayroll && (
+                                <>
+                                  <Button
+                                    type="text"
+                                    size="small"
+                                    icon={<EditOutlined />}
+                                    onClick={() => {
+                                      setEditingPayrollEntry(record);
+                                      setPayrollEntryFormVisible(true);
+                                    }}
+                                  />
+                                  <Popconfirm
+                                    title="Delete this payroll entry?"
+                                    onConfirm={() => deletePayrollEntryMutation.mutate(record.id)}
+                                  >
+                                    <Button
+                                      type="text"
+                                      size="small"
+                                      icon={<DeleteOutlined />}
+                                      danger
+                                    />
+                                  </Popconfirm>
+                                </>
+                              )}
+                            </Space>
+                          ),
+                        },
+                        {
                           title: 'Employee ID',
                           dataIndex: 'employee_id',
                           key: 'employee_id',
                           width: 120,
+                          fixed: 'left' as const,
                         },
                         {
                           title: 'Employee Name',
@@ -879,39 +914,6 @@ const PayrollManagement: React.FC = () => {
                           key: 'paye_tax',
                           render: (val: number) => formatMoney(val),
                           width: 110,
-                        },
-                        {
-                          title: 'Actions',
-                          key: 'actions',
-                          width: 120,
-                          render: (_: any, record: PayrollEntry) => (
-                            <Space>
-                              {canManagePayroll && (
-                                <>
-                                  <Button
-                                    type="text"
-                                    size="small"
-                                    icon={<EditOutlined />}
-                                    onClick={() => {
-                                      setEditingPayrollEntry(record);
-                                      setPayrollEntryFormVisible(true);
-                                    }}
-                                  />
-                                  <Popconfirm
-                                    title="Delete this payroll entry?"
-                                    onConfirm={() => deletePayrollEntryMutation.mutate(record.id)}
-                                  >
-                                    <Button
-                                      type="text"
-                                      size="small"
-                                      icon={<DeleteOutlined />}
-                                      danger
-                                    />
-                                  </Popconfirm>
-                                </>
-                              )}
-                            </Space>
-                          ),
                         },
                       ]}
                       dataSource={filteredPayrollEntries}

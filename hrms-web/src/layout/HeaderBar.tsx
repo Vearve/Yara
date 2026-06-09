@@ -490,9 +490,9 @@ export default function HeaderBar() {
         />
       </Flex>
 
-      <Flex vertical style={{ flex: 1, minWidth: 0, marginLeft: 16 }}>
-        <Text strong style={{ color: theme === 'dark' ? '#D4AF37' : '#352b47', fontSize: 16 }}>Hello, {displayName}</Text>
-        <Text type="secondary" style={{ fontSize: 12, color: theme === 'dark' ? '#c4c8d4' : '#70697f' }}>What are we doing today?</Text>
+      <Flex vertical style={{ flex: 1, minWidth: 0, marginLeft: 16, overflow: 'hidden' }}>
+        <Text strong style={{ color: theme === 'dark' ? '#D4AF37' : '#352b47', fontSize: 15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>Hello, {displayName}</Text>
+        <Text type="secondary" style={{ fontSize: 11, color: theme === 'dark' ? '#c4c8d4' : '#70697f', whiteSpace: 'nowrap' }}>What are we doing today?</Text>
       </Flex>
 
       <Flex align="center" gap={20} style={{ flex: 0, marginLeft: 'auto' }}>

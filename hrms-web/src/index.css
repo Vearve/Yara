@@ -45,33 +45,33 @@
 /* Light Mode */
 :root.light-mode {
   color-scheme: light;
-  --bg-base: #f6f5f2;
-  --bg-panel: #ece9e3;
-  --bg-card: #ffffff;
-  --bg-card-soft: #fdfcfa;
+  --bg-base: #eae7e1;
+  --bg-panel: #e0ddd6;
+  --bg-card: #f0ede7;
+  --bg-card-soft: #f5f2ec;
   --accent: #4a3fcf;
   --accent-soft: #695ff0;
-  --text: #202022;
-  --text-dim: #5c5865;
-  --text-muted: #8b8696;
-  --border: rgba(74, 63, 207, 0.12);
-  --glow: 0 14px 32px rgba(29, 24, 47, 0.07);
-  --sidebar-bg: linear-gradient(180deg, #2a163c 0%, #3a2151 100%);
-  --sidebar-border: rgba(255, 255, 255, 0.16);
+  --text: #1e1b28;
+  --text-dim: #514b62;
+  --text-muted: #857e96;
+  --border: rgba(74, 63, 207, 0.14);
+  --glow: 0 8px 24px rgba(29, 24, 47, 0.09);
+  --sidebar-bg: linear-gradient(180deg, #241439 0%, #32194d 100%);
+  --sidebar-border: rgba(255, 255, 255, 0.14);
   --sidebar-text: #f3effa;
-  --sidebar-hover: rgba(255, 255, 255, 0.045);
-  --sidebar-active: rgba(255, 255, 255, 0.11);
-  --header-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(250, 247, 241, 0.97) 100%);
-  --header-border: rgba(41, 28, 58, 0.08);
-  --shell-bg: linear-gradient(180deg, #f6f5f2 0%, #edeae5 55%, #f6f5f2 100%);
-  --shell-glow: radial-gradient(ellipse 1100px 520px at center top, rgba(81, 62, 149, 0.08), transparent 70%), radial-gradient(circle at 88% 8%, rgba(143, 161, 255, 0.08), transparent 24%), radial-gradient(circle at 95% 1%, rgba(255, 255, 255, 0.7), transparent 12%);
-  --shell-grid: repeating-linear-gradient(90deg, transparent, transparent 119px, rgba(44, 33, 69, 0.025) 119px, rgba(44, 33, 69, 0.025) 120px);
-  --hero-bg: linear-gradient(140deg, rgba(255, 255, 255, 0.96) 0%, rgba(247, 243, 237, 0.98) 100%);
-  --hero-border: rgba(65, 47, 126, 0.14);
-  --hero-eyebrow: #71688a;
-  --hero-title: #261f35;
-  --hero-description: #564d69;
-  --hero-orb: rgba(92, 73, 173, 0.12);
+  --sidebar-hover: rgba(255, 255, 255, 0.05);
+  --sidebar-active: rgba(255, 255, 255, 0.12);
+  --header-bg: linear-gradient(180deg, rgba(244, 241, 235, 0.97) 0%, rgba(238, 234, 227, 0.99) 100%);
+  --header-border: rgba(41, 28, 58, 0.1);
+  --shell-bg: linear-gradient(180deg, #eae7e1 0%, #e2dfd8 55%, #eae7e1 100%);
+  --shell-glow: radial-gradient(ellipse 1100px 520px at center top, rgba(74, 63, 207, 0.07), transparent 70%), radial-gradient(circle at 85% 6%, rgba(120, 100, 220, 0.06), transparent 26%);
+  --shell-grid: repeating-linear-gradient(90deg, transparent, transparent 119px, rgba(44, 33, 69, 0.03) 119px, rgba(44, 33, 69, 0.03) 120px);
+  --hero-bg: linear-gradient(140deg, rgba(244, 241, 235, 0.98) 0%, rgba(237, 233, 225, 0.99) 100%);
+  --hero-border: rgba(65, 47, 126, 0.15);
+  --hero-eyebrow: #6a6182;
+  --hero-title: #241c35;
+  --hero-description: #52496a;
+  --hero-orb: rgba(74, 63, 207, 0.1);
 }
 
 /* Dark Mode Explicit */
@@ -121,10 +121,9 @@ body {
 }
 
 :root.light-mode body {
-  background: radial-gradient(circle at 12% 14%, rgba(77, 58, 154, 0.08), transparent 34%),
-    radial-gradient(circle at 89% 2%, rgba(129, 118, 235, 0.08), transparent 26%),
-    radial-gradient(circle at 96% 0%, rgba(255, 255, 255, 0.65), transparent 11%),
-    linear-gradient(145deg, #f6f5f2 0%, #ebe8e2 44%, #f6f5f2 100%);
+  background: radial-gradient(circle at 12% 14%, rgba(74, 63, 207, 0.07), transparent 36%),
+    radial-gradient(circle at 88% 3%, rgba(100, 90, 210, 0.06), transparent 28%),
+    linear-gradient(145deg, #eae7e1 0%, #dedad3 44%, #eae7e1 100%);
 }
 
 a {
@@ -225,21 +224,38 @@ a:hover {
 }
 
 :root.light-mode .ant-table {
-  background: #ffffff;
+  background: var(--bg-card);
 }
 
 :root.light-mode .ant-table-thead>tr>th {
-  background: #f4f0eb;
-  color: #352c46;
-  border-bottom: 1px solid rgba(53, 44, 70, 0.12);
+  background: #dedad2;
+  color: #261c35;
+  border-bottom: 1px solid rgba(53, 44, 70, 0.14);
+  font-weight: 600;
 }
 
 :root.light-mode .ant-table-tbody>tr>td {
-  border-bottom: 1px solid rgba(53, 44, 70, 0.08);
+  background: var(--bg-card);
+  border-bottom: 1px solid rgba(53, 44, 70, 0.07);
+  color: var(--text);
+}
+
+:root.light-mode .ant-table-tbody>tr:nth-child(even)>td {
+  background: #ebe8e2;
 }
 
 :root.light-mode .ant-table-tbody>tr:hover>td {
-  background: #f8f4ef;
+  background: #ddd9d1 !important;
+}
+
+:root.light-mode .ant-card {
+  background: var(--bg-card);
+  border-color: rgba(53, 44, 70, 0.1);
+}
+
+:root.light-mode .ant-card-head {
+  background: var(--bg-card);
+  border-bottom-color: rgba(53, 44, 70, 0.1);
 }
 
 :root.light-mode .ant-input,
@@ -247,8 +263,9 @@ a:hover {
 :root.light-mode .ant-select-selector,
 :root.light-mode .ant-picker,
 :root.light-mode .ant-input-number {
-  border-color: rgba(53, 44, 70, 0.26);
-  background: #ffffff;
+  border-color: rgba(53, 44, 70, 0.22);
+  background: #f7f4ee;
+  color: var(--text);
 }
 
 :root.light-mode .ant-select-selection-placeholder,
