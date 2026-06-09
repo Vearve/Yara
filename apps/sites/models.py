@@ -14,7 +14,7 @@ class Site(models.Model):
         CLOSED = 'CLOSED', 'Closed'
 
     workspace = models.ForeignKey(
-        'core.Workspace', on_delete=models.CASCADE, related_name='sites'
+        'core.Workspace', on_delete=models.CASCADE, related_name='work_sites'
     )
     name = models.CharField(max_length=200)
     location = models.CharField(max_length=300, blank=True)
