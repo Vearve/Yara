@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'apps.safety.apps.SafetyConfig',
     'apps.tracking.apps.TrackingConfig',
     'apps.activities.apps.ActivitiesConfig',
+    'apps.sites.apps.SitesConfig',
 ]
 
 MIDDLEWARE = [

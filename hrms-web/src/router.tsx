@@ -11,6 +11,8 @@ import EngagementsTerminations from './views/HCM/EngagementsTerminations';
 import Summary from './views/HCM/Summary';
 import ContractSchedule from './views/HCM/ContractSchedule';
 import Medicals from './views/HCM/Medicals';
+import SiteList from './views/HCM/Sites/SiteList';
+import SiteManage from './views/HCM/Sites/SiteManage';
 import Trainings from './views/Tracking/Trainings';
 import CaseStudies from './views/Activities/CaseStudies';
 import Hearings from './views/Activities/Hearings';
@@ -67,6 +69,8 @@ export const router = createHashRouter([
       { path: 'hcm/summary', element: <Summary /> },
       { path: 'hcm/contract-schedule', element: <ContractSchedule /> },
       { path: 'hcm/medicals', element: <Medicals /> },
+      { path: 'hcm/sites', element: <SiteList /> },
+      { path: 'hcm/sites/:id/manage', element: <SiteManage /> },
       { path: 'tracking/trainings', element: <Trainings /> },
       { path: 'activities/case-studies', element: <CaseStudies /> },
       { path: 'activities/hearings', element: <Hearings /> },

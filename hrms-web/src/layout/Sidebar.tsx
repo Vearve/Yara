@@ -50,6 +50,7 @@ export default function Sidebar({ activePath }: { activePath: string }) {
         { key: '/hcm/summary', label: <Link to="/hcm/summary">Summary</Link> },
         { key: '/hcm/contract-schedule', label: <Link to="/hcm/contract-schedule">Contract Schedule</Link> },
         { key: '/hcm/medicals', label: <Link to="/hcm/medicals">Medical Management</Link> },
+        { key: '/hcm/sites', label: <Link to="/hcm/sites">Site Management</Link> },
       ]
     },
     { key: '/tracking/trainings', icon: <SafetyOutlined />, label: <Link to="/tracking/trainings">Trainings</Link> },

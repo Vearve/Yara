@@ -40,6 +40,7 @@ urlpatterns = [
     path('api/v1/activities/', include('apps.activities.urls')),
     path('api/v1/performance/', include('apps.performance.urls')),
     path('api/v1/core/', include('apps.core.urls')),
+    path('api/v1/sites/', include('apps.sites.urls')),
 ]
 
 # Serve media files
