@@ -270,13 +270,14 @@ const AccessRequestsManagement: React.FC = () => {
       {/* Detail Modal */}
       <Modal
         title="Request Details"
-        visible={detailModalVisible}
+        open={detailModalVisible}
         onCancel={() => {
           setDetailModalVisible(false);
           setSelectedRequest(null);
         }}
         footer={null}
         width={600}
+        destroyOnClose
       >
         {selectedRequest && (
           <div>
@@ -358,7 +359,7 @@ const AccessRequestsManagement: React.FC = () => {
       {/* Process Modal */}
       <Modal
         title={`${processAction === 'APPROVE' ? 'Approve' : 'Deny'} Access Request`}
-        visible={processModalVisible}
+        open={processModalVisible}
         onOk={handleSubmitProcess}
         onCancel={() => {
           setProcessModalVisible(false);
@@ -366,6 +367,7 @@ const AccessRequestsManagement: React.FC = () => {
           form.resetFields();
         }}
         confirmLoading={processRequestMutation.isPending}
+        destroyOnClose
       >
         <Form form={form} layout="vertical">
           {selectedRequest && (

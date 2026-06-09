@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Table, Button, Space, Modal, Form, Input, Select, Tag, message, Drawer } from 'antd';
@@ -62,7 +62,14 @@ export default function Departments() {
       return Array.isArray(arr) ? arr : [];
     },
     enabled: !!workspaceId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
+
+  const employeeOptions = useMemo(
+    () => (employees || []).map((e: any) => ({ value: e.id, label: `${e.first_name} ${e.last_name}` })),
+    [employees],
+  );
 
   const createMut = useMutation({
     mutationFn: async (payload: any) => (await http.post('/api/v1/hcm/departments/', payload)).data,
@@ -201,6 +208,7 @@ export default function Departments() {
         onOk={() => form.submit()}
         confirmLoading={createMut.isPending || updateMut.isPending}
         width={600}
+        destroyOnClose
       >
         <Form form={form} layout="vertical" onFinish={(vals) => {
           const payload = { ...vals };
@@ -226,7 +234,7 @@ export default function Departments() {
               showSearch
               placeholder="Select manager"
               optionFilterProp="label"
-              options={(employees || []).map((e: any) => ({ value: e.id, label: `${e.first_name} ${e.last_name}` }))}
+              options={employeeOptions}
             />
           </Form.Item>
           <Form.Item name="job_titles" label="Job Titles">

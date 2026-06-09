@@ -18,6 +18,8 @@ function useEmployees(workspaceId: string | null) {
       return Array.isArray(data) ? data : [];
     },
     enabled: !!workspaceId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 }
 
@@ -30,6 +32,8 @@ function useDepartments(workspaceId: string | null) {
       return Array.isArray(data) ? data : [];
     },
     enabled: !!workspaceId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 }
 

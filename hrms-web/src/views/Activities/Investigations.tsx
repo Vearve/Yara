@@ -1,7 +1,7 @@
 import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Upload, Drawer } from 'antd';
 import { PlusOutlined, EyeOutlined, UploadOutlined, FilePdfOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { listInvestigations, createInvestigation } from '../../api/activities';
 import http from '../../lib/http';
 import { exportInvestigationToPDF } from '../../lib/pdfExport';
@@ -56,6 +56,8 @@ export default function Investigations() {
       return res.data?.results || res.data || [];
     },
     enabled: !!workspaceId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const { data: caseStudies = [] } = useQuery({
@@ -65,7 +67,14 @@ export default function Investigations() {
       return res.data?.results || res.data || [];
     },
     enabled: !!workspaceId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
+
+  const caseStudyOptions = useMemo(
+    () => (caseStudies || []).map((c: any) => ({ value: c.id, label: c.case_number })),
+    [caseStudies],
+  );
 
   const createMutation = useMutation({
     mutationFn: createInvestigation,
@@ -334,6 +343,7 @@ export default function Investigations() {
         onOk={() => form.submit()}
         confirmLoading={createMutation.isPending}
         width={600}
+        destroyOnClose
       >
         <Form form={form} layout="vertical" onFinish={handleCreate}>
           <Form.Item
@@ -369,7 +379,7 @@ export default function Investigations() {
               placeholder="Link to case study"
               showSearch
               optionFilterProp="label"
-              options={(caseStudies || []).map((c: any) => ({ value: c.id, label: c.case_number }))}
+              options={caseStudyOptions}
               allowClear
             />
           </Form.Item>
@@ -432,6 +442,7 @@ export default function Investigations() {
         onOk={() => editForm.submit()}
         confirmLoading={updateMutation.isPending}
         width={600}
+        destroyOnClose
       >
         <Form form={editForm} layout="vertical" onFinish={handleEditSubmit}>
           <Form.Item
@@ -467,7 +478,7 @@ export default function Investigations() {
               placeholder="Link to case study"
               showSearch
               optionFilterProp="label"
-              options={(caseStudies || []).map((c: any) => ({ value: c.id, label: c.case_number }))}
+              options={caseStudyOptions}
               allowClear
             />
           </Form.Item>

@@ -428,6 +428,7 @@ export default function Medicals() {
         onCancel={() => setViewModalOpen(false)}
         footer={null}
         width={700}
+        destroyOnClose
       >
         {viewingRecord && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -470,6 +471,7 @@ export default function Medicals() {
         onOk={() => form.submit()}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         width={650}
+        destroyOnClose
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item

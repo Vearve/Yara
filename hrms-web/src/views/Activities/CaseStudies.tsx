@@ -81,6 +81,8 @@ export default function CaseStudies() {
       return res.data?.results || res.data || [];
     },
     enabled: !!workspaceId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const { data: reports } = useQuery({
@@ -428,6 +430,7 @@ export default function CaseStudies() {
         }}
         onOk={() => form.submit()}
         width={600}
+        destroyOnClose
       >
         <Form
           form={form}
@@ -546,6 +549,7 @@ export default function CaseStudies() {
         onOk={() => createForm.submit()}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         width={600}
+        destroyOnClose
       >
         <Form form={createForm} layout="vertical" onFinish={handleSubmitForm}>
           <Form.Item

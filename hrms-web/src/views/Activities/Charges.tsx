@@ -76,6 +76,8 @@ export default function Charges() {
       return res.data?.results ?? res.data ?? [];
     },
     enabled: !!workspaceId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const { data: caseStudies = [] } = useQuery({
@@ -85,7 +87,18 @@ export default function Charges() {
       return res.data?.results ?? res.data ?? [];
     },
     enabled: !!workspaceId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
+
+  const employeeOptions = useMemo(
+    () => (employees || []).map((e: any) => ({ value: e.id, label: e.full_name || `${e.first_name} ${e.last_name}` })),
+    [employees],
+  );
+  const caseStudyOptions = useMemo(
+    () => (caseStudies || []).map((c: any) => ({ value: c.id, label: c.case_number })),
+    [caseStudies],
+  );
 
   const createMutation = useMutation({
     mutationFn: async (values: any) => {
@@ -314,6 +327,7 @@ export default function Charges() {
         onCancel={() => setViewModalOpen(false)}
         footer={null}
         width={700}
+        destroyOnClose
       >
         {viewingRecord && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -357,6 +371,7 @@ export default function Charges() {
         onOk={() => editForm.submit()}
         confirmLoading={updateMutation.isPending}
         width={600}
+        destroyOnClose
       >
         <Form form={editForm} layout="vertical" onFinish={handleEditSubmit}>
           <Form.Item
@@ -368,7 +383,7 @@ export default function Charges() {
               showSearch
               optionFilterProp="label"
               placeholder="Select employee"
-              options={(employees || []).map((e: any) => ({ value: e.id, label: e.full_name || `${e.first_name} ${e.last_name}` }))}
+              options={employeeOptions}
               allowClear
             />
           </Form.Item>
@@ -378,7 +393,7 @@ export default function Charges() {
               showSearch
               optionFilterProp="label"
               placeholder="Link to case study"
-              options={(caseStudies || []).map((c: any) => ({ value: c.id, label: c.case_number }))}
+              options={caseStudyOptions}
               allowClear
             />
           </Form.Item>
@@ -439,6 +454,7 @@ export default function Charges() {
         onOk={() => form.submit()}
         confirmLoading={createMutation.isPending}
         width={600}
+        destroyOnClose
       >
         <Form form={form} layout="vertical" onFinish={handleCreate}>
           <Form.Item
@@ -450,7 +466,7 @@ export default function Charges() {
               showSearch
               optionFilterProp="label"
               placeholder="Select employee"
-              options={(employees || []).map((e: any) => ({ value: e.id, label: e.full_name || `${e.first_name} ${e.last_name}` }))}
+              options={employeeOptions}
               allowClear
             />
           </Form.Item>
@@ -460,7 +476,7 @@ export default function Charges() {
               showSearch
               optionFilterProp="label"
               placeholder="Link to case study"
-              options={(caseStudies || []).map((c: any) => ({ value: c.id, label: c.case_number }))}
+              options={caseStudyOptions}
               allowClear
             />
           </Form.Item>

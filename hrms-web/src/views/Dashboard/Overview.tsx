@@ -1,6 +1,6 @@
 import { Select, DatePicker, Tag, Spin, Row, Col, Button, Input } from 'antd';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import http from '../../lib/http';
 import ReactECharts from 'echarts-for-react';
 import { Filter, Users, BriefcaseBusiness, Activity, Stethoscope, RefreshCw, Search } from 'lucide-react';
@@ -49,7 +49,14 @@ export default function Overview() {
       return res.data?.results || res.data || [];
     },
     enabled: hasToken,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
+
+  const departmentOptions = useMemo(
+    () => (departments || []).map((d: any) => ({ value: d.id, label: d.name })),
+    [departments],
+  );
 
   const { data: hcmSummary } = useQuery({
     queryKey: ['hcm-summary', workspaceId, appliedFilters.department, appliedFilters.range, appliedFilters.search],
@@ -179,7 +186,7 @@ export default function Overview() {
             style={{ width: 220 }}
             value={pendingDepartment}
             onChange={(val) => setPendingDepartment(val ?? null)}
-            options={(departments || []).map((d: any) => ({ value: d.id, label: d.name }))}
+            options={departmentOptions}
           />
           <DatePicker.RangePicker value={pendingRange} onChange={setPendingRange} />
           <Input

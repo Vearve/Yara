@@ -22,12 +22,17 @@ export const SalaryManagementDashboard = () => {
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
 
+  const [workspaceId] = useState<string | null>(() => localStorage.getItem('workspaceId'));
+
   const { data: employees = [] } = useQuery({
-    queryKey: ['employees-list'],
+    queryKey: ['employees-list', workspaceId],
     queryFn: async () => {
       const res = await http.get('/api/v1/hcm/employees/', { params: { page_size: 200 } });
       return res.data?.results || res.data || [];
     },
+    enabled: !!workspaceId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const handleAddNew = () => {

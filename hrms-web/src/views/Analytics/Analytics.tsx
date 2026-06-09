@@ -4,7 +4,7 @@ import jsPDF from 'jspdf';
 import { Filter, RefreshCw, TrendingUp, Activity, Flame, Download } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { GlassCard, TagPill } from '../../components/NeonPrimitives';
 import { KPICard } from '../../components/KPICard';
 import { HeroBanner } from '../../components/HeroBanner';
@@ -53,6 +53,8 @@ export default function Analytics() {
       const res = await http.get('/api/v1/hcm/departments/', { params: { page_size: 100 } });
       return res.data?.results || res.data || [];
     },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const { data: employees = [] } = useQuery({
@@ -61,9 +63,26 @@ export default function Analytics() {
       const res = await http.get('/api/v1/hcm/employees/', { params: { page_size: 200 } });
       return res.data?.results || res.data || [];
     },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
-  const jobTitles = Array.from(new Set((employees || []).map((e: any) => e.job_title).filter(Boolean))) as string[];
+  const jobTitles = useMemo(
+    () => Array.from(new Set((employees || []).map((e: any) => e.job_title).filter(Boolean))) as string[],
+    [employees],
+  );
+  const departmentOptions = useMemo(
+    () => (departments || []).map((d: any) => ({ label: d.name, value: d.id })),
+    [departments],
+  );
+  const employeeOptions = useMemo(
+    () => (employees || []).map((e: any) => ({ label: `${e.first_name} ${e.last_name} (${e.employee_id})`, value: e.id })),
+    [employees],
+  );
+  const jobTitleOptions = useMemo(
+    () => jobTitles.map((t: string) => ({ label: t, value: t })),
+    [jobTitles],
+  );
 
   const { data: analytics, isLoading, error } = useQuery<AnalyticsData>({
     queryKey: ['analytics', workspaceId, appliedFilters],
@@ -256,7 +275,7 @@ export default function Analytics() {
               style={{ width: '100%' }}
               value={pendingFilters.departmentId}
               onChange={(value) => setPendingFilters({ ...pendingFilters, departmentId: value })}
-              options={(departments || []).map((d: any) => ({ label: d.name, value: d.id }))}
+              options={departmentOptions}
             />
           </Col>
           <Col xs={24} sm={12} md={6}>
@@ -267,7 +286,7 @@ export default function Analytics() {
               style={{ width: '100%' }}
               value={pendingFilters.jobTitle}
               onChange={(value) => setPendingFilters({ ...pendingFilters, jobTitle: value })}
-              options={jobTitles.map((t: string) => ({ label: t, value: t }))}
+              options={jobTitleOptions}
             />
           </Col>
           <Col xs={24} sm={12} md={6}>
@@ -279,10 +298,7 @@ export default function Analytics() {
               value={pendingFilters.employeeId}
               onChange={(value) => setPendingFilters({ ...pendingFilters, employeeId: value })}
               optionFilterProp="label"
-              options={(employees || []).map((e: any) => ({
-                label: `${e.first_name} ${e.last_name} (${e.employee_id})`,
-                value: e.id
-              }))}
+              options={employeeOptions}
             />
           </Col>
           <Col xs={24} sm={12} md={6}>
@@ -635,6 +651,7 @@ export default function Analytics() {
         open={summaryModalOpen}
         onCancel={() => setSummaryModalOpen(false)}
         footer={null}
+        destroyOnClose
       >
         {selectedSummary && (
           <div style={{ display: 'grid', gap: 6 }}>

@@ -17,6 +17,7 @@ interface Training {
 
 export default function Trainings() {
   const qc = useQueryClient();
+  const [workspaceId] = React.useState<string | null>(() => localStorage.getItem('workspaceId'));
   const [open, setOpen] = React.useState(false);
   const [viewOpen, setViewOpen] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
@@ -26,26 +27,33 @@ export default function Trainings() {
   const [fileList, setFileList] = React.useState<any[]>([]);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['trainings'],
+    queryKey: ['trainings', workspaceId],
     queryFn: async () => (await http.get('/api/v1/tracking/trainings/')).data,
+    enabled: !!workspaceId,
   });
 
   const rows: Training[] = data?.results ?? data ?? [];
 
   const { data: employees = [] } = useQuery({
-    queryKey: ['employees-list'],
+    queryKey: ['employees-list', workspaceId],
     queryFn: async () => {
       const res = await http.get('/api/v1/hcm/employees/', { params: { page_size: 200 } });
       return res.data?.results || res.data || [];
     },
+    enabled: !!workspaceId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const { data: trainingTypes = [] } = useQuery({
-    queryKey: ['training-types'],
+    queryKey: ['training-types', workspaceId],
     queryFn: async () => {
       const res = await http.get('/api/v1/tracking/training-types/');
       return res.data?.results || res.data || [];
     },
+    enabled: !!workspaceId,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
   });
 
   const resolveTrainingTypeId = async (name: string) => {

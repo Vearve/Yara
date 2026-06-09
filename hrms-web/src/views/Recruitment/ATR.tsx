@@ -64,21 +64,29 @@ export default function ATR() {
     },
   });
 
+  const [workspaceId] = useState<string | null>(() => localStorage.getItem('workspaceId'));
+
   const { data: departments = [] } = useQuery({
-    queryKey: ['departments'],
+    queryKey: ['departments', workspaceId],
     queryFn: async () => {
       const res = await http.get('/api/v1/hcm/departments/', { params: { page_size: 200 } });
       return res.data?.results || res.data || [];
     },
+    enabled: !!workspaceId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const { data: jobs = [] } = useQuery({
-    queryKey: ['jobs', selectedDepartment],
+    queryKey: ['jobs', workspaceId, selectedDepartment],
     queryFn: async () => {
       const params = selectedDepartment ? { department: selectedDepartment, page_size: 200 } : { page_size: 200 };
       const res = await http.get('/api/v1/hcm/jobs/', { params });
       return res.data?.results || res.data || [];
     },
+    enabled: !!workspaceId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const departmentMap = useMemo(() => {

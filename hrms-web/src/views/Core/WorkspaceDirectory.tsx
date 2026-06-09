@@ -245,7 +245,7 @@ const WorkspaceDirectory: React.FC = () => {
 
       <Modal
         title={`Request Access: ${selectedWorkspace?.name}`}
-        visible={requestModalVisible}
+        open={requestModalVisible}
         onOk={handleSubmitRequest}
         onCancel={() => {
           setRequestModalVisible(false);
@@ -253,6 +253,7 @@ const WorkspaceDirectory: React.FC = () => {
           form.resetFields();
         }}
         confirmLoading={createRequestMutation.isPending}
+        destroyOnClose
       >
         <Form form={form} layout="vertical">
           <Form.Item label="Workspace" className="mb-0">

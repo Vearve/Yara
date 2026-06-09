@@ -66,6 +66,8 @@ export default function Reports() {
       return res.data?.results ?? res.data ?? [];
     },
     enabled: !!workspaceId,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
   });
 
   const { data: caseStudies = [] } = useQuery({
@@ -75,6 +77,8 @@ export default function Reports() {
       return res.data?.results ?? res.data ?? [];
     },
     enabled: !!workspaceId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
 
   const { data: employees = [] } = useQuery({
@@ -84,7 +88,21 @@ export default function Reports() {
       return res.data?.results ?? res.data ?? [];
     },
     enabled: !!workspaceId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
+
+  const employeeOptions = useMemo(
+    () => (employees || []).map((employee: any) => ({
+      value: employee.id,
+      label: `${employee.employee_id || employee.employee_code || 'EMP'} - ${employee.full_name || `${employee.first_name} ${employee.last_name}`}`,
+    })),
+    [employees],
+  );
+  const caseStudyOptions = useMemo(
+    () => (caseStudies || []).map((c: any) => ({ value: c.id, label: c.case_number })),
+    [caseStudies],
+  );
 
   const reportTypeOptions = (reportTypes?.length ? reportTypes : [
     { id: 'SAFETY', name: 'SAFETY' },
@@ -345,6 +363,7 @@ export default function Reports() {
         onCancel={() => setViewModalOpen(false)}
         footer={null}
         width={700}
+        destroyOnClose
       >
         {viewingRecord && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -377,6 +396,7 @@ export default function Reports() {
         onOk={() => editForm.submit()}
         confirmLoading={updateMut.isPending}
         width={600}
+        destroyOnClose
       >
         <Form form={editForm} layout="vertical" onFinish={handleEditSubmit}>
           <Form.Item name="report_number" label="Report Number" rules={[{ required: true }]}>
@@ -394,10 +414,7 @@ export default function Reports() {
             <Select
               showSearch
               optionFilterProp="label"
-              options={(employees || []).map((employee: any) => ({
-                value: employee.id,
-                label: `${employee.employee_id || employee.employee_code || 'EMP'} - ${employee.full_name || `${employee.first_name} ${employee.last_name}`}`,
-              }))}
+              options={employeeOptions}
               placeholder="Select the reporting employee"
               allowClear
             />
@@ -406,7 +423,7 @@ export default function Reports() {
             <Select
               showSearch
               optionFilterProp="label"
-              options={(caseStudies || []).map((c: any) => ({ value: c.id, label: c.case_number }))}
+              options={caseStudyOptions}
               placeholder="Link to case study"
               allowClear
             />
@@ -448,6 +465,7 @@ export default function Reports() {
         onOk={() => form.submit()}
         confirmLoading={createMut.isPending}
         width={600}
+        destroyOnClose
       >
         <Form form={form} layout="vertical" onFinish={(vals) => {
           const fd = new FormData();
@@ -480,10 +498,7 @@ export default function Reports() {
             <Select
               showSearch
               optionFilterProp="label"
-              options={(employees || []).map((employee: any) => ({
-                value: employee.id,
-                label: `${employee.employee_id || employee.employee_code || 'EMP'} - ${employee.full_name || `${employee.first_name} ${employee.last_name}`}`,
-              }))}
+              options={employeeOptions}
               placeholder="Select the reporting employee"
               allowClear
             />
@@ -492,7 +507,7 @@ export default function Reports() {
             <Select
               showSearch
               optionFilterProp="label"
-              options={(caseStudies || []).map((c: any) => ({ value: c.id, label: c.case_number }))}
+              options={caseStudyOptions}
               placeholder="Link to case study"
               allowClear
             />

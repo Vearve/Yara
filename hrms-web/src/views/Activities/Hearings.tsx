@@ -1,7 +1,7 @@
 import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Upload, Drawer } from 'antd';
 import { PlusOutlined, EyeOutlined, FilePdfOutlined, UploadOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { listHearings, createHearing } from '../../api/activities';
 import http from '../../lib/http';
 import { exportHearingToPDF } from '../../lib/pdfExport';
@@ -56,6 +56,8 @@ export default function Hearings() {
       return res.data?.results || res.data || [];
     },
     enabled: !!workspaceId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const { data: caseStudies = [] } = useQuery({
@@ -65,7 +67,14 @@ export default function Hearings() {
       return res.data?.results || res.data || [];
     },
     enabled: !!workspaceId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
+
+  const caseStudyOptions = useMemo(
+    () => (caseStudies || []).map((c: any) => ({ value: c.id, label: c.case_number })),
+    [caseStudies],
+  );
 
   const createMutation = useMutation({
     mutationFn: createHearing,
@@ -337,6 +346,7 @@ export default function Hearings() {
         onOk={() => form.submit()}
         confirmLoading={createMutation.isPending}
         width={600}
+        destroyOnClose
       >
         <Form form={form} layout="vertical" onFinish={handleCreate}>
           <Form.Item
@@ -368,7 +378,7 @@ export default function Hearings() {
               placeholder="Link to case study"
               showSearch
               optionFilterProp="label"
-              options={(caseStudies || []).map((c: any) => ({ value: c.id, label: c.case_number }))}
+              options={caseStudyOptions}
               allowClear
             />
           </Form.Item>
@@ -431,6 +441,7 @@ export default function Hearings() {
         onOk={() => editForm.submit()}
         confirmLoading={updateMutation.isPending}
         width={600}
+        destroyOnClose
       >
         <Form form={editForm} layout="vertical" onFinish={handleEditSubmit}>
           <Form.Item
@@ -462,7 +473,7 @@ export default function Hearings() {
               placeholder="Link to case study"
               showSearch
               optionFilterProp="label"
-              options={(caseStudies || []).map((c: any) => ({ value: c.id, label: c.case_number }))}
+              options={caseStudyOptions}
               allowClear
             />
           </Form.Item>

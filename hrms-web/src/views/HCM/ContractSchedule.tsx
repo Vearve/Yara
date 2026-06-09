@@ -13,10 +13,11 @@ export default function ContractSchedule() {
   const [selectedContract, setSelectedContract] = useState<any>(null);
   const [viewModal, setViewModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [workspaceId] = useState<string | null>(() => localStorage.getItem('workspaceId'));
 
   // Fetch contracts
   const { data: contracts = [], isLoading: contractsLoading, refetch: refetchContracts } = useQuery({
-    queryKey: ['contracts', appliedFilters],
+    queryKey: ['contracts', workspaceId, appliedFilters],
     queryFn: async () => {
       const params: any = {};
       if (appliedFilters.employee) params.search = appliedFilters.employee;
@@ -30,20 +31,24 @@ export default function ContractSchedule() {
 
   // Fetch employees for enrichment
   const { data: employees = [] } = useQuery({
-    queryKey: ['employees-min'],
+    queryKey: ['employees-min', workspaceId],
     queryFn: async () => {
       const res = await http.get('/api/v1/hcm/employees/', { params: { page_size: 500 } });
       return res.data?.results || res.data || [];
     },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   // Fetch departments for filter
   const { data: departments = [] } = useQuery({
-    queryKey: ['departments-min'],
+    queryKey: ['departments-min', workspaceId],
     queryFn: async () => {
       const res = await http.get('/api/v1/hcm/departments/', { params: { page_size: 200 } });
       return res.data?.results || res.data || [];
     },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   // Delete mutation
@@ -238,6 +243,7 @@ export default function ContractSchedule() {
         onCancel={() => setViewModal(false)}
         footer={null}
         width={700}
+        destroyOnClose
       >
         {selectedContract && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
