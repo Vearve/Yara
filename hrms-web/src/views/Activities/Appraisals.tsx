@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Button, Card, DatePicker, Drawer, Form, Input, InputNumber, Modal, Select, Space, Table, Tabs, Tag, message, Upload } from 'antd';
+import MobileTable from '../../components/MobileTable';
+import { Button, Card, DatePicker, Drawer, Form, Input, InputNumber, Modal, Select, Space, Tabs, Tag, message, Upload } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { addDevelopmentItem, addFactor, addImprovement, addNextObjective, addObjective, createAppraisal, deleteAppraisal, deleteDevelopmentItem, deleteImprovement, deleteNextObjectiveItem, deleteObjective, deleteFactor, listAppraisals, listDevelopmentItems, listFactors, listImprovements, listNextObjectives, listObjectives, ratingOptions, updateAppraisal, updateDevelopmentItem, updateImprovement, updateNextObjectiveItem, updateObjective, updateFactor } from '../../api/appraisals';
@@ -457,7 +458,7 @@ export default function Appraisals() {
         </Space>
       </Card>
       <Card>
-        <Table rowKey={(r: any) => r.id} loading={isLoading} columns={columns as any} dataSource={appraisals} />
+        <MobileTable rowKey={(r: any) => r.id} loading={isLoading} columns={columns as any} dataSource={appraisals} />
       </Card>
 
       <Modal
@@ -558,7 +559,7 @@ export default function Appraisals() {
                     </Form>
                   </Card>
                   <Card title="Objectives List">
-                    <Table rowKey={(r: any) => r.id} size="small" dataSource={objectives} columns={[
+                    <MobileTable rowKey={(r: any) => r.id} size="small" dataSource={objectives} columns={[
                       { title: '#', dataIndex: 'order', width: 70 },
                       { title: 'Title', dataIndex: 'title' },
                       { title: 'Self', dataIndex: 'self_rating', width: 90 },
@@ -635,7 +636,7 @@ export default function Appraisals() {
                     </Form>
                   </Card>
                   <Card title="Performance Factors">
-                    <Table rowKey={(r: any) => r.id} size="small" dataSource={perfFactors} columns={[
+                    <MobileTable rowKey={(r: any) => r.id} size="small" dataSource={perfFactors} columns={[
                       { title: '#', dataIndex: 'order', width: 70 },
                       { title: 'Name', dataIndex: 'name' },
                       { title: 'Rating', dataIndex: 'rating', width: 100 },
@@ -675,7 +676,7 @@ export default function Appraisals() {
                     ] as any} />
                   </Card>
                   <Card title="Behavioral Traits">
-                    <Table rowKey={(r: any) => r.id} size="small" dataSource={behFactors} columns={[
+                    <MobileTable rowKey={(r: any) => r.id} size="small" dataSource={behFactors} columns={[
                       { title: '#', dataIndex: 'order', width: 70 },
                       { title: 'Name', dataIndex: 'name' },
                       { title: 'Rating', dataIndex: 'rating', width: 100 },
@@ -715,7 +716,7 @@ export default function Appraisals() {
                     ] as any} />
                   </Card>
                   <Card title="Supervisory Factors">
-                    <Table rowKey={(r: any) => r.id} size="small" dataSource={supFactors} columns={[
+                    <MobileTable rowKey={(r: any) => r.id} size="small" dataSource={supFactors} columns={[
                       { title: '#', dataIndex: 'order', width: 70 },
                       { title: 'Name', dataIndex: 'name' },
                       { title: 'Rating', dataIndex: 'rating', width: 100 },
@@ -788,7 +789,7 @@ export default function Appraisals() {
                     </Form>
                   </Card>
                   <Card title="Improvement Items">
-                    <Table rowKey={(r: any) => r.id} size="small" dataSource={improvements} columns={[
+                    <MobileTable rowKey={(r: any) => r.id} size="small" dataSource={improvements} columns={[
                       { title: 'Issue', dataIndex: 'issue' },
                       { title: 'Limiting Factors', dataIndex: 'limiting_factors' },
                       { title: 'Actions', dataIndex: 'actions' },
@@ -854,7 +855,7 @@ export default function Appraisals() {
                     </Form>
                   </Card>
                   <Card title="Next Period Objectives">
-                    <Table rowKey={(r: any) => r.id} size="small" dataSource={nextObjectives} columns={[
+                    <MobileTable rowKey={(r: any) => r.id} size="small" dataSource={nextObjectives} columns={[
                       { title: 'Key Area', dataIndex: 'key_area', width: 180 },
                       { title: 'Objective', dataIndex: 'objective' },
                       { title: 'Indicators', dataIndex: 'indicators' },
@@ -925,7 +926,7 @@ export default function Appraisals() {
                     </Form>
                   </Card>
                   <Card title="Development Plan">
-                    <Table rowKey={(r: any) => r.id} size="small" dataSource={devItems} columns={[
+                    <MobileTable rowKey={(r: any) => r.id} size="small" dataSource={devItems} columns={[
                       { title: 'Training Need', dataIndex: 'training_need' },
                       { title: 'Action', dataIndex: 'action' },
                       { title: 'Responsible', dataIndex: 'responsible' },

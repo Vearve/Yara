@@ -1,4 +1,5 @@
-import { Table, Button, Tag, Space, Modal, Form, Input, Select, DatePicker, message, Upload, Card } from 'antd';
+import { Button, Tag, Space, Modal, Form, Input, Select, DatePicker, message, Upload, Card } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import { PlusOutlined, EditOutlined, ExclamationCircleOutlined, EyeOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
@@ -411,7 +412,7 @@ export default function Medicals() {
         }}
         bodyStyle={{ padding: '16px' }}
       >
-        <Table
+        <MobileTable
           loading={isLoading}
           dataSource={rows}
           rowKey="id"

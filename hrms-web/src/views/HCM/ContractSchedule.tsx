@@ -1,4 +1,5 @@
-import { Card, Table, Tag, Space, Input, DatePicker, Select, Button, Modal, Form, message } from 'antd';
+import { Card, Tag, Space, Input, DatePicker, Select, Button, Modal, Form, message } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -226,7 +227,7 @@ export default function ContractSchedule() {
         }}
         bodyStyle={{ padding: '16px' }}
       >
-        <Table
+        <MobileTable
           columns={columns}
           dataSource={rows}
           rowKey={(r: any) => r.sn}

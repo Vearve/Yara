@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
+import MobileTable from '../../components/MobileTable';
 import { useEffect } from 'react';
-import { Row, Col, Table, Select, DatePicker, Button, Space, Input } from 'antd';
+import { Row, Col, Select, DatePicker, Button, Space, Input } from 'antd';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -295,7 +296,7 @@ export default function Summary() {
             title="Summary by Employee Classification"
             style={{ height: '100%' }}
           >
-            <Table
+            <MobileTable
               columns={categoryCols}
               dataSource={[{
                 key: 1,
@@ -316,7 +317,7 @@ export default function Summary() {
             title="Weekly Headcount Movement"
             style={{ height: '100%' }}
           >
-            <Table
+            <MobileTable
               columns={weekCols}
               dataSource={[{
                 key: 1,

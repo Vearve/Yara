@@ -1,4 +1,5 @@
-import { Table, Tag, Button, Spin, Select, DatePicker, Row, Col, Modal } from 'antd';
+import { Tag, Button, Spin, Select, DatePicker, Row, Col, Modal } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Filter, RefreshCw, TrendingUp, Activity, Flame, Download } from 'lucide-react';
@@ -538,7 +539,7 @@ export default function Analytics() {
           <div className="text-sm analytics-section-title" style={{ color: sectionTitleColor, fontWeight: 700 }}>Monthly Performance Summary</div>
           <DatePicker.RangePicker value={summaryRange} onChange={setSummaryRange as any} />
         </div>
-        <Table
+        <MobileTable
           size="small"
           pagination={{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'] }}
           scroll={{ x: 1400 }}

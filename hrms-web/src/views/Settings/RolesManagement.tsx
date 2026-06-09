@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import MobileTable from '../../components/MobileTable';
 import {
-  Table,
   Button,
   Modal,
   Form,
@@ -374,7 +374,7 @@ const RolesManagement: React.FC = () => {
 
       <Spin spinning={rolesLoading}>
         {rolesData && rolesData.length > 0 ? (
-          <Table
+          <MobileTable
             columns={columns}
             dataSource={rolesData}
             rowKey="id"

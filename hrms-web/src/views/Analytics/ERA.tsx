@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Select, Tabs, Table, Tag, Spin, Row, Col, Empty, Statistic } from 'antd';
+import { Select, Tabs, Tag, Spin, Row, Col, Empty, Statistic } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import ReactECharts from 'echarts-for-react';
 import http from '../../lib/http';
 import { GlassCard } from '../../components/NeonPrimitives';
@@ -340,7 +341,7 @@ export default function ERA() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                       <div>
                         <div style={{ color: labelColor, fontWeight: 700, marginBottom: 8 }}>Case Studies ({caseStudies.length})</div>
-                        <Table
+                        <MobileTable
                           size="small"
                           dataSource={caseStudies}
                           rowKey="id"
@@ -357,7 +358,7 @@ export default function ERA() {
                       </div>
                       <div>
                         <div style={{ color: labelColor, fontWeight: 700, marginBottom: 8 }}>Charges ({charges.length})</div>
-                        <Table
+                        <MobileTable
                           size="small"
                           dataSource={charges}
                           rowKey="id"
@@ -373,7 +374,7 @@ export default function ERA() {
                       </div>
                       <div>
                         <div style={{ color: labelColor, fontWeight: 700, marginBottom: 8 }}>Hearings ({hearings.length})</div>
-                        <Table
+                        <MobileTable
                           size="small"
                           dataSource={hearings}
                           rowKey="id"
@@ -389,7 +390,7 @@ export default function ERA() {
                       </div>
                       <div>
                         <div style={{ color: labelColor, fontWeight: 700, marginBottom: 8 }}>Investigations ({investigations.length})</div>
-                        <Table
+                        <MobileTable
                           size="small"
                           dataSource={investigations}
                           rowKey="id"
@@ -405,7 +406,7 @@ export default function ERA() {
                       </div>
                       <div>
                         <div style={{ color: labelColor, fontWeight: 700, marginBottom: 8 }}>Reports ({reports.length})</div>
-                        <Table
+                        <MobileTable
                           size="small"
                           dataSource={reports}
                           rowKey="id"
@@ -429,7 +430,7 @@ export default function ERA() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                       <div>
                         <div style={{ color: labelColor, fontWeight: 700, marginBottom: 8 }}>Leave Requests ({leave.length})</div>
-                        <Table
+                        <MobileTable
                           size="small"
                           dataSource={leave}
                           rowKey="id"
@@ -446,7 +447,7 @@ export default function ERA() {
                       </div>
                       <div>
                         <div style={{ color: labelColor, fontWeight: 700, marginBottom: 8 }}>Sick Notes ({sickNotes.length})</div>
-                        <Table
+                        <MobileTable
                           size="small"
                           dataSource={sickNotes}
                           rowKey="id"
@@ -463,7 +464,7 @@ export default function ERA() {
                       </div>
                       <div>
                         <div style={{ color: labelColor, fontWeight: 700, marginBottom: 8 }}>Absenteeism ({absenteeism.length})</div>
-                        <Table
+                        <MobileTable
                           size="small"
                           dataSource={absenteeism}
                           rowKey="id"
@@ -516,7 +517,7 @@ export default function ERA() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                       <div>
                         <div style={{ color: labelColor, fontWeight: 700, marginBottom: 8 }}>Medical Records ({medicals.length})</div>
-                        <Table
+                        <MobileTable
                           size="small"
                           dataSource={medicals}
                           rowKey="id"
@@ -533,7 +534,7 @@ export default function ERA() {
                       </div>
                       <div>
                         <div style={{ color: labelColor, fontWeight: 700, marginBottom: 8 }}>Trainings ({trainings.length})</div>
-                        <Table
+                        <MobileTable
                           size="small"
                           dataSource={trainings}
                           rowKey="id"

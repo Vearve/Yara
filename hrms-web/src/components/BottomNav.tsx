@@ -6,8 +6,9 @@ import { Grid } from 'antd';
 import {
   DashboardOutlined,
   TeamOutlined,
-  MoneyCollectOutlined,
-  HeartOutlined,
+  DollarCircleOutlined,
+  BankOutlined,
+  BarChartOutlined,
   AppstoreOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -15,8 +16,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const NAV_ITEMS = [
   { key: '/dashboard', icon: DashboardOutlined, label: 'Home' },
   { key: '/hcm/demography', icon: TeamOutlined, label: 'People' },
-  { key: '/payroll/management', icon: MoneyCollectOutlined, label: 'Payroll' },
-  { key: '/leave', icon: HeartOutlined, label: 'Leave' },
+  { key: '/payroll/salary-management', icon: DollarCircleOutlined, label: 'Salary' },
+  { key: '/hcm/sites', icon: BankOutlined, label: 'Sites' },
+  { key: '/analytics', icon: BarChartOutlined, label: 'Analytics' },
   { key: '__more__', icon: AppstoreOutlined, label: 'More' },
 ];
 
@@ -76,7 +78,7 @@ export default function BottomNav({ onMore }: { onMore: () => void }) {
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              padding: '6px 4px',
+              padding: '5px 2px',
               position: 'relative',
               transition: 'opacity 0.15s',
             }}
@@ -98,7 +100,7 @@ export default function BottomNav({ onMore }: { onMore: () => void }) {
             )}
             <Icon
               style={{
-                fontSize: 20,
+                fontSize: 18,
                 color: active ? 'var(--accent)' : 'var(--text-muted)',
                 transition: 'color 0.15s',
                 marginTop: active ? 4 : 0,

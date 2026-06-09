@@ -1,4 +1,5 @@
-import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, DatePicker, Upload, Card, Row, Col } from 'antd';
+import { Button, Tag, Space, Modal, Form, Input, Select, message, DatePicker, Upload, Card, Row, Col } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import { PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, UploadOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Stethoscope } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -287,7 +288,7 @@ export default function Absenteeism() {
         </Row>
       </Card>
 
-      <Table columns={columns} dataSource={filteredData} loading={isLoading} rowKey="id" />
+      <MobileTable columns={columns} dataSource={filteredData} loading={isLoading} rowKey="id" />
 
       <Modal
         title="Report Absenteeism"

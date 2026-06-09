@@ -1,4 +1,5 @@
-import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Upload, DatePicker, Card } from 'antd';
+import { Button, Tag, Space, Modal, Form, Input, Select, message, Upload, DatePicker, Card } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import { PlusOutlined, EyeOutlined, DownloadOutlined, FilePdfOutlined, UploadOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -353,7 +354,7 @@ export default function Reports() {
         }}
         bodyStyle={{ padding: '16px' }}
       >
-        <Table columns={columns} dataSource={rows} loading={isLoading} rowKey="id" scroll={{ x: 1600 }} style={{ color: '#f7f8fb' }} />
+        <MobileTable columns={columns} dataSource={rows} loading={isLoading} rowKey="id" scroll={{ x: 1600 }} style={{ color: '#f7f8fb' }} />
       </Card>
 
       {/* View Report Modal */}

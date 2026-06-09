@@ -1,4 +1,5 @@
-import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Upload, Card } from 'antd';
+import { Button, Tag, Space, Modal, Form, Input, Select, message, Upload, Card } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import { PlusOutlined, EyeOutlined, UploadOutlined, EditOutlined, DeleteOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo, useEffect } from 'react';
@@ -317,7 +318,7 @@ export default function Charges() {
         }}
         bodyStyle={{ padding: '16px' }}
       >
-        <Table columns={columns} dataSource={rows} loading={isLoading} rowKey="id" scroll={{ x: 1200 }} style={{ color: '#f7f8fb' }} />
+        <MobileTable columns={columns} dataSource={rows} loading={isLoading} rowKey="id" scroll={{ x: 1200 }} style={{ color: '#f7f8fb' }} />
       </Card>
 
       {/* View Charge Modal */}

@@ -1,6 +1,7 @@
 import React from 'react';
+import MobileTable from '../../components/MobileTable';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AutoComplete, Table, Tag, Space, Button, Modal, Form, Input, Select, Upload, message } from 'antd';
+import { AutoComplete, Tag, Space, Button, Modal, Form, Input, Select, Upload, message } from 'antd';
 import { UploadOutlined, PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import http from '../../lib/http';
 
@@ -146,7 +147,7 @@ export default function Trainings() {
       <Space style={{ marginBottom: 16 }}>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => setOpen(true)}>Add Training</Button>
       </Space>
-      <Table
+      <MobileTable
         loading={isLoading}
         dataSource={rows}
         rowKey={(r: Training) => r.id}

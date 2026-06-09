@@ -65,19 +65,20 @@ const AppWithTheme = () => {
       algorithm,
       token: {
         colorPrimary: '#4a3fcf',
-        colorBgBase: '#f6f5f2',
-        colorBgContainer: '#ffffff',
-        colorBorder: 'rgba(53, 44, 70, 0.12)',
-        colorText: '#252033',
-        colorTextSecondary: '#625b75',
+        colorBgBase: '#ccc9c3',
+        colorBgContainer: '#d9d6d0',
+        colorBgElevated: '#e2dfd9',
+        colorBorder: 'rgba(53, 44, 70, 0.16)',
+        colorText: '#1e1a2b',
+        colorTextSecondary: '#4e4863',
         borderRadius: 12,
         fontFamily: 'Manrope, Space Grotesk, system-ui, -apple-system, sans-serif',
       },
       components: {
         Layout: {
           siderBg: '#2a163c',
-          headerBg: '#ffffff',
-          bodyBg: '#f1eee8',
+          headerBg: '#dedad4',
+          bodyBg: '#ccc9c3',
         },
         Menu: {
           itemBg: '#2a163c',
@@ -87,12 +88,29 @@ const AppWithTheme = () => {
           itemColor: '#e8e0f5',
         },
         Card: {
-          colorBgContainer: '#ffffff',
-          colorBorderSecondary: 'rgba(53, 44, 70, 0.12)',
+          colorBgContainer: '#d9d6d0',
+          colorBorderSecondary: 'rgba(53, 44, 70, 0.14)',
         },
         Table: {
-          headerBg: '#f4f0eb',
-          rowHoverBg: '#f8f4ef',
+          colorBgContainer: '#d9d6d0',
+          headerBg: '#c2bfb9',
+          rowHoverBg: '#cac7c1',
+        },
+        Modal: {
+          contentBg: '#dedad4',
+          headerBg: '#dedad4',
+        },
+        Drawer: {
+          colorBgElevated: '#dedad4',
+        },
+        Select: {
+          colorBgContainer: '#d9d6d0',
+        },
+        Input: {
+          colorBgContainer: '#d9d6d0',
+        },
+        DatePicker: {
+          colorBgContainer: '#d9d6d0',
         },
         Button: {
           controlHeight: 40,

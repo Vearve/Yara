@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import MobileTable from '../../components/MobileTable';
 import {
   Card,
-  Table,
   Button,
   Space,
   Select,
@@ -800,7 +800,7 @@ const PayrollManagement: React.FC = () => {
                   </Row>
 
                   <Spin spinning={payrollEntriesLoading}>
-                    <Table
+                    <MobileTable
                       columns={[
                         {
                           title: 'Actions',
@@ -1041,7 +1041,7 @@ const PayrollManagement: React.FC = () => {
                   )}
 
                   <Spin spinning={payslipsLoading}>
-                    <Table
+                    <MobileTable
                       columns={columns}
                       dataSource={payslipsList}
                       rowKey="id"
@@ -1480,7 +1480,7 @@ const PayrollManagement: React.FC = () => {
 
                     <Card size="small" title="PAYE Band Breakdown" loading={taxBreakdownLoading}>
                       {taxBreakdown && taxBreakdown.bands && taxBreakdown.bands.length > 0 ? (
-                        <Table
+                        <MobileTable
                           size="small"
                           pagination={false}
                           dataSource={taxBreakdown.bands.map((b, idx) => ({ key: idx, ...b }))}

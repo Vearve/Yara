@@ -1,4 +1,5 @@
-import { Calendar, Modal, Form, Input, Select, DatePicker, Button, message, Tag, Tabs, Table, Space, Upload } from 'antd';
+import { Calendar, Modal, Form, Input, Select, DatePicker, Button, message, Tag, Tabs, Space, Upload } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import { UploadOutlined } from '@ant-design/icons';
 import { PlusOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
@@ -417,7 +418,7 @@ export default function Schedule() {
                   </Button>
                 </div>
 
-                <Table
+                <MobileTable
                   loading={trainingsLoading}
                   dataSource={trainingsData?.results || trainingsData || []}
                   rowKey="id"

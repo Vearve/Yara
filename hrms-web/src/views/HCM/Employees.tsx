@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import MobileTable from '../../components/MobileTable';
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Table, Tag, Button, Space } from 'antd';
+import { Tag, Button, Space } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import http from '../../lib/http';
 import EmployeeForm from '../../components/EmployeeForm';
@@ -69,7 +70,7 @@ export default function Employees() {
           Add Employee
         </Button>
       </Space>
-      <Table
+      <MobileTable
         loading={isLoading}
         dataSource={rows}
         rowKey={(r: Employee) => r.id}

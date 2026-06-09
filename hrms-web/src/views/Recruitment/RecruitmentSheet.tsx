@@ -1,4 +1,5 @@
-import { Table, Button, Modal, Form, Input, DatePicker, message, Row, Col, Select, Upload, Drawer, Card, Space } from 'antd';
+import { Button, Modal, Form, Input, DatePicker, message, Row, Col, Select, Upload, Drawer, Card, Space } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import { PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -315,7 +316,7 @@ export default function RecruitmentSheet() {
         </Space>
       </Card>
 
-      <Table
+      <MobileTable
         columns={columns}
         dataSource={rows}
         loading={isLoading}

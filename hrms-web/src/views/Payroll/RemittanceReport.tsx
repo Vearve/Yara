@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Card, Row, Col, Table, Select, Button, Space, Statistic, Divider, message } from 'antd';
+import MobileTable from '../../components/MobileTable';
+import { Card, Row, Col, Select, Button, Space, Statistic, Divider, message } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import http from '../../lib/http';
@@ -333,7 +334,7 @@ export default function RemittanceReport() {
             </Row>
 
             <Divider>Employee Breakdown</Divider>
-            <Table
+            <MobileTable
               columns={breakdownColumns}
               dataSource={report.employee_breakdown.map((emp, idx) => ({
                 ...emp,

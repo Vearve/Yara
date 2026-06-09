@@ -1,4 +1,5 @@
-import { Card, Row, Col, Table, Space, Input, Select, DatePicker, Button } from 'antd';
+import { Card, Row, Col, Space, Input, Select, DatePicker, Button } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import { useMemo, useState } from 'react';
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -249,7 +250,7 @@ export default function EngagementsTerminations() {
             }}
             bodyStyle={{ padding: '16px' }}
           >
-            <Table 
+            <MobileTable 
               columns={engagementCols} 
               dataSource={engagementRows} 
               rowKey={(r: any)=>r.sn} 
@@ -275,7 +276,7 @@ export default function EngagementsTerminations() {
             }}
             bodyStyle={{ padding: '16px' }}
           >
-            <Table 
+            <MobileTable 
               columns={terminationCols} 
               dataSource={terminationRows} 
               rowKey={(r: any)=>r.sn} 

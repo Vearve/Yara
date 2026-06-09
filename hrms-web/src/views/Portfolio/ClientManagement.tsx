@@ -1,10 +1,10 @@
 import { useState } from 'react';
+import MobileTable from '../../components/MobileTable';
 import {
   Card,
   Row,
   Col,
   Button,
-  Table,
   Space,
   Tag,
   Modal,
@@ -280,7 +280,7 @@ export default function ClientManagement() {
           borderRadius: '12px',
         }}
       >
-        <Table
+        <MobileTable
           columns={columns}
           dataSource={clients || []}
           loading={isLoading}

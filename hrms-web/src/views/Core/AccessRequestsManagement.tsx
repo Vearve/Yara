@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
+import MobileTable from '../../components/MobileTable';
 import { Link } from 'react-router-dom';
 import {
   Card,
-  Table,
   Button,
   Space,
   Modal,
@@ -256,7 +256,7 @@ const AccessRequestsManagement: React.FC = () => {
         <Empty description="No access requests" />
       ) : (
         <Card>
-          <Table
+          <MobileTable
             columns={columns}
             dataSource={requests}
             rowKey="id"

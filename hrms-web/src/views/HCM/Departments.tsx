@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
+import MobileTable from '../../components/MobileTable';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Table, Button, Space, Modal, Form, Input, Select, Tag, message, Drawer } from 'antd';
+import { Button, Space, Modal, Form, Input, Select, Tag, message, Drawer } from 'antd';
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import http from '../../lib/http';
 import { HeroBanner } from '../../components/HeroBanner';
@@ -140,7 +141,7 @@ export default function Departments() {
           </Button>
         </Space>
       </div>
-      <Table
+      <MobileTable
         loading={isLoading}
         dataSource={rows}
         rowKey={(r: Department) => r.id}

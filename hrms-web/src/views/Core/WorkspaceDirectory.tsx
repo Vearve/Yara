@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import MobileTable from '../../components/MobileTable';
 import {
   Card,
-  Table,
   Button,
   Input,
   message,
@@ -233,7 +233,7 @@ const WorkspaceDirectory: React.FC = () => {
         <Empty description={searchText ? 'No workspaces found' : 'No workspaces available'} />
       ) : (
         <Card>
-          <Table
+          <MobileTable
             columns={columns}
             dataSource={filteredWorkspaces}
             rowKey="id"

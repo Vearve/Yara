@@ -1,4 +1,5 @@
-import { Card, Row, Col, Table, Statistic, Space, Empty, Button, Modal, Form, Input, InputNumber, message, Select, Slider } from 'antd';
+import { Card, Row, Col, Statistic, Space, Empty, Button, Modal, Form, Input, InputNumber, message, Select, Slider } from 'antd';
+import MobileTable from '../components/MobileTable';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { useSalaryRanges, useTitleBreakdowns, usePayrollEntries, useCreateTitleBreakdown, useUpdateTitleBreakdown, useDeleteTitleBreakdown } from '@/lib/hooks/useSalaryManagement';
@@ -296,7 +297,7 @@ export const SalaryManagementDashboard = () => {
         loading={rangesLoading}
       >
         {salaryRanges.length > 0 ? (
-          <Table
+          <MobileTable
             columns={salaryRangeColumns}
             dataSource={salaryRanges.map((r: SalaryRange, idx: number) => ({ ...r, key: idx }))}
             pagination={{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['10', '20', '50'] }}
@@ -345,7 +346,7 @@ export const SalaryManagementDashboard = () => {
         loading={entriesLoading}
       >
         {filteredEntries.length > 0 ? (
-          <Table
+          <MobileTable
             columns={employeeSalaryColumns}
             dataSource={filteredEntries.map((e, idx) => ({ ...e, key: idx }))}
             pagination={{ pageSize: 20 }}
@@ -372,7 +373,7 @@ export const SalaryManagementDashboard = () => {
         loading={breakdownsLoading}
       >
         {titleBreakdowns.length > 0 ? (
-          <Table
+          <MobileTable
             columns={titleBreakdownColumns}
             dataSource={titleBreakdowns.map((t: TitleBreakdown, idx: number) => ({ ...t, key: idx }))}
             pagination={{ pageSize: 10 }}

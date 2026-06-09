@@ -1,4 +1,5 @@
 import { Table, Button, Modal, Form, Input, Select, DatePicker, message, Tag, Row, Col, InputNumber, Card, Space } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import { PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -381,7 +382,7 @@ export default function ATR() {
         </Space>
       </Card>
 
-      <Table
+      <MobileTable
         columns={columns}
         dataSource={rows}
         loading={isLoading}

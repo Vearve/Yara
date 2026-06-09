@@ -1,4 +1,5 @@
-import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Upload, Drawer } from 'antd';
+import { Button, Tag, Space, Modal, Form, Input, Select, message, Upload, Drawer } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import { PlusOutlined, EyeOutlined, FilePdfOutlined, UploadOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useMemo } from 'react';
@@ -322,7 +323,7 @@ export default function Hearings() {
         </Space>
       </div>
 
-      <Table
+      <MobileTable
         columns={columns}
         dataSource={rows}
         loading={isLoading}

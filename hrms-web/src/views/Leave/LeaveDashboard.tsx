@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Card, Row, Col, Table, Tag, Button, Modal, Form, Input, Select, DatePicker, Upload, message, Statistic, Empty, Space, Descriptions } from 'antd';
+import { Card, Row, Col, Tag, Button, Modal, Form, Input, Select, DatePicker, Upload, message, Statistic, Empty, Space, Descriptions } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import { PlusOutlined, UploadOutlined, DownloadOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { CalendarDays, FileText } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -420,7 +421,7 @@ export default function LeaveDashboard() {
           >
             <div id="leave-table">
               {filteredLeaveRequests.length ? (
-                <Table columns={leaveColumns} dataSource={filteredLeaveRequests.map((r) => ({ ...r, key: r.id }))} pagination={{ pageSize: 10 }} size="small" scroll={{ x: 900 }} />
+                <MobileTable columns={leaveColumns} dataSource={filteredLeaveRequests.map((r) => ({ ...r, key: r.id }))} pagination={{ pageSize: 10 }} size="small" scroll={{ x: 900 }} />
               ) : (
                 <Empty description="No leave requests" />
               )}
@@ -440,7 +441,7 @@ export default function LeaveDashboard() {
           >
             <div id="sick-table">
               {filteredSickNotes.length ? (
-                <Table columns={sickColumns} dataSource={filteredSickNotes.map((s) => ({ ...s, key: s.id }))} pagination={{ pageSize: 8 }} size="small" scroll={{ x: 700 }} />
+                <MobileTable columns={sickColumns} dataSource={filteredSickNotes.map((s) => ({ ...s, key: s.id }))} pagination={{ pageSize: 8 }} size="small" scroll={{ x: 700 }} />
               ) : (
                 <Empty description="No sick notes" />
               )}
@@ -462,7 +463,7 @@ export default function LeaveDashboard() {
             loading={doubleTicketsLoading}
           >
             {doubleTickets.length ? (
-              <Table columns={doubleTicketColumns} dataSource={filteredDoubleTickets.map((d) => ({ ...d, key: d.id }))} pagination={{ pageSize: 10 }} size="small" scroll={{ x: 1000 }} />
+              <MobileTable columns={doubleTicketColumns} dataSource={filteredDoubleTickets.map((d) => ({ ...d, key: d.id }))} pagination={{ pageSize: 10 }} size="small" scroll={{ x: 1000 }} />
             ) : (
               <Empty description="No double ticket requests" />
             )}

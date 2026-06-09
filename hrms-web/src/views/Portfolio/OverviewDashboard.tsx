@@ -1,4 +1,5 @@
-import { Row, Col, Table, Tag, Space, Typography, Spin } from 'antd';
+import { Row, Col, Tag, Space, Typography, Spin } from 'antd';
+import MobileTable from '../../components/MobileTable';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { TeamOutlined, ProjectOutlined, UserOutlined, RiseOutlined, CheckCircleOutlined } from '@ant-design/icons';
@@ -246,7 +247,7 @@ export default function OverviewDashboard() {
           <span style={{ color: '#f7f8fb', fontSize: 16, fontWeight: 700 }}>Client Workspaces</span>
           <TagPill variant="cyan">{portfolio?.clients.length || 0} records</TagPill>
         </div>
-        <Table
+        <MobileTable
           columns={columns}
           dataSource={portfolio?.clients || []}
           loading={isLoading}

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Table, Tag, Space, Button, Modal, Form, Input, Select, message, Drawer, Collapse, Badge, Upload, Card, Row, Col } from 'antd';
+import MobileTable from '../../components/MobileTable';
+import { Tag, Space, Button, Modal, Form, Input, Select, message, Drawer, Collapse, Badge, Upload, Card, Row, Col } from 'antd';
 import { EyeOutlined, PlusOutlined, FileAddOutlined, UploadOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { FileText } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -359,7 +360,7 @@ export default function CaseStudies() {
         </Space>
       </Card>
 
-      <Table
+      <MobileTable
         loading={isLoading}
         dataSource={rows}
         rowKey={(r: CaseStudy) => r.id}
