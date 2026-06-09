@@ -96,7 +96,15 @@ export default function Sidebar({ activePath }: { activePath: string }) {
         { key: '/leave/absenteeism', label: <Link to="/leave/absenteeism">Absenteeism</Link> },
       ]
     },
-    { key: '/analytics', icon: <BarChartOutlined />, label: <Link to="/analytics">Analytics</Link> },
+    {
+      key: 'analytics',
+      icon: <BarChartOutlined />,
+      label: 'Analytics',
+      children: [
+        { key: '/analytics', label: <Link to="/analytics">General Analytics</Link> },
+        { key: '/analytics/era', label: <Link to="/analytics/era">ERA</Link> },
+      ]
+    },
     {
       key: 'settings',
       icon: <SettingOutlined />,

@@ -23,6 +23,7 @@ import Projects from './views/Projects/Projects';
 import ATR from './views/Recruitment/ATR';
 import RecruitmentSheet from './views/Recruitment/RecruitmentSheet';
 import Analytics from './views/Analytics/Analytics';
+import ERA from './views/Analytics/ERA';
 import Login from './views/Auth/Login';
 import InviteByCode from './views/Auth/InviteByCode.tsx';
 import MessagingInbox from './views/Messaging/MessagingInbox';
@@ -79,6 +80,7 @@ export const router = createHashRouter([
       { path: 'leave', element: <LeaveDashboard /> },
       { path: 'leave/absenteeism', element: <Absenteeism /> },
       { path: 'analytics', element: <Analytics /> },
+      { path: 'analytics/era', element: <ERA /> },
       { path: 'settings/roles', element: <RolesManagement /> },
       { path: 'settings/statutory', element: <StatutorySettingsManagement /> },
       { path: 'payroll/management', element: <PayrollManagement /> },
