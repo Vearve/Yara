@@ -30,9 +30,11 @@ class LeaveRequestViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        # Filter by workspace through employee relationship
         if hasattr(self.request, 'workspace') and self.request.workspace:
             qs = qs.filter(employee__workspace=self.request.workspace)
+        employee_id = self.request.query_params.get('employee')
+        if employee_id:
+            qs = qs.filter(employee_id=employee_id)
         return qs
 
     def _ensure_manager(self, request):
@@ -123,9 +125,11 @@ class SickNoteViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        # Filter by workspace through employee relationship
         if hasattr(self.request, 'workspace') and self.request.workspace:
             qs = qs.filter(employee__workspace=self.request.workspace)
+        employee_id = self.request.query_params.get('employee')
+        if employee_id:
+            qs = qs.filter(employee_id=employee_id)
         return qs
 
     def _ensure_manager(self, request):

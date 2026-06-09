@@ -44,13 +44,12 @@ export default function ERA() {
   );
 
   const enabled = !!workspaceId && !!selectedEmployee;
-  const employeeParam = { employee: selectedEmployee, page_size: 200 };
 
   // All record queries — only fire when employee selected
   const { data: chargesData, isLoading: chargesLoading } = useQuery({
     queryKey: ['era-charges', workspaceId, selectedEmployee],
     queryFn: async () => {
-      const res = await http.get('/api/v1/activities/charges/', { params: employeeParam });
+      const res = await http.get('/api/v1/activities/charges/', { params: { employee: selectedEmployee, page_size: 200 } });
       return res.data?.results || res.data || [];
     },
     enabled,
@@ -60,7 +59,7 @@ export default function ERA() {
   const { data: reportsData, isLoading: reportsLoading } = useQuery({
     queryKey: ['era-reports', workspaceId, selectedEmployee],
     queryFn: async () => {
-      const res = await http.get('/api/v1/activities/reports/', { params: employeeParam });
+      const res = await http.get('/api/v1/activities/reports/', { params: { reported_employee: selectedEmployee, page_size: 200 } });
       return res.data?.results || res.data || [];
     },
     enabled,
@@ -70,7 +69,7 @@ export default function ERA() {
   const { data: hearingsData, isLoading: hearingsLoading } = useQuery({
     queryKey: ['era-hearings', workspaceId, selectedEmployee],
     queryFn: async () => {
-      const res = await http.get('/api/v1/activities/hearings/', { params: employeeParam });
+      const res = await http.get('/api/v1/activities/hearings/', { params: { related_employee: selectedEmployee, page_size: 200 } });
       return res.data?.results || res.data || [];
     },
     enabled,
@@ -80,7 +79,7 @@ export default function ERA() {
   const { data: caseStudiesData, isLoading: caseStudiesLoading } = useQuery({
     queryKey: ['era-case-studies', workspaceId, selectedEmployee],
     queryFn: async () => {
-      const res = await http.get('/api/v1/activities/case-studies/', { params: employeeParam });
+      const res = await http.get('/api/v1/activities/case-studies/', { params: { related_employee: selectedEmployee, page_size: 200 } });
       return res.data?.results || res.data || [];
     },
     enabled,
@@ -90,7 +89,7 @@ export default function ERA() {
   const { data: investigationsData, isLoading: investigationsLoading } = useQuery({
     queryKey: ['era-investigations', workspaceId, selectedEmployee],
     queryFn: async () => {
-      const res = await http.get('/api/v1/activities/investigations/', { params: employeeParam });
+      const res = await http.get('/api/v1/activities/investigations/', { params: { related_employee: selectedEmployee, page_size: 200 } });
       return res.data?.results || res.data || [];
     },
     enabled,
@@ -100,7 +99,7 @@ export default function ERA() {
   const { data: leaveData, isLoading: leaveLoading } = useQuery({
     queryKey: ['era-leave', workspaceId, selectedEmployee],
     queryFn: async () => {
-      const res = await http.get('/api/v1/leave/requests/', { params: employeeParam });
+      const res = await http.get('/api/v1/leave/requests/', { params: { employee: selectedEmployee, page_size: 200 } });
       return res.data?.results || res.data || [];
     },
     enabled,
@@ -110,7 +109,7 @@ export default function ERA() {
   const { data: sickNotesData, isLoading: sickLoading } = useQuery({
     queryKey: ['era-sick-notes', workspaceId, selectedEmployee],
     queryFn: async () => {
-      const res = await http.get('/api/v1/leave/sick-notes/', { params: employeeParam });
+      const res = await http.get('/api/v1/leave/sick-notes/', { params: { employee: selectedEmployee, page_size: 200 } });
       return res.data?.results || res.data || [];
     },
     enabled,
@@ -120,7 +119,7 @@ export default function ERA() {
   const { data: absenteeismData, isLoading: absenteeismLoading } = useQuery({
     queryKey: ['era-absenteeism', workspaceId, selectedEmployee],
     queryFn: async () => {
-      const res = await http.get('/api/v1/leave/absenteeism/', { params: employeeParam });
+      const res = await http.get('/api/v1/leave/absenteeism/', { params: { employee: selectedEmployee, page_size: 200 } });
       return res.data?.results || res.data || [];
     },
     enabled,
@@ -130,7 +129,7 @@ export default function ERA() {
   const { data: appraisalsData, isLoading: appraisalsLoading } = useQuery({
     queryKey: ['era-appraisals', workspaceId, selectedEmployee],
     queryFn: async () => {
-      const res = await http.get('/api/v1/activities/appraisals/', { params: employeeParam });
+      const res = await http.get('/api/v1/activities/appraisals/', { params: { appraisee: selectedEmployee, page_size: 200 } });
       return res.data?.results || res.data || [];
     },
     enabled,

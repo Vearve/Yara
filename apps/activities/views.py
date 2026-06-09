@@ -26,7 +26,7 @@ class ReportViewSet(viewsets.ModelViewSet):
     queryset = Report.objects.select_related('reported_by', 'workspace').all()
     serializer_class = ReportSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['report_type', 'severity', 'status', 'case_study']
+    filterset_fields = ['report_type', 'severity', 'status', 'case_study', 'reported_employee']
     search_fields = ['title', 'description', 'location']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
@@ -159,7 +159,7 @@ class CaseStudyViewSet(viewsets.ModelViewSet):
     queryset = CaseStudy.objects.select_related('related_report', 'related_employee').all()
     serializer_class = CaseStudySerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status']
+    filterset_fields = ['status', 'related_employee']
     search_fields = ['case_number', 'title']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
