@@ -69,13 +69,16 @@ class DepartmentSerializer(serializers.ModelSerializer):
         existing = {job.title: job for job in department.jobs.all()}
         keep = set(clean_titles)
 
-        for title in clean_titles:
-            if title not in existing:
-                Job.objects.create(department=department, title=title)
+        new_titles = [t for t in clean_titles if t not in existing]
+        if new_titles:
+            Job.objects.bulk_create(
+                [Job(department=department, title=t) for t in new_titles],
+                ignore_conflicts=True,
+            )
 
-        for title, job in existing.items():
-            if title not in keep:
-                job.delete()
+        remove_titles = [t for t in existing if t not in keep]
+        if remove_titles:
+            department.jobs.filter(title__in=remove_titles).delete()
 
     def create(self, validated_data):
         job_titles = validated_data.pop('job_titles', None)

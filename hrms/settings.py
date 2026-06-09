@@ -214,6 +214,16 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'hrms.pagination.StandardResultsSetPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # Rate limiting — applied globally; auth endpoints use the stricter 'auth' scope
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '200/day',
+        'user': '2000/day',
+        'auth': '10/minute',  # applied explicitly on login/token endpoints
+    },
 }
 
 # Simple JWT Configuration
@@ -417,3 +427,17 @@ if USE_S3:
     # Optional: Private media storage (not exposed via CDN)
     # PRIVATE_MEDIA_LOCATION = 'private'
     # PRIVATE_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# ---------------------------------------------------------------------------
+# Sentry error tracking
+# Set SENTRY_DSN in Render environment variables to enable.
+# ---------------------------------------------------------------------------
+_SENTRY_DSN = config('SENTRY_DSN', default=None)
+if _SENTRY_DSN:
+    import sentry_sdk
+    sentry_sdk.init(
+        dsn=_SENTRY_DSN,
+        traces_sample_rate=config('SENTRY_TRACES_SAMPLE_RATE', default=0.1, cast=float),
+        send_default_pii=False,
+        environment='production' if not DEBUG else 'development',
+    )

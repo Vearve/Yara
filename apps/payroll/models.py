@@ -3,9 +3,13 @@ Payroll Models
 Reflects Human Management Payroll sheet: components and per-employee entries.
 """
 
+import logging
+
 from django.db import models
 from apps.hcm.models import Employee
 from decimal import Decimal, ROUND_HALF_UP
+
+logger = logging.getLogger(__name__)
 
 
 class PayrollComponent(models.Model):
@@ -272,14 +276,10 @@ class Payslip(models.Model):
         )
         
         absenteeism_count = absenteeism_records.count()
-        
-        # Debug logging
-        print(f"[Absenteeism] Employee {self.employee.employee_id}: Period {first_day} to {last_day}")
-        print(f"[Absenteeism] Found {absenteeism_count} UNJUSTIFIED records")
-        if absenteeism_count > 0:
-            for record in absenteeism_records:
-                print(f"  - {record.date}: {record.status}")
-        
+        logger.debug(
+            "Absenteeism for %s: %d UNJUSTIFIED in %s–%s",
+            self.employee.employee_id, absenteeism_count, first_day, last_day,
+        )
         return absenteeism_count
     
     
@@ -403,13 +403,11 @@ class Payslip(models.Model):
                 unpaid_leave_days
             )
         
-        # Calculate absenteeism deduction if not manually set (26-day standard)
+        # Calculate absenteeism deduction if not manually set
         if absenteeism_days > 0 and absenteeism_deduction == 0:
-            daily_rate = basic_salary / Decimal('26')  # Zambian standard: 26 working days
-            self.absenteeism_deduction = (daily_rate * absenteeism_days).quantize(
-                Decimal('0.01'),
-                rounding=ROUND_HALF_UP,
-            )
+            self.absenteeism_deduction = Decimal(str(
+                calculate_unpaid_leave_deduction(float(basic_salary), float(absenteeism_days))
+            )).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         
         # Collect all custom deductions
         custom_deductions = {}

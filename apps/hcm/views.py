@@ -3,6 +3,10 @@ HCM API ViewSets
 Handles CRUD operations for employees, contracts, departments, etc.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -13,10 +17,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
 from django.db.models import Sum, Q, Count
 from django.utils import timezone
+
+if TYPE_CHECKING:
+    from apps.core.types import WorkspaceRequest
 from django.http import HttpResponse
-from django.views.decorators.cache import cache_page
-from django.utils.decorators import method_decorator
-from datetime import datetime, timedelta
+from datetime import timedelta
 import pandas as pd
 import csv
 from io import BytesIO, StringIO
@@ -40,6 +45,9 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     ViewSet for Employee CRUD operations.
     List view uses EmployeeListSerializer, detail uses EmployeeDetailSerializer.
     """
+    if TYPE_CHECKING:
+        request: WorkspaceRequest
+
     queryset = Employee.objects.select_related(
         'department', 'employment_type', 'category', 'classification', 'workspace'
     ).all()
@@ -59,8 +67,6 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         # Handle full name search
         search_param = self.request.query_params.get('search', '').strip()
         if search_param:
-            from django.db.models import Q, Value, CharField
-            from django.db.models.functions import Concat
             # Search for full name pattern "First Last"
             name_parts = search_param.split()
             if len(name_parts) >= 2:
@@ -266,7 +272,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         })
 
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
-    def template_download(self, request):
+    def template_download(self, _request):
         """
         Download CSV template for employee import.
         Headers show all supported fields and example data.
@@ -484,7 +490,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                             raise ValueError('Employee ID belongs to a different workspace')
 
                         # Update or create
-                        employee, created_flag = Employee.objects.update_or_create(
+                        _, created_flag = Employee.objects.update_or_create(
                             employee_id=employee_data['employee_id'],
                             defaults=employee_data
                         )
@@ -495,7 +501,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                             updated += 1
 
                     except Exception as e:
-                        errors.append(f"Row {idx + 1}: {str(e)}")
+                        errors.append(f"Row {idx}: {str(e)}")
 
             return Response({
                 'success': True,
@@ -511,6 +517,9 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
 class ContractViewSet(viewsets.ModelViewSet):
     """ViewSet for employee contracts."""
+    if TYPE_CHECKING:
+        request: WorkspaceRequest
+
     queryset = Contract.objects.select_related('employee', 'contract_type').all()
     serializer_class = ContractSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -534,6 +543,9 @@ class ContractViewSet(viewsets.ModelViewSet):
 
 class EngagementViewSet(viewsets.ModelViewSet):
     """ViewSet for employee engagements."""
+    if TYPE_CHECKING:
+        request: WorkspaceRequest
+
     queryset = Engagement.objects.select_related('employee', 'employee__department', 'contract_type').all()
     serializer_class = EngagementSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -550,6 +562,9 @@ class EngagementViewSet(viewsets.ModelViewSet):
 
 class TerminationViewSet(viewsets.ModelViewSet):
     """ViewSet for employee terminations."""
+    if TYPE_CHECKING:
+        request: WorkspaceRequest
+
     queryset = Termination.objects.select_related('employee', 'employee__department', 'termination_reason').all()
     serializer_class = TerminationSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -563,19 +578,7 @@ class TerminationViewSet(viewsets.ModelViewSet):
             qs = qs.filter(employee__workspace=self.request.workspace)
         return qs
 
-    def perform_create(self, serializer):
-        termination = serializer.save()
-        employee = termination.employee
-        if employee.employment_status != 'TERMINATED':
-            employee.employment_status = 'TERMINATED'
-            employee.save(update_fields=['employment_status', 'updated_at'])
-
-    def perform_update(self, serializer):
-        termination = serializer.save()
-        employee = termination.employee
-        if employee.employment_status != 'TERMINATED':
-            employee.employment_status = 'TERMINATED'
-            employee.save(update_fields=['employment_status', 'updated_at'])
+    # Employee status update is handled by the post_save signal on Termination model.
 
 
 class ContractTypeViewSet(viewsets.ModelViewSet):
@@ -596,6 +599,9 @@ class TerminationReasonViewSet(viewsets.ModelViewSet):
 
 class DepartmentViewSet(viewsets.ModelViewSet):
     """ViewSet for departments."""
+    if TYPE_CHECKING:
+        request: WorkspaceRequest
+
     queryset = Department.objects.select_related('manager').prefetch_related('jobs').all()
     serializer_class = DepartmentSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -622,6 +628,9 @@ class DepartmentViewSet(viewsets.ModelViewSet):
 
 class JobViewSet(viewsets.ModelViewSet):
     """ViewSet for department job titles."""
+    if TYPE_CHECKING:
+        request: WorkspaceRequest
+
     queryset = Job.objects.select_related('department').all()
     serializer_class = JobSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -639,14 +648,14 @@ class JobViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         department = serializer.validated_data.get('department')
         if hasattr(self.request, 'workspace') and self.request.workspace:
-            if department and department.workspace_id != self.request.workspace.id:
+            if department and department.workspace_id != self.request.workspace_id:
                 raise ValidationError({'department': 'Department is not in your active workspace.'})
         serializer.save()
 
     def perform_update(self, serializer):
         department = serializer.validated_data.get('department', getattr(serializer.instance, 'department', None))
         if hasattr(self.request, 'workspace') and self.request.workspace:
-            if department and department.workspace_id != self.request.workspace.id:
+            if department and department.workspace_id != self.request.workspace_id:
                 raise ValidationError({'department': 'Department is not in your active workspace.'})
         serializer.save()
 
@@ -669,6 +678,9 @@ class EmployeeCategoryViewSet(viewsets.ModelViewSet):
 
 class EmployeeDocumentViewSet(viewsets.ModelViewSet):
     """Employee document uploads."""
+    if TYPE_CHECKING:
+        request: WorkspaceRequest
+
     queryset = EmployeeDocument.objects.select_related('employee').all()
     serializer_class = EmployeeDocumentSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
@@ -686,6 +698,9 @@ class EmployeeDocumentViewSet(viewsets.ModelViewSet):
 
 class EmployeeBeneficiaryViewSet(viewsets.ModelViewSet):
     """Persistent employee beneficiaries."""
+    if TYPE_CHECKING:
+        request: WorkspaceRequest
+
     queryset = EmployeeBeneficiary.objects.select_related('employee').all()
     serializer_class = EmployeeBeneficiarySerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -705,7 +720,7 @@ class EmployeeBeneficiaryViewSet(viewsets.ModelViewSet):
             raise ValidationError({'employee': 'Employee is required.'})
 
         if hasattr(self.request, 'workspace') and self.request.workspace:
-            if employee.workspace_id != self.request.workspace.id:
+            if employee.workspace_id != self.request.workspace_id:
                 raise ValidationError({'employee': 'Employee is not in your active workspace.'})
 
         serializer.save()

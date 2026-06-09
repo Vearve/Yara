@@ -1,7 +1,13 @@
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
+from rest_framework.throttling import AnonRateThrottle
 from apps.core.models import WorkspaceMembership
+
+
+class AuthRateThrottle(AnonRateThrottle):
+    """Stricter throttle for login attempts — 10 per minute per IP."""
+    scope = 'auth'
 
 
 class WorkspaceAwareTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -66,3 +72,4 @@ class WorkspaceAwareTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class WorkspaceAwareTokenObtainPairView(TokenObtainPairView):
     serializer_class = WorkspaceAwareTokenObtainPairSerializer
+    throttle_classes = [AuthRateThrottle]

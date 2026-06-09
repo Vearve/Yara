@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/v1/payroll/', include('apps.payroll.urls')),
     path('api/v1/leave/', include('apps.leave.urls')),
     path('api/v1/recruitment/', include('apps.recruitment.urls')),
+    path('api/v1/attendance/', include('apps.attendance.urls')),
     path('api/v1/tracking/', include('apps.tracking.urls')),
     path('api/v1/activities/', include('apps.activities.urls')),
     path('api/v1/performance/', include('apps.performance.urls')),

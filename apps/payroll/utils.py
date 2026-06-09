@@ -23,9 +23,9 @@ def get_statutory_settings(workspace=None):
                 'napsa_ceiling': float(settings.napsa_ceiling_monthly),
                 'nhima_rate': float(settings.nhima_rate),
             }
-        except:
+        except Exception:
             pass
-    
+
     # Fallback to defaults
     return {
         'napsa_rate': 0.05,
@@ -50,7 +50,7 @@ def get_paye_tax_bands(workspace=None):
             bands = PayeTaxBand.objects.filter(workspace=workspace).order_by('order', 'min_amount')
             if bands.exists():
                 return [(float(band.max_amount), float(band.rate)) for band in bands]
-        except:
+        except Exception:
             pass
     
     # Fallback to default Zambian 2025/2026 tax bands

@@ -6,6 +6,7 @@ Tracks trainings, medicals, permits, probation periods, and compliance expiries.
 from django.db import models
 from django.utils import timezone
 from apps.hcm.models import Employee
+from apps.core.models import Workspace
 
 
 class TrainingType(models.Model):
@@ -15,16 +16,21 @@ class TrainingType(models.Model):
         ('THIRD_PARTY', 'Third-Party Certified'),
         ('DRILL', 'Drill'),
     ]
-    
-    name = models.CharField(max_length=200, unique=True)
+
+    workspace = models.ForeignKey(
+        Workspace, on_delete=models.CASCADE, related_name='training_types',
+        null=True, blank=True,
+    )
+    name = models.CharField(max_length=200)
     category = models.CharField(max_length=50, choices=CATEGORIES)
     description = models.TextField(blank=True)
     requires_certification = models.BooleanField(default=False)
     default_validity_months = models.IntegerField(null=True, blank=True)
-    
+
     class Meta:
         verbose_name_plural = "Training Types"
-    
+        unique_together = [['workspace', 'name']]
+
     def __str__(self):
         return f"{self.name} ({self.category})"
 
@@ -91,14 +97,19 @@ class MedicalType(models.Model):
         ('BASELINE', 'Baseline Medical'),
         ('EXIT', 'Exit Medical'),
     ]
-    
-    name = models.CharField(max_length=100, choices=TYPES, unique=True)
+
+    workspace = models.ForeignKey(
+        Workspace, on_delete=models.CASCADE, related_name='medical_types',
+        null=True, blank=True,
+    )
+    name = models.CharField(max_length=100, choices=TYPES)
     description = models.TextField(blank=True)
     frequency_months = models.IntegerField(null=True, blank=True, help_text="Frequency in months for mandatory re-tests")
-    
+
     class Meta:
         verbose_name_plural = "Medical Types"
-    
+        unique_together = [['workspace', 'name']]
+
     def __str__(self):
         return self.name
 
