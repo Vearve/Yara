@@ -235,7 +235,7 @@ class Employee(models.Model):
     photo = models.ImageField(upload_to='employee_photos/', blank=True)
     
     # Contact
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, blank=True, null=True)
     phone = models.CharField(max_length=20)
     house_address = models.TextField()
     residential_area = models.CharField(max_length=100, choices=RESIDENCY_CHOICES, default='OTHER')

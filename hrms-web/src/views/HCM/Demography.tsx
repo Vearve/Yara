@@ -622,7 +622,7 @@ export default function Demography() {
       if (values.nhima) formData.append('nhima', values.nhima);
       if (values.sss_number) formData.append('sss_number', values.sss_number);
       formData.append('phone', values.phone);
-      formData.append('email', values.email);
+      if (values.email) formData.append('email', values.email);
       formData.append('house_address', values.house_address);
       if (values.point_of_hire) formData.append('point_of_hire', values.point_of_hire);
       formData.append('employment_type', String(values.employment_type));
@@ -1342,7 +1342,7 @@ export default function Demography() {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="email" label="Email" rules={[{ type: 'email', required: true }]}>
+              <Form.Item name="email" label="Email" rules={[{ type: 'email' }]}>
                 <Input />
               </Form.Item>
             </Col>
