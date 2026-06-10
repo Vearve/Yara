@@ -493,7 +493,7 @@ export default function ERA() {
                           <ReactECharts option={appraisalChart} style={{ height: 200 }} />
                         </GlassCard>
                       )}
-                      <Table
+                      <MobileTable
                         size="small"
                         dataSource={appraisals}
                         rowKey="id"
