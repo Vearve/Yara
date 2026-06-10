@@ -362,8 +362,7 @@ export default function Schedule() {
                             padding: 16,
                             border: `2px solid ${getEventColor(event.type)}`,
                             borderRadius: 8,
-                            background: 'rgba(10, 10, 10, 0.6)',
-                            backdropFilter: 'blur(4px)',
+                            background: '#0b0f1a',
                             boxShadow: `0 2px 8px ${getEventColor(event.type)}30`,
                           }}
                         >

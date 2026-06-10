@@ -29,7 +29,7 @@
   --sidebar-text: #f7f8fb;
   --sidebar-hover: rgba(245, 196, 0, 0.08);
   --sidebar-active: rgba(245, 196, 0, 0.14);
-  --header-bg: linear-gradient(90deg, rgba(11, 15, 26, 0.95) 0%, rgba(15, 22, 40, 0.92) 50%, rgba(11, 15, 26, 0.95) 100%);
+  --header-bg: #0b0f1a;
   --header-border: rgba(245, 196, 0, 0.15);
   --shell-bg: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-panel) 50%, var(--bg-base) 100%);
   --shell-glow: radial-gradient(ellipse 1200px 600px at center top, rgba(245, 196, 0, 0.05), transparent 70%);
@@ -61,7 +61,7 @@
   --sidebar-text: #f3effa;
   --sidebar-hover: rgba(255, 255, 255, 0.05);
   --sidebar-active: rgba(255, 255, 255, 0.12);
-  --header-bg: linear-gradient(180deg, rgba(244, 241, 235, 0.97) 0%, rgba(238, 234, 227, 0.99) 100%);
+  --header-bg: #dedad4;
   --header-border: rgba(41, 28, 58, 0.1);
   --shell-bg: linear-gradient(180deg, #eae7e1 0%, #e2dfd8 55%, #eae7e1 100%);
   --shell-glow: radial-gradient(ellipse 1100px 520px at center top, rgba(74, 63, 207, 0.07), transparent 70%), radial-gradient(circle at 85% 6%, rgba(120, 100, 220, 0.06), transparent 26%);
@@ -93,7 +93,7 @@
   --sidebar-text: #f7f8fb;
   --sidebar-hover: rgba(245, 196, 0, 0.08);
   --sidebar-active: rgba(245, 196, 0, 0.14);
-  --header-bg: linear-gradient(90deg, rgba(11, 15, 26, 0.95) 0%, rgba(15, 22, 40, 0.92) 50%, rgba(11, 15, 26, 0.95) 100%);
+  --header-bg: #0b0f1a;
   --header-border: rgba(245, 196, 0, 0.15);
   --shell-bg: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-panel) 50%, var(--bg-base) 100%);
   --shell-glow: radial-gradient(ellipse 1200px 600px at center top, rgba(245, 196, 0, 0.05), transparent 70%);
@@ -138,7 +138,6 @@ a:hover {
 .glass-panel {
   background: var(--bg-card-soft);
   border: 1px solid var(--border);
-  backdrop-filter: blur(10px);
   box-shadow: var(--glow);
 }
 

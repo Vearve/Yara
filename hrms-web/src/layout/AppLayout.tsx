@@ -260,7 +260,6 @@ export default function AppLayout() {
         <Header
           style={{
             background: 'var(--header-bg)',
-            backdropFilter: 'blur(12px)',
             padding: 0,
             borderBottom: '1px solid var(--header-border)',
             boxShadow: '0 4px 16px rgba(28, 22, 44, 0.08)',

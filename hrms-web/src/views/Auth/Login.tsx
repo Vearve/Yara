@@ -98,8 +98,7 @@ export default function Login() {
       <Card
         style={{
           width: 400,
-          background: 'rgba(10, 10, 10, 0.85)',
-          backdropFilter: 'blur(10px)',
+          background: '#0b0f1a',
           border: '1px solid rgba(212, 175, 55, 0.3)',
           boxShadow: '0 8px 32px rgba(212, 175, 55, 0.15)',
         }}
