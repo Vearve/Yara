@@ -226,7 +226,8 @@ export default function HeaderBar({ onMobileMenu }: { onMobileMenu?: () => void 
       const res = await http.get('/api/v1/core/conversations/');
       return Array.isArray(res.data) ? res.data : res.data?.results || [];
     },
-    refetchInterval: 5000, // Poll every 5 seconds
+    refetchInterval: 30000,
+    refetchIntervalInBackground: false,
     enabled: !!localStorage.getItem('access'),
   });
 

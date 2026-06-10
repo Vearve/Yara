@@ -17,6 +17,9 @@ const http = axios.create({
   },
 });
 
+// Shared refresh lock — prevents N concurrent 401s from firing N refresh calls
+let refreshPromise: Promise<string> | null = null;
+
 http.interceptors.request.use((config) => {
   const token = localStorage.getItem('access');
   const workspaceId = localStorage.getItem('workspaceId');
@@ -50,19 +53,27 @@ http.interceptors.response.use(
       const refresh = localStorage.getItem('refresh');
       if (refresh) {
         try {
-          const refreshPayload = JSON.stringify({ refresh });
-          const res = await http.post('/api/v1/auth/token/refresh/', refreshPayload, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          localStorage.setItem('access', res.data.access);
+          // All concurrent 401s share one refresh call
+          if (!refreshPromise) {
+            refreshPromise = http
+              .post('/api/v1/auth/token/refresh/', JSON.stringify({ refresh }), {
+                headers: { 'Content-Type': 'application/json' },
+              })
+              .then((res) => {
+                localStorage.setItem('access', res.data.access);
+                return res.data.access as string;
+              })
+              .finally(() => {
+                refreshPromise = null;
+              });
+          }
+          const newToken = await refreshPromise;
           const hdrs: AxiosRequestHeaders = (original.headers || {}) as AxiosRequestHeaders;
-          hdrs.Authorization = `Bearer ${res.data.access}`;
-          hdrs['Content-Type'] = 'application/json';
+          hdrs.Authorization = `Bearer ${newToken}`;
           original.headers = hdrs;
           return http(original as any);
         } catch (e) {
+          refreshPromise = null;
           localStorage.clear();
           window.location.replace('/');
         }
