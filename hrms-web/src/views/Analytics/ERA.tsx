@@ -45,6 +45,7 @@ export default function ERA() {
   );
 
   const enabled = !!workspaceId && !!selectedEmployee;
+  const employeeParam = { employee: selectedEmployee, page_size: 200 };
 
   // All record queries — only fire when employee selected
   const { data: chargesData, isLoading: chargesLoading } = useQuery({
