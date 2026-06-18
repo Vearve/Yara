@@ -104,7 +104,8 @@ class EmployeeListSerializer(serializers.ModelSerializer):
             'id', 'employee_id', 'first_name', 'last_name', 'full_name',
             'email', 'job_title', 'department', 'department_name',
             'employment_type', 'employment_type_name',
-            'employment_status', 'hire_date', 'photo', 'created_at'
+            'employment_status', 'hire_date', 'photo', 'created_at',
+            'gender', 'nationality', 'date_of_birth',
         ]
         read_only_fields = ['id', 'created_at', 'full_name']
 
