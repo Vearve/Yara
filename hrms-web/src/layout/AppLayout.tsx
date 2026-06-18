@@ -265,7 +265,7 @@ export default function AppLayout() {
             boxShadow: '0 4px 16px rgba(28, 22, 44, 0.08)',
             position: 'sticky',
             top: 0,
-            zIndex: 2,
+            zIndex: 100,
           }}
         >
           <HeaderBar onMobileMenu={isMobile ? () => setDrawerOpen(true) : undefined} />
