@@ -144,6 +144,17 @@ export default function SiteManage() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // All active allocations across every site — used to prevent double-assigning
+  const { data: allSiteAllocations = [] } = useQuery<{ employee: number }[]>({
+    queryKey: ['all-site-employees', workspaceId],
+    queryFn: async () => {
+      const res = await http.get('/api/v1/sites/site-employees/', { params: { is_active: true, page_size: 5000 } });
+      return res.data?.results ?? res.data ?? [];
+    },
+    enabled: !!workspaceId,
+    staleTime: 60 * 1000,
+  });
+
   const { data: reconData, isLoading: reconLoading } = useQuery({
     queryKey: ['labour-recon', selectedPeriodId],
     queryFn: async () => (await http.get(`/api/v1/sites/site-periods/${selectedPeriodId}/labour_recon/`)).data,
@@ -167,6 +178,7 @@ export default function SiteManage() {
       queryClient.invalidateQueries({ queryKey: ['site-employees', id] });
       queryClient.invalidateQueries({ queryKey: ['site-stats', id] });
       queryClient.invalidateQueries({ queryKey: ['site', id] });
+      queryClient.invalidateQueries({ queryKey: ['all-site-employees', workspaceId] });
       message.success(editingAssignment ? 'Assignment updated' : 'Employee allocated to site');
       setAllocateVisible(false);
       setEditingAssignment(null);
@@ -181,6 +193,7 @@ export default function SiteManage() {
       queryClient.invalidateQueries({ queryKey: ['site-employees', id] });
       queryClient.invalidateQueries({ queryKey: ['site-stats', id] });
       queryClient.invalidateQueries({ queryKey: ['site', id] });
+      queryClient.invalidateQueries({ queryKey: ['all-site-employees', workspaceId] });
       message.success('Employee removed from site');
     },
     onError: (e: any) => message.error(e.response?.data?.error || 'Failed to remove employee'),
@@ -285,14 +298,15 @@ export default function SiteManage() {
   }, [allActiveAssignments, empSearch, empDeptFilter]);
 
   const employeeOptions = useMemo(() => {
-    const allocatedIds = new Set(activeAssignments.map(a => a.employee));
+    // Block anyone already active on ANY site, except the employee being edited
+    const globalAllocatedIds = new Set(allSiteAllocations.map(a => a.employee));
     return allEmployees
-      .filter((e: any) => !allocatedIds.has(e.id) || editingAssignment?.employee === e.id)
+      .filter((e: any) => !globalAllocatedIds.has(e.id) || editingAssignment?.employee === e.id)
       .map((e: any) => ({
         value: e.id,
-        label: `${e.full_name} (${e.employee_number || e.id})`,
+        label: `${e.full_name} (${e.employee_id || e.id})`,
       }));
-  }, [allEmployees, activeAssignments, editingAssignment]);
+  }, [allEmployees, allSiteAllocations, editingAssignment]);
 
   const openAllocate = (assignment?: SiteEmployee) => {
     setEditingAssignment(assignment || null);
