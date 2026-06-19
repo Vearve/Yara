@@ -596,7 +596,7 @@ export default function SiteManage() {
               dataSource={activeAssignments}
               rowKey="id"
               loading={assignmentsLoading}
-              pagination={false}
+              pagination={{ pageSize: 20, showTotal: (total) => `${total} employees`, showSizeChanger: false }}
               size="small"
               locale={{ emptyText: 'No employees allocated to this site yet.' }}
             />
