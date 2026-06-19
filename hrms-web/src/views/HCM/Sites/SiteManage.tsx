@@ -526,7 +526,19 @@ export default function SiteManage() {
                       <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.04)', borderRadius: 10 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                           <span style={{ fontWeight: 600 }}>{dept.department}</span>
-                          <Badge count={dept.count} color="#3ee7ff" />
+                          <span style={{
+                            background: '#3ee7ff',
+                            color: '#0a1628',
+                            fontWeight: 700,
+                            fontSize: 12,
+                            borderRadius: '50%',
+                            minWidth: 22,
+                            height: 22,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '0 6px',
+                          }}>{dept.count}</span>
                         </div>
                         <Progress percent={pct} size="small" strokeColor="#3ee7ff" showInfo={false} />
                         <div style={{ fontSize: 11, color: '#888', marginTop: 4 }}>{pct}% of site workforce</div>
