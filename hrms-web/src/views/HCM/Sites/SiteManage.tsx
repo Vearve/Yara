@@ -113,10 +113,13 @@ export default function SiteManage() {
     enabled: !!id,
   });
 
+  const [empSearch, setEmpSearch] = useState('');
+  const [empDeptFilter, setEmpDeptFilter] = useState<string | null>(null);
+
   const { data: assignments = [], isLoading: assignmentsLoading } = useQuery<SiteEmployee[]>({
     queryKey: ['site-employees', id],
     queryFn: async () => {
-      const res = await http.get(`/api/v1/sites/site-employees/?site=${id}`);
+      const res = await http.get(`/api/v1/sites/site-employees/`, { params: { site: id, page_size: 1000 } });
       return res.data?.results ?? res.data ?? [];
     },
     enabled: !!id,
@@ -259,8 +262,27 @@ export default function SiteManage() {
   });
 
   // ---- Computed ----
-  const activeAssignments = useMemo(() => assignments.filter(a => a.is_active), [assignments]);
+  const allActiveAssignments = useMemo(() => assignments.filter(a => a.is_active), [assignments]);
   const inactiveAssignments = useMemo(() => assignments.filter(a => !a.is_active), [assignments]);
+
+  const deptOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const opts: { label: string; value: string }[] = [];
+    allActiveAssignments.forEach(a => {
+      const name = a.department?.name;
+      if (name && !seen.has(name)) { seen.add(name); opts.push({ label: name, value: name }); }
+    });
+    return opts.sort((a, b) => a.label.localeCompare(b.label));
+  }, [allActiveAssignments]);
+
+  const activeAssignments = useMemo(() => {
+    const q = empSearch.toLowerCase();
+    return allActiveAssignments.filter(a => {
+      const matchesSearch = !q || a.employee_name.toLowerCase().includes(q) || a.role_on_site?.toLowerCase().includes(q);
+      const matchesDept = !empDeptFilter || a.department?.name === empDeptFilter;
+      return matchesSearch && matchesDept;
+    });
+  }, [allActiveAssignments, empSearch, empDeptFilter]);
 
   const employeeOptions = useMemo(() => {
     const allocatedIds = new Set(activeAssignments.map(a => a.employee));
@@ -542,10 +564,28 @@ export default function SiteManage() {
     },
     {
       key: 'employees',
-      label: `Employees (${activeAssignments.length})`,
+      label: `Employees (${allActiveAssignments.length})`,
       children: (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+            <Space wrap>
+              <Input.Search
+                placeholder="Search name or role..."
+                allowClear
+                style={{ width: 220 }}
+                value={empSearch}
+                onChange={e => setEmpSearch(e.target.value)}
+                onSearch={v => setEmpSearch(v)}
+              />
+              <Select
+                placeholder="Filter by department"
+                allowClear
+                style={{ width: 200 }}
+                options={deptOptions}
+                value={empDeptFilter}
+                onChange={v => setEmpDeptFilter(v ?? null)}
+              />
+            </Space>
             <Button type="primary" icon={<UserAddOutlined />} onClick={() => openAllocate()}>
               Allocate Employee
             </Button>
