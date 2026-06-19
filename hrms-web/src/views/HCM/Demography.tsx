@@ -22,6 +22,7 @@ import {
   Upload,
   Statistic,
   Avatar,
+  Popconfirm,
 } from 'antd';
 import {
   UploadOutlined,
@@ -677,6 +678,16 @@ export default function Demography() {
     },
   });
 
+  const deleteEmployeeMutation = useMutation({
+    mutationFn: (id: number) => http.delete(`/api/v1/hcm/employees/${id}/`),
+    onSuccess: () => {
+      message.success('Employee deleted');
+      queryClient.invalidateQueries({ queryKey: ['employees', workspaceId] });
+      if (drawerOpen) setDrawerOpen(false);
+    },
+    onError: () => message.error('Could not delete employee'),
+  });
+
   const handleImport = async () => {
     if (!importFile) {
       message.error('Please select a file');
@@ -711,17 +722,28 @@ export default function Demography() {
       title: 'Action',
       fixed: 'left' as const,
       render: (_: any, record: EmployeeRow) => (
-        <Button
-          type="link"
-          onClick={() => {
-            setSelectedId(record.id);
-            setDrawerOpen(true);
-          }}
-        >
-          View / Manage
-        </Button>
+        <Space size={0}>
+          <Button
+            type="link"
+            onClick={() => {
+              setSelectedId(record.id);
+              setDrawerOpen(true);
+            }}
+          >
+            View / Manage
+          </Button>
+          <Popconfirm
+            title="Permanently delete this employee?"
+            description="This cannot be undone."
+            okText="Delete"
+            okButtonProps={{ danger: true, loading: deleteEmployeeMutation.isPending }}
+            onConfirm={() => deleteEmployeeMutation.mutate(record.id)}
+          >
+            <Button type="link" danger size="small">Delete</Button>
+          </Popconfirm>
+        </Space>
       ),
-      width: 130,
+      width: 210,
     },
     {
       title: 'Photo',
@@ -1019,7 +1041,8 @@ export default function Demography() {
               });
               setEmployeeModalOpen(true);
             }}
-            deleteConfirm="Terminate this employee?"
+            onDelete={(record) => deleteEmployeeMutation.mutate(record.id)}
+            deleteConfirm="Permanently delete this employee? This cannot be undone."
             desktopTable={
               <Table
                 loading={listLoading}
