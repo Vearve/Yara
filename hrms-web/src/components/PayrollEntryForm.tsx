@@ -210,14 +210,20 @@ export default function PayrollEntryForm({ visible, onClose, onSuccess, entry }:
     }
   };
 
-  // Calculate totals
-  const basic = Number(form.getFieldValue('basic') || 0);
-  const housing = Number(form.getFieldValue('housing') || 0);
-  const transportation = Number(form.getFieldValue('transportation') || 0);
-  const lunch = Number(form.getFieldValue('lunch') || 0);
-  const gross = basic + housing + transportation + lunch;
-  const netInput = form.getFieldValue('net');
-  const net = netInput ? Number(netInput) : gross * 0.7; // Estimate (70% after deductions)
+  // Reactive watchers — re-render summary whenever any field changes
+  const basicWatch       = Form.useWatch('basic', form);
+  const housingWatch     = Form.useWatch('housing', form);
+  const transportWatch   = Form.useWatch('transportation', form);
+  const lunchWatch       = Form.useWatch('lunch', form);
+  const netWatch         = Form.useWatch('net', form);
+
+  const basic          = Number(basicWatch || 0);
+  const housing        = Number(housingWatch || 0);
+  const transportation = Number(transportWatch || 0);
+  const lunch          = Number(lunchWatch || 0);
+  const gross          = basic + housing + transportation + lunch;
+  const netInput       = netWatch;
+  const net            = netInput ? Number(netInput) : gross * 0.7;
 
   return (
     <Modal
