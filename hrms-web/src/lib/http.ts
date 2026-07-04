@@ -25,10 +25,12 @@ http.interceptors.request.use((config) => {
   const workspaceId = localStorage.getItem('workspaceId');
 
   const headers: AxiosRequestHeaders = (config.headers || {}) as AxiosRequestHeaders;
-  if (
+  if (config.data instanceof FormData) {
+    // Let the browser set Content-Type with the correct multipart boundary
+    delete (headers as any)['Content-Type'];
+  } else if (
     config.data &&
     typeof config.data === 'object' &&
-    !(config.data instanceof FormData) &&
     !(config.data instanceof URLSearchParams)
   ) {
     headers['Content-Type'] = 'application/json';
