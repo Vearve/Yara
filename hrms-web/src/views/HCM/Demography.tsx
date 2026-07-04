@@ -621,6 +621,7 @@ export default function Demography() {
       formData.append('nrc', values.nrc);
       if (values.tpin && values.tpin.trim()) formData.append('tpin', values.tpin.trim());
       if (values.nhima) formData.append('nhima', values.nhima);
+      if (values.napsa_number) formData.append('napsa_number', values.napsa_number);
       if (values.sss_number) formData.append('sss_number', values.sss_number);
       formData.append('phone', values.phone);
       if (values.email) formData.append('email', values.email);
@@ -1356,6 +1357,11 @@ export default function Demography() {
             </Col>
             <Col span={12}>
               <Form.Item name="nhima" label="NHIMA Number">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="napsa_number" label="NAPSA Number">
                 <Input />
               </Form.Item>
             </Col>

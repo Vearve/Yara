@@ -145,6 +145,20 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
             return response
         except FileNotFoundError:
             return Response({'detail': 'Logo file not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=True, methods=['post'], url_path='upload_logo', parser_classes=[MultiPartParser, FormParser])
+    def upload_logo(self, request, pk=None):
+        """Upload workspace logo — stores as binary in DB, no filesystem required."""
+        workspace = self.get_object()
+        self._check_update_permission(workspace)
+        logo_file = request.FILES.get('logo')
+        if not logo_file:
+            return Response({'detail': 'No logo file provided'}, status=status.HTTP_400_BAD_REQUEST)
+        logo_file.seek(0)
+        workspace.logo_data = logo_file.read()
+        workspace.logo_content_type = logo_file.content_type or 'image/png'
+        workspace.save(update_fields=['logo_data', 'logo_content_type'])
+        return Response({'detail': 'Logo uploaded successfully'})
     
     @action(detail=False, methods=['get'])
     def my_workspaces(self, request):

@@ -113,7 +113,7 @@ export default function HeaderBar({ onMobileMenu }: { onMobileMenu?: () => void 
     formData.append('logo', file);
 
     try {
-      await http.patch(`/api/v1/core/workspaces/${workspaceId}/`, formData);
+      await http.post(`/api/v1/core/workspaces/${workspaceId}/upload_logo/`, formData);
 
       await loadWorkspaceLogo(workspaceId);
       window.dispatchEvent(new Event('companyLogoUpdated'));
