@@ -575,30 +575,24 @@ class ContractViewSet(viewsets.ModelViewSet):
 
     queryset = Contract.objects.select_related('employee', 'contract_type').all()
     serializer_class = ContractSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['employee', 'status', 'contract_type']
-    search_fields = ['employee__first_name', 'employee__last_name', 'employee__employee_id', 'contract_number']
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = None  # set below after import
     ordering_fields = ['start_date', 'end_date', 'created_at']
     ordering = ['-created_at']
 
+    def get_filterset_class(self):
+        from .filters import ContractFilter
+        return ContractFilter
+
     def get_queryset(self):
-        from django.utils import timezone
         today = timezone.now().date()
 
-        # Auto-expire contracts whose end_date has passed and are still ACTIVE
-        Contract.objects.filter(
-            status='ACTIVE',
-            end_date__lt=today,
-        ).update(status='EXPIRED')
+        # Bulk-sync: mark ACTIVE contracts whose end_date has passed
+        Contract.objects.filter(status='ACTIVE', end_date__lt=today).update(status='EXPIRED')
 
         qs = super().get_queryset()
         if hasattr(self.request, 'workspace') and self.request.workspace:
             qs = qs.filter(employee__workspace=self.request.workspace)
-
-        dept_id = self.request.query_params.get('department_id')
-        if dept_id:
-            qs = qs.filter(employee__department_id=dept_id)
-
         return qs
 
 
