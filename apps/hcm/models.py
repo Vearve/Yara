@@ -539,17 +539,20 @@ def create_or_update_contract_on_engagement(sender, instance, created, **kwargs)
     # Generate contract number if not exists
     contract_number = f"CONT-{employee.id}-{engagement.id}"
     
-    # update_or_create: on update only changes these four fields; on create also sets contract_number and status.
-    Contract.objects.update_or_create(
+    contract, created = Contract.objects.get_or_create(
         employee=employee,
         defaults={
+            'contract_number': contract_number,
             'contract_type': engagement.contract_type,
             'start_date': engagement.engagement_date,
             'end_date': engagement.initial_contract_end_date,
             'duration_months': engagement.contract_duration_months,
-        },
-        create_defaults={
-            'contract_number': contract_number,
             'status': 'ACTIVE',
         },
     )
+    if not created:
+        contract.contract_type = engagement.contract_type
+        contract.start_date = engagement.engagement_date
+        contract.end_date = engagement.initial_contract_end_date
+        contract.duration_months = engagement.contract_duration_months
+        contract.save(update_fields=['contract_type', 'start_date', 'end_date', 'duration_months', 'updated_at'])
