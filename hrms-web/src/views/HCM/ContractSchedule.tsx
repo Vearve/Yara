@@ -1,19 +1,21 @@
-import { Card, Tag, Space, Input, DatePicker, Select, Button, Modal, Form, message } from 'antd';
+import { Card, Tag, Space, Input, Select, Button, Modal, Form, message, DatePicker } from 'antd';
 import MobileTable from '../../components/MobileTable';
 import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import React, { useMemo, useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import http from '../../lib/http';
 import dayjs from 'dayjs';
 import { HeroBanner } from '../../components/HeroBanner';
 
 export default function ContractSchedule() {
   const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
+  const queryClient = useQueryClient();
   const [pendingFilters, setPendingFilters] = useState<{ employee?: string; status?: string; dept?: number }>({});
   const [appliedFilters, setAppliedFilters] = useState<{ employee?: string; status?: string; dept?: number }>({});
   const [selectedContract, setSelectedContract] = useState<any>(null);
   const [viewModal, setViewModal] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingContract, setEditingContract] = useState<any>(null);
   const [workspaceId] = useState<string | null>(() => localStorage.getItem('workspaceId'));
 
   // Fetch contracts
@@ -64,6 +66,20 @@ export default function ContractSchedule() {
     onError: () => message.error('Failed to delete contract'),
   });
 
+  // Edit/update mutation
+  const editMut = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      await http.patch(`/api/v1/hcm/contracts/${id}/`, data);
+    },
+    onSuccess: () => {
+      message.success('Contract updated');
+      setEditingContract(null);
+      editForm.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['contracts', workspaceId] });
+    },
+    onError: () => message.error('Failed to update contract'),
+  });
+
   // Employee map for enrichment
   const employeeMap = useMemo(() => {
     const map = new Map<number, any>();
@@ -107,7 +123,16 @@ export default function ContractSchedule() {
               setViewModal(true);
             }}
           />
-          <EditOutlined style={{ cursor: 'pointer', color: '#52c41a' }} onClick={() => setEditingId(record.id)} />
+          <EditOutlined
+            style={{ cursor: 'pointer', color: '#52c41a' }}
+            onClick={() => {
+              setEditingContract(record);
+              editForm.setFieldsValue({
+                status: record.status,
+                end_date: record.end_date && record.end_date !== '-' ? dayjs(record.end_date) : null,
+              });
+            }}
+          />
           <DeleteOutlined
             style={{ cursor: 'pointer', color: '#ff4d4f' }}
             onClick={() => {
@@ -236,6 +261,43 @@ export default function ContractSchedule() {
           loading={contractsLoading}
         />
       </Card>
+
+      {/* Edit Contract Modal */}
+      <Modal
+        title={`Edit Contract — ${editingContract?.contract_number || ''}`}
+        open={!!editingContract}
+        onCancel={() => { setEditingContract(null); editForm.resetFields(); }}
+        onOk={() => editForm.submit()}
+        confirmLoading={editMut.isPending}
+        destroyOnClose
+      >
+        <Form
+          form={editForm}
+          layout="vertical"
+          onFinish={(values) => {
+            editMut.mutate({
+              id: editingContract.id,
+              data: {
+                status: values.status,
+                end_date: values.end_date ? values.end_date.format('YYYY-MM-DD') : null,
+              },
+            });
+          }}
+        >
+          <Form.Item name="status" label="Status" rules={[{ required: true }]}>
+            <Select>
+              <Select.Option value="ACTIVE">Active</Select.Option>
+              <Select.Option value="EXPIRED">Expired</Select.Option>
+              <Select.Option value="RENEWED">Renewed</Select.Option>
+              <Select.Option value="TERMINATED">Terminated</Select.Option>
+              <Select.Option value="PENDING_RENEWAL">Pending Renewal</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="end_date" label="End Date">
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+        </Form>
+      </Modal>
 
       {/* View Contract Modal */}
       <Modal

@@ -582,15 +582,23 @@ class ContractViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
     def get_queryset(self):
+        from django.utils import timezone
+        today = timezone.now().date()
+
+        # Auto-expire contracts whose end_date has passed and are still ACTIVE
+        Contract.objects.filter(
+            status='ACTIVE',
+            end_date__lt=today,
+        ).update(status='EXPIRED')
+
         qs = super().get_queryset()
         if hasattr(self.request, 'workspace') and self.request.workspace:
             qs = qs.filter(employee__workspace=self.request.workspace)
-        
-        # Allow filtering by department_id through employee
+
         dept_id = self.request.query_params.get('department_id')
         if dept_id:
             qs = qs.filter(employee__department_id=dept_id)
-        
+
         return qs
 
 
