@@ -1,261 +1,170 @@
 """
-PDF generation utilities for payslips - receipt style format
+PDF generation utilities for payslips.
+Receipt-style layout using ReportLab canvas directly.
 """
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.lib import colors
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
+from datetime import datetime
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 from io import BytesIO
-from django.conf import settings
-import os
 
 
 def generate_payslip_pdf(payslip, workspace_name=None):
     """
-    Generate a receipt-style PDF for a payslip
-    Returns BytesIO buffer containing the PDF
+    Generate a receipt-style PDF for a payslip.
+    Returns a bytes object containing the PDF.
     """
-    buffer = BytesIO()
-    receipt_width = 3.2 * inch
-    receipt_height = 11 * inch
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=(receipt_width, receipt_height),
-        rightMargin=12,
-        leftMargin=12,
-        topMargin=12,
-        bottomMargin=12
-    )
-    
-    # Container for the 'Flowable' objects
-    elements = []
-    
-    # Define styles
-    styles = getSampleStyleSheet()
-    
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=12,
-        textColor=colors.HexColor('#111111'),
-        spaceAfter=6,
-        alignment=TA_CENTER,
-        fontName='Helvetica-Bold'
-    )
-    
-    heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
-        fontSize=9,
-        textColor=colors.HexColor('#111111'),
-        spaceAfter=4,
-        spaceBefore=6,
-        fontName='Helvetica-Bold'
-    )
-    
-    normal_style = ParagraphStyle(
-        'CustomNormal',
-        parent=styles['Normal'],
-        fontSize=8,
-        textColor=colors.HexColor('#333333'),
-    )
-    
-    company_style = ParagraphStyle(
-        'CompanyName',
-        parent=styles['Heading1'],
-        fontSize=11,
-        textColor=colors.HexColor('#111111'),
-        spaceAfter=2,
-        alignment=TA_CENTER,
-        fontName='Helvetica-Bold'
-    )
-    
-    # Company Name - prefer request/workspace name when provided
+    # ---- Company name ----
     if workspace_name:
-        company_name = workspace_name
+        company_name = workspace_name.upper()
     else:
-        workspace = payslip.employee.workspace
-        if not workspace:
-            # Try to get workspace from active contract
-            try:
-                active_contract = payslip.employee.contracts.filter(status='ACTIVE').first()
-                if active_contract and active_contract.employee:
-                    workspace = active_contract.employee.workspace
-            except Exception:
-                pass
-        company_name = workspace.name if workspace else "Company Name"
-    elements.append(Paragraph(company_name.upper(), company_style))
-    elements.append(Paragraph("PAYSLIP RECEIPT", title_style))
-    elements.append(Spacer(1, 0.08 * inch))
-    
-    # Employee Information Table
-    department_name = 'N/A'
-    employee_department = getattr(payslip.employee, 'department', None)
-    if employee_department:
-        department_name = getattr(employee_department, 'name', None) or str(employee_department)
+        workspace = getattr(payslip.employee, 'workspace', None)
+        company_name = workspace.name.upper() if workspace else 'COMPANY'
 
-    emp_data = [
-        ['Employee ID', payslip.employee.employee_id],
-        ['Employee Name', payslip.employee.full_name],
-        ['Department', department_name],
-        ['Period', str(payslip.period)],
-    ]
-    
-    emp_table = Table(emp_data, colWidths=[doc.width * 0.45, doc.width * 0.55])
-    emp_table.setStyle(TableStyle([
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#111111')),
-        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('LINEBELOW', (0, -1), (-1, -1), 0.5, colors.HexColor('#111111')),
-    ]))
-    elements.append(emp_table)
-    elements.append(Spacer(1, 0.1 * inch))
-    
-    # Earnings Section
-    elements.append(Paragraph("EARNINGS", heading_style))
-    
-    earnings_data = [
-        ['Basic Salary', f"{float(payslip.basic_salary):,.2f}"],
-    ]
-    
-    if float(payslip.housing_allowance) > 0:
-        earnings_data.append(['Housing Allowance', f"{float(payslip.housing_allowance):,.2f}"])
-    if float(payslip.transportation_allowance) > 0:
-        earnings_data.append(['Transportation Allowance', f"{float(payslip.transportation_allowance):,.2f}"])
-    if float(payslip.lunch_allowance) > 0:
-        earnings_data.append(['Lunch Allowance', f"{float(payslip.lunch_allowance):,.2f}"])
-    if float(payslip.other_allowances) > 0:
-        earnings_data.append(['Other Allowances', f"{float(payslip.other_allowances):,.2f}"])
+    # ---- Department ----
+    dept = getattr(payslip.employee, 'department', None)
+    department_name = getattr(dept, 'name', None) or 'N/A'
+
+    # ---- Currency ----
+    currency = getattr(payslip, 'currency', 'ZMW') or 'ZMW'
+
+    def fmt(val):
+        try:
+            return f"{float(val):,.2f}"
+        except (TypeError, ValueError):
+            return '0.00'
+
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    left = 35
+    right = width - 35
+    y = height - 45
+
+    def draw_line(text, size=9, bold=False, center=False, right_align=False):
+        nonlocal y
+        font = 'Helvetica-Bold' if bold else 'Helvetica'
+        c.setFont(font, size)
+        if center:
+            tw = c.stringWidth(text, font, size)
+            x = (width - tw) / 2
+        elif right_align:
+            tw = c.stringWidth(text, font, size)
+            x = right - tw
+        else:
+            x = left
+        c.drawString(x, y, text)
+        y -= size + 4
+
+    def draw_row(label, value, label_size=9, value_size=9, bold_label=False, bold_value=False):
+        """Draw a key-value row on the same line."""
+        nonlocal y
+        lf = 'Helvetica-Bold' if bold_label else 'Helvetica'
+        vf = 'Helvetica-Bold' if bold_value else 'Helvetica'
+        c.setFont(lf, label_size)
+        c.drawString(left, y, label)
+        c.setFont(vf, value_size)
+        tw = c.stringWidth(value, vf, value_size)
+        c.drawString(right - tw, y, value)
+        y -= label_size + 4
+
+    def draw_separator(char='-'):
+        nonlocal y
+        c.setFont('Courier', 8)
+        max_chars = int((right - left) / c.stringWidth(char, 'Courier', 8))
+        c.drawString(left, y, char * max_chars)
+        y -= 11
+
+    # ======= HEADER =======
+    draw_line(company_name, size=14, bold=True, center=True)
+    draw_line('PAYSLIP', size=11, center=True)
+    draw_separator('=')
+    y -= 3
+
+    # ======= EMPLOYEE INFO =======
+    draw_line('EMPLOYEE INFORMATION', size=9, bold=True)
+    y -= 2
+    draw_row('Employee ID', payslip.employee.employee_id)
+    draw_row('Name', payslip.employee.full_name)
+    draw_row('Department', department_name)
+    draw_row('Pay Period', str(payslip.period))
+    draw_row('Currency', currency)
+    draw_separator()
+
+    # ======= EARNINGS =======
+    draw_line('EARNINGS', size=9, bold=True)
+    y -= 2
+    draw_row('Basic Salary', fmt(payslip.basic_salary))
+
+    if float(payslip.housing_allowance or 0) > 0:
+        draw_row('Housing Allowance', fmt(payslip.housing_allowance))
+    if float(payslip.transportation_allowance or 0) > 0:
+        draw_row('Transportation Allowance', fmt(payslip.transportation_allowance))
+    if float(payslip.lunch_allowance or 0) > 0:
+        draw_row('Lunch Allowance', fmt(payslip.lunch_allowance))
+    if float(payslip.other_allowances or 0) > 0:
+        draw_row('Other Allowances', fmt(payslip.other_allowances))
     if float(payslip.overtime_payment or 0) > 0:
-        earnings_data.append(['Overtime', f"{float(payslip.overtime_payment):,.2f}"])
+        draw_row('Overtime', fmt(payslip.overtime_payment))
     if float(payslip.bonus or 0) > 0:
-        earnings_data.append(['Bonus', f"{float(payslip.bonus):,.2f}"])
+        draw_row('Bonus', fmt(payslip.bonus))
     if float(payslip.double_ticket_payment or 0) > 0:
-        earnings_data.append(['Double Ticket (Sunday/Holiday)', f"{float(payslip.double_ticket_payment):,.2f}"])
-    
-    earnings_data.append(['GROSS SALARY', f"{float(payslip.gross_salary):,.2f}"])
-    
-    earnings_table = Table(earnings_data, colWidths=[doc.width * 0.65, doc.width * 0.35])
-    earnings_table.setStyle(TableStyle([
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#111111')),
-        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('LINEBELOW', (0, -1), (-1, -1), 0.6, colors.HexColor('#111111')),
-    ]))
-    elements.append(earnings_table)
-    elements.append(Spacer(1, 0.12 * inch))
-    
-    # Deductions Section
-    elements.append(Paragraph("DEDUCTIONS", heading_style))
-    
-    deductions_data = [
-        ['NAPSA (Employee)', f"{float(payslip.napsa_employee):,.2f}"],
-        ['PAYE Tax', f"{float(payslip.paye_tax):,.2f}"],
-        ['NHIMA (Employee)', f"{float(payslip.nhima_employee):,.2f}"],
-    ]
-    
+        draw_row('Double Ticket (Sun/Holiday)', fmt(payslip.double_ticket_payment))
+
+    draw_separator('-')
+    draw_row('GROSS SALARY', f"{currency} {fmt(payslip.gross_salary)}", bold_label=True, bold_value=True)
+    draw_separator()
+
+    # ======= DEDUCTIONS =======
+    draw_line('DEDUCTIONS', size=9, bold=True)
+    y -= 2
+    draw_row('NAPSA (Employee)', fmt(payslip.napsa_employee))
+    draw_row('PAYE Tax', fmt(payslip.paye_tax))
+    draw_row('NHIMA (Employee)', fmt(payslip.nhima_employee))
+
     if float(payslip.unpaid_leave_deduction or 0) > 0:
-        deductions_data.append(['Unpaid Leave', f"{float(payslip.unpaid_leave_deduction):,.2f}"])
+        draw_row('Unpaid Leave', fmt(payslip.unpaid_leave_deduction))
     if float(payslip.absenteeism_deduction or 0) > 0:
-        deductions_data.append(['Absenteeism', f"{float(payslip.absenteeism_deduction):,.2f}"])
-    
-    # Add custom deductions
-    for deduction in payslip.custom_deductions.all():
-        deductions_data.append([deduction.description, f"{float(deduction.amount):,.2f}"])
-    
-    deductions_data.append(['TOTAL DEDUCTIONS', f"{float(payslip.total_deductions):,.2f}"])
-    
-    deductions_table = Table(deductions_data, colWidths=[doc.width * 0.65, doc.width * 0.35])
-    deductions_table.setStyle(TableStyle([
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#111111')),
-        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('LINEBELOW', (0, -1), (-1, -1), 0.6, colors.HexColor('#111111')),
-    ]))
-    elements.append(deductions_table)
-    elements.append(Spacer(1, 0.15 * inch))
-    
-    # Net Pay Summary (Large and prominent)
-    net_data = [
-        ['NET PAY', f"K {float(payslip.net_salary):,.2f}"]
-    ]
-    
-    net_table = Table(net_data, colWidths=[doc.width * 0.65, doc.width * 0.35])
-    net_table.setStyle(TableStyle([
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#111111')),
-        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('LINEABOVE', (0, 0), (-1, 0), 1, colors.HexColor('#111111')),
-        ('LINEBELOW', (0, 0), (-1, 0), 1, colors.HexColor('#111111')),
-    ]))
-    elements.append(net_table)
-    
-    # Employer Contributions (informational)
-    elements.append(Spacer(1, 0.15 * inch))
-    elements.append(Paragraph("EMPLOYER CONTRIBUTIONS", heading_style))
-    
-    employer_data = [
-        ['NAPSA (Employer)', f"K {float(payslip.napsa_employer):,.2f}"],
-        ['NHIMA (Employer)', f"K {float(payslip.nhima_employer):,.2f}"],
-    ]
-    
-    employer_table = Table(employer_data, colWidths=[doc.width * 0.65, doc.width * 0.35])
-    employer_table.setStyle(TableStyle([
-        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('LINEBELOW', (0, -1), (-1, -1), 0.3, colors.HexColor('#111111')),
-    ]))
-    elements.append(employer_table)
-    
-    # Notes if any
+        draw_row('Absenteeism', fmt(payslip.absenteeism_deduction))
+
+    for ded in payslip.custom_deductions.all():
+        draw_row(ded.description[:40], fmt(ded.amount))
+
+    draw_separator('-')
+    draw_row('TOTAL DEDUCTIONS', f"{currency} {fmt(payslip.total_deductions)}", bold_label=True, bold_value=True)
+    draw_separator()
+
+    # ======= NET PAY =======
+    y -= 4
+    draw_row('NET PAY', f"{currency} {fmt(payslip.net_salary)}", label_size=12, value_size=12, bold_label=True, bold_value=True)
+    y -= 4
+    draw_separator('=')
+
+    # ======= EMPLOYER CONTRIBUTIONS =======
+    draw_line('EMPLOYER CONTRIBUTIONS (info only)', size=9, bold=True)
+    y -= 2
+    draw_row('NAPSA (Employer)', fmt(payslip.napsa_employer))
+    draw_row('NHIMA (Employer)', fmt(payslip.nhima_employer))
+    draw_separator()
+
+    # ======= NOTES =======
     if payslip.notes:
-        elements.append(Spacer(1, 0.3 * inch))
-        elements.append(Paragraph("NOTES", heading_style))
-        notes_para = Paragraph(payslip.notes, normal_style)
-        elements.append(notes_para)
-    
-    # Footer
-    elements.append(Spacer(1, 0.5 * inch))
-    footer_style = ParagraphStyle(
-        'Footer',
-        parent=styles['Normal'],
-        fontSize=8,
-        textColor=colors.HexColor('#999999'),
-        alignment=TA_CENTER
-    )
-    elements.append(Paragraph("This is a computer-generated payslip and does not require a signature.", footer_style))
-    elements.append(Paragraph(f"Generated on: {payslip.period}", footer_style))
-    
-    # Build PDF
-    doc.build(elements)
-    
-    # Get the value of the BytesIO buffer
-    pdf = buffer.getvalue()
-    buffer.close()
-    
-    return pdf
+        draw_line('NOTES', size=9, bold=True)
+        y -= 2
+        for line in str(payslip.notes)[:300].split('\n')[:6]:
+            if line.strip():
+                draw_line(line.strip()[:75], size=8)
+        draw_separator()
+
+    # ======= FOOTER =======
+    y -= 6
+    draw_separator('=')
+    draw_line('This is a computer-generated payslip.', size=7, center=True)
+    draw_line(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}", size=7, center=True)
+    draw_separator('=')
+
+    c.showPage()
+    c.save()
+
+    buffer.seek(0)
+    return buffer.getvalue()
