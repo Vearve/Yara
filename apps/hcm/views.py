@@ -30,6 +30,7 @@ from .models import (
     ContractType, TerminationReason, EmploymentType, EmployeeCategory, EmployeeDocument,
     EmployeeBeneficiary
 )
+from .filters import ContractFilter
 from apps.core.models import WorkspaceMembership
 from .serializers import (
     EmployeeListSerializer, EmployeeDetailSerializer,
@@ -576,13 +577,9 @@ class ContractViewSet(viewsets.ModelViewSet):
     queryset = Contract.objects.select_related('employee', 'contract_type').all()
     serializer_class = ContractSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_class = None  # set below after import
+    filterset_class = ContractFilter
     ordering_fields = ['start_date', 'end_date', 'created_at']
     ordering = ['-created_at']
-
-    def get_filterset_class(self):
-        from .filters import ContractFilter
-        return ContractFilter
 
     def get_queryset(self):
         today = timezone.now().date()
