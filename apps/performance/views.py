@@ -178,8 +178,8 @@ class KPIViewSet(viewsets.ModelViewSet):
             'terminations': terminations,
             'active_employees': active,
             'turnover_rate': round(turnover_rate, 2),
-            'period_start': period_start,
-            'period_end': period_end,
+            'period_start': period_start.isoformat(),
+            'period_end': period_end.isoformat(),
         })
 
     @action(detail=False, methods=['get'])

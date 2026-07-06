@@ -1,20 +1,15 @@
-import json
 import base64
 from typing import Any
 
 from rest_framework.renderers import JSONRenderer
+from rest_framework.utils.encoders import JSONEncoder as DRFJSONEncoder
 
 
-class BytesSafeJSONEncoder(json.JSONEncoder):
-    """JSON encoder that safely serializes bytes.
-
-    - If bytes decode as UTF-8, returns the decoded string.
-    - Otherwise returns a base64 encoded ASCII string so JSON encoding
-      doesn't raise UnicodeDecodeError during rendering.
-    """
+class BytesSafeJSONEncoder(DRFJSONEncoder):
+    """JSON encoder that extends DRF's encoder (handles date/datetime/Decimal)
+    and also safely serializes raw bytes/memoryview objects."""
 
     def default(self, obj: Any):
-        # Handle raw bytes or memoryviews that can appear in error contexts or unexpected fields
         if isinstance(obj, (bytes, bytearray, memoryview)):
             try:
                 return bytes(obj).decode('utf-8')
