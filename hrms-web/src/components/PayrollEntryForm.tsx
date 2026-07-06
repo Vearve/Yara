@@ -1,5 +1,5 @@
 import { Modal, Form, Input, Select, InputNumber, message, Divider, Card, Row, Col, Button, Space, Alert } from 'antd';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import http from '../lib/http';
 import { useQuery } from '@tanstack/react-query';
 
@@ -33,6 +33,11 @@ export default function PayrollEntryForm({ visible, onClose, onSuccess, entry }:
   const [netCalcResult, setNetCalcResult] = useState<any>(null);
   const MAX_SALARY = 9999999999999.99;
 
+  // Salary split ratios — updated from net-calc API result; defaults match backend
+  const ratiosRef = useRef({ basic: 0.45, housing: 0.25, transport: 0.15, lunch: 0.15 });
+  // Flag: prevents cascaded onValuesChange when we programmatically setFieldsValue
+  const autoCalcRef = useRef(false);
+
   // Fetch all employees
   const { data: employeesRaw } = useQuery({
     queryKey: ['employees', 'payroll-entry-form'],
@@ -57,9 +62,33 @@ export default function PayrollEntryForm({ visible, onClose, onSuccess, entry }:
     }
   };
 
-  // Auto-calculate from net when it changes
+  // Helper: apply net-calc result to form fields and store ratios
+  const applyNetCalcResult = (data: any) => {
+    const g = Number(data.gross_salary);
+    if (g > 0) {
+      ratiosRef.current = {
+        basic:    Number(data.basic_salary)            / g,
+        housing:  Number(data.housing_allowance)       / g,
+        transport: Number(data.transportation_allowance) / g,
+        lunch:    Number(data.lunch_allowance)         / g,
+      };
+    }
+    autoCalcRef.current = true;
+    form.setFieldsValue({
+      basic:          data.basic_salary,
+      housing:        data.housing_allowance,
+      transportation: data.transportation_allowance,
+      lunch:          data.lunch_allowance,
+    });
+    setTimeout(() => { autoCalcRef.current = false; }, 0);
+  };
+
+  // onValuesChange handler — fires for any field change
   const handleNetChange = async (changedValues: any, allValues: any) => {
-    if (changedValues.net && allValues.net > 0) {
+    if (autoCalcRef.current) return;
+
+    // Net changed → recalculate all components from net via API
+    if ('net' in changedValues && Number(allValues.net) > 0) {
       try {
         setNetCalcLoading(true);
         const response = await http.post('/api/v1/payroll/payslips/calculate_from_net/', {
@@ -67,16 +96,27 @@ export default function PayrollEntryForm({ visible, onClose, onSuccess, entry }:
         });
         const data = response.data;
         setNetCalcResult(data);
-        form.setFieldsValue({
-          basic: data.basic_salary,
-          housing: data.housing_allowance,
-          transportation: data.transportation_allowance,
-          lunch: data.lunch_allowance,
-        });
+        applyNetCalcResult(data);
       } catch (e: any) {
         console.warn('Could not auto-calculate from net:', e.message);
       } finally {
         setNetCalcLoading(false);
+      }
+      return;
+    }
+
+    // Basic changed manually → recalculate allowances using stored ratios
+    if ('basic' in changedValues && Number(allValues.basic) > 0) {
+      const r = ratiosRef.current;
+      if (r.basic > 0) {
+        const newGross = Number(allValues.basic) / r.basic;
+        autoCalcRef.current = true;
+        form.setFieldsValue({
+          housing:        parseFloat((newGross * r.housing).toFixed(2)),
+          transportation: parseFloat((newGross * r.transport).toFixed(2)),
+          lunch:          parseFloat((newGross * r.lunch).toFixed(2)),
+        });
+        setTimeout(() => { autoCalcRef.current = false; }, 0);
       }
     }
   };
@@ -184,23 +224,14 @@ export default function PayrollEntryForm({ visible, onClose, onSuccess, entry }:
       message.error('Please enter a net salary amount');
       return;
     }
-
     try {
       setNetCalcLoading(true);
       const response = await http.post('/api/v1/payroll/payslips/calculate_from_net/', {
         net_salary: netSalary,
       });
-
       const data = response.data;
       setNetCalcResult(data);
-
-      form.setFieldsValue({
-        basic: data.basic_salary,
-        housing: data.housing_allowance,
-        transportation: data.transportation_allowance,
-        lunch: data.lunch_allowance,
-      });
-
+      applyNetCalcResult(data);
       message.success('Salary components calculated from net salary');
     } catch (e: any) {
       const errorMsg = e.response?.data?.error || 'Failed to calculate from net salary';
