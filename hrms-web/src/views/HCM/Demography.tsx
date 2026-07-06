@@ -1118,17 +1118,10 @@ export default function Demography() {
                 <Descriptions.Item label="Employee ID">{employeeDetail.employee_id}</Descriptions.Item>
                 <Descriptions.Item label="Job Title">{employeeDetail.job_title}</Descriptions.Item>
                 <Descriptions.Item label="Department">{employeeDetail.department_detail?.name}</Descriptions.Item>
-                <Descriptions.Item label="Category">{employeeDetail.category_detail?.name}</Descriptions.Item>
-                <Descriptions.Item label="Classification">{employeeDetail.classification_detail?.name}</Descriptions.Item>
-                <Descriptions.Item label="Employment Type">{employeeDetail.employment_type_detail?.name}</Descriptions.Item>
-                <Descriptions.Item label="Contract Type">
-                  {employeeDetail.contractor_type === 'PERMANENT' && 'Permanent'}
-                  {employeeDetail.contractor_type === 'CONTRACT' && 'Fixed-Term / Verbal'}
-                  {employeeDetail.contractor_type === 'TEMPORARY' && 'Short Term / Temp'}
-                  {employeeDetail.contractor_type === 'CONTRACTOR' && 'Contractor (External)'}
-                  {employeeDetail.contractor_type === 'CONSULTANT' && 'Consultant'}
-                  {!employeeDetail.contractor_type && 'Not specified'}
-                </Descriptions.Item>
+                <Descriptions.Item label="Category">{employeeDetail.category_name || '—'}</Descriptions.Item>
+                <Descriptions.Item label="Classification">{employeeDetail.classification_name || '—'}</Descriptions.Item>
+                <Descriptions.Item label="Employment Type">{employeeDetail.employment_type_name || '—'}</Descriptions.Item>
+                <Descriptions.Item label="NRC">{employeeDetail.nrc || '—'}</Descriptions.Item>
                 <Descriptions.Item label="Status">{employeeDetail.employment_status}</Descriptions.Item>
                 <Descriptions.Item label="Hire Date">{employeeDetail.hire_date}</Descriptions.Item>
                 <Descriptions.Item label="DOB">{employeeDetail.date_of_birth}</Descriptions.Item>
