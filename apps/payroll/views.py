@@ -877,7 +877,7 @@ class PayslipViewSet(viewsets.ModelViewSet):
         Columns: Employee ID, Employee Name, Bank, Branch, Account Number, Account Name, Net Salary, Currency
         """
         import openpyxl
-        from django.http import HttpResponse
+        from io import BytesIO
 
         year = request.query_params.get('year')
         month = request.query_params.get('month')
