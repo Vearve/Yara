@@ -454,15 +454,19 @@ html::-webkit-scrollbar-thumb:hover {
   .ant-modal-content {
     border-radius: 20px 20px 0 0 !important;
     max-height: 90vh !important;
-    overflow: hidden !important;
+    /* overflow:hidden blocks iOS touch-scroll on children — use clip instead */
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
     display: flex !important;
     flex-direction: column !important;
     padding-bottom: 0 !important;
   }
-  /* Body scrolls, header + footer stay put */
+  /* Body scrolls, header + footer stay fixed */
   .ant-modal-body {
     overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
     flex: 1 1 auto !important;
     min-height: 0 !important;
     padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
@@ -488,6 +492,24 @@ html::-webkit-scrollbar-thumb:hover {
     background: var(--border);
     border-radius: 2px;
     margin: 0 auto 10px;
+  }
+
+  /* Drawer body: same touch-scroll treatment */
+  .ant-drawer-body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+  }
+  .ant-drawer-content {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .ant-drawer-wrapper-body {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
 
   /* Tables scroll horizontally inside their container */
