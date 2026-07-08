@@ -869,6 +869,77 @@ class PayslipViewSet(viewsets.ModelViewSet):
         serializer = PayslipSerializer(payslips, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'])
+    def bank_transfer_export(self, request):
+        """
+        Export salary bank transfer file as Excel.
+        GET: ?year=2026&month=1
+        Columns: Employee ID, Employee Name, Bank, Branch, Account Number, Account Name, Net Salary, Currency
+        """
+        import openpyxl
+        from django.http import HttpResponse
+
+        year = request.query_params.get('year')
+        month = request.query_params.get('month')
+        if not year or not month:
+            return Response({'error': 'year and month are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        payslips = self.get_queryset().filter(
+            period__year=year,
+            period__month=month,
+        ).select_related('employee')
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = 'Bank Transfer'
+
+        headers = [
+            'No.', 'Employee ID', 'Employee Name',
+            'Bank Name', 'Branch', 'Account Number', 'Account Name',
+            'Net Salary', 'Currency',
+        ]
+        ws.append(headers)
+
+        # Bold header row
+        from openpyxl.styles import Font, PatternFill, Alignment
+        header_font = Font(bold=True)
+        header_fill = PatternFill(fill_type='solid', fgColor='1F4E79')
+        for cell in ws[1]:
+            cell.font = Font(bold=True, color='FFFFFF')
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal='center')
+
+        for idx, payslip in enumerate(payslips, start=1):
+            emp = payslip.employee
+            ws.append([
+                idx,
+                emp.employee_id,
+                emp.full_name,
+                emp.bank_name or '',
+                emp.bank_branch or '',
+                emp.bank_account_number or '',
+                emp.bank_account_name or emp.full_name,
+                float(payslip.net_salary or 0),
+                payslip.currency or 'ZMW',
+            ])
+
+        # Auto-size columns
+        for col in ws.columns:
+            max_len = max((len(str(cell.value or '')) for cell in col), default=10)
+            ws.column_dimensions[col[0].column_letter].width = min(max_len + 4, 40)
+
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        period_label = f"{year}_{str(month).zfill(2)}"
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = f'attachment; filename="BankTransfer_{period_label}.xlsx"'
+        return response
+
     @action(detail=False, methods=['post'])
     def calculate_from_net(self, request):
         """

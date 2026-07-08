@@ -23,6 +23,7 @@ import {
   Statistic,
   Avatar,
   Popconfirm,
+  Divider,
 } from 'antd';
 import {
   UploadOutlined,
@@ -623,6 +624,10 @@ export default function Demography() {
       if (values.nhima) formData.append('nhima', values.nhima);
       if (values.napsa_number) formData.append('napsa_number', values.napsa_number);
       if (values.sss_number) formData.append('sss_number', values.sss_number);
+      if (values.bank_name) formData.append('bank_name', values.bank_name);
+      if (values.bank_branch) formData.append('bank_branch', values.bank_branch);
+      if (values.bank_account_number) formData.append('bank_account_number', values.bank_account_number);
+      if (values.bank_account_name) formData.append('bank_account_name', values.bank_account_name);
       formData.append('phone', values.phone);
       if (values.email) formData.append('email', values.email);
       formData.append('house_address', values.house_address);
@@ -1133,6 +1138,14 @@ export default function Demography() {
                 <Descriptions.Item label="Next of Kin" span={2}>
                   {employeeDetail.next_of_kin_name} ({employeeDetail.next_of_kin_relationship}) - {employeeDetail.next_of_kin_phone}
                 </Descriptions.Item>
+                {(employeeDetail.bank_name || employeeDetail.bank_account_number) && (
+                  <>
+                    <Descriptions.Item label="Bank" span={2}>{employeeDetail.bank_name || '—'}</Descriptions.Item>
+                    <Descriptions.Item label="Branch">{employeeDetail.bank_branch || '—'}</Descriptions.Item>
+                    <Descriptions.Item label="Account No.">{employeeDetail.bank_account_number || '—'}</Descriptions.Item>
+                    <Descriptions.Item label="Account Name" span={2}>{employeeDetail.bank_account_name || '—'}</Descriptions.Item>
+                  </>
+                )}
               </Descriptions>
             </Card>
 
@@ -1438,6 +1451,30 @@ export default function Demography() {
                     </Select.Option>
                   ))}
                 </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Divider orientation="left" style={{ marginTop: 8 }}>Banking Details</Divider>
+          <Row gutter={[16, 0]}>
+            <Col span={12}>
+              <Form.Item name="bank_name" label="Bank Name">
+                <Input placeholder="e.g. Zanaco, FNB, Standard Chartered" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="bank_branch" label="Branch / Sort Code">
+                <Input placeholder="e.g. Cairo Road, 0001" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="bank_account_number" label="Account Number">
+                <Input placeholder="e.g. 0123456789" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="bank_account_name" label="Account Name">
+                <Input placeholder="Name as on bank account" />
               </Form.Item>
             </Col>
           </Row>

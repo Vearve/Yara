@@ -439,12 +439,29 @@ const PayrollManagement: React.FC = () => {
       const { data } = await http.get(
         `/api/v1/payroll/payslips/export/?year=${selectedYear}&month=${selectedMonth}`
       );
-      // Convert to CSV
       const csvData = convertToCSV(data);
       downloadCSV(csvData, `Payroll_${selectedYear}_${selectedMonth}.csv`);
       message.success('Payroll exported');
     } catch (error) {
       message.error('Failed to export payroll');
+    }
+  };
+
+  const handleBankTransferExport = async () => {
+    try {
+      const response = await http.get(
+        `/api/v1/payroll/payslips/bank_transfer_export/?year=${selectedYear}&month=${selectedMonth}`,
+        { responseType: 'blob' }
+      );
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `BankTransfer_${selectedYear}_${String(selectedMonth).padStart(2, '0')}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      message.success('Bank transfer file downloaded');
+    } catch (error) {
+      message.error('Failed to export bank transfer file');
     }
   };
 
@@ -966,6 +983,13 @@ const PayrollManagement: React.FC = () => {
                           onClick={handleExport}
                         >
                           Export
+                        </Button>
+                        <Button
+                          icon={<ExportOutlined />}
+                          onClick={handleBankTransferExport}
+                          style={{ background: '#1a4e8a', color: '#fff', border: 'none' }}
+                        >
+                          Bank Transfer
                         </Button>
                       </Space>
                     </Col>

@@ -146,6 +146,7 @@ class EmployeeDetailSerializer(serializers.ModelSerializer):
             'category', 'category_name', 'classification', 'classification_name', 
             'point_of_hire', 'contractor_type',
             'hire_date', 'next_of_kin_name', 'next_of_kin_relationship', 'next_of_kin_phone',
+            'bank_name', 'bank_branch', 'bank_account_number', 'bank_account_name',
             'photo', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'full_name']

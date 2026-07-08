@@ -256,7 +256,13 @@ class Employee(models.Model):
     next_of_kin_name = models.CharField(max_length=200, blank=True)
     next_of_kin_relationship = models.CharField(max_length=100, blank=True)
     next_of_kin_phone = models.CharField(max_length=20, blank=True)
-    
+
+    # Banking
+    bank_name = models.CharField(max_length=100, blank=True, help_text="Name of the bank")
+    bank_branch = models.CharField(max_length=100, blank=True, help_text="Branch name or code")
+    bank_account_number = models.CharField(max_length=50, blank=True, help_text="Account number")
+    bank_account_name = models.CharField(max_length=200, blank=True, help_text="Account holder name")
+
     # System
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
