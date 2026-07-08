@@ -920,7 +920,7 @@ class PayslipViewSet(viewsets.ModelViewSet):
                 emp.bank_account_number or '',
                 emp.bank_account_name or emp.full_name,
                 float(payslip.net_salary or 0),
-                payslip.currency or 'ZMW',
+                'ZMW',
             ])
 
         # Auto-size columns
