@@ -436,30 +436,43 @@ html::-webkit-scrollbar-thumb:hover {
     max-width: 100vw;
   }
 
-  /* ── Modals → bottom sheets ── */
+  /* ── Modals → bottom sheets (antd 6: panel class is ant-modal-container) ── */
   .ant-modal-root .ant-modal-wrap {
     display: flex !important;
     align-items: flex-end !important;
     justify-content: center !important;
     padding: 0 !important;
+    overflow: hidden !important;
   }
   .ant-modal {
     margin: 0 !important;
     padding-bottom: 0 !important;
     max-width: 100vw !important;
     width: 100% !important;
-    top: auto !important;
+    top: 0 !important;
     vertical-align: bottom !important;
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 90vh !important;
   }
-  .ant-modal-content {
+  /* antd 6: anonymous sentinel div wraps the container — must pass flex through */
+  .ant-modal > div:first-child {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: 90vh !important;
+    overflow: hidden !important;
+  }
+  /* antd 6 renamed ant-modal-content → ant-modal-container */
+  .ant-modal-container {
     border-radius: 20px 20px 0 0 !important;
     max-height: 90vh !important;
-    /* overflow:hidden blocks iOS touch-scroll on children — use clip instead */
-    overflow-x: hidden !important;
-    overflow-y: visible !important;
+    overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
     padding-bottom: 0 !important;
+    width: 100% !important;
   }
   /* Body scrolls, header + footer stay fixed */
   .ant-modal-body {
@@ -494,22 +507,28 @@ html::-webkit-scrollbar-thumb:hover {
     margin: 0 auto 10px;
   }
 
-  /* Drawer body: same touch-scroll treatment */
+  /* Drawer body: touch-scroll (antd 6: wrapper is ant-drawer-section) */
   .ant-drawer-body {
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior: contain !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
     padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+  }
+  /* antd 6: ant-drawer-section replaced ant-drawer-wrapper-body */
+  .ant-drawer-section {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    height: 100% !important;
   }
   .ant-drawer-content {
     display: flex !important;
     flex-direction: column !important;
-  }
-  .ant-drawer-wrapper-body {
-    display: flex !important;
-    flex-direction: column !important;
     overflow: hidden !important;
+    height: 100% !important;
   }
 
   /* Tables scroll horizontally inside their container */
